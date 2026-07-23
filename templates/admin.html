@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Admin Dashboard</h1>
+
+<p class="muted">
+  Welcome, {{ session["user"]["full_name"] }}.
+  Select a section to manage UrbaneTrack.
+</p>
+
+<section class="grid">
+
+  <div class="card">
+    <h2>Appointments</h2>
+
+    <p>
+      Schedule therapy or assessment appointments, assign therapists,
+      update confirmation status and reschedule sessions.
+    </p>
+
+    <a
+      href="{{ url_for('admin_appointments') }}"
+      class="btn primary"
+    >
+      Manage Appointments
+    </a>
+  </div>
+
+  <div class="card">
+    <h2>User Accounts</h2>
+
+    <p>
+      Create and manage therapist and parent accounts.
+    </p>
+
+    <a
+      href="{{ url_for('admin_create_user') }}"
+      class="btn primary"
+    >
+      Manage User Accounts
+    </a>
+  </div>
+
+</section>
+{% endblock %}

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    {% block title %}UrbaneTrack{% endblock %}
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}"
+  >
+</head>
+
+<body>
+
+  {% if session.get("user") %}
+    <!-- Logged-in top navigation -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button
+          type="button"
+          id="menuButton"
+          class="menu-button"
+          aria-label="Open menu"
+        >
+          ☰
+        </button>
+
+        <a href="{{ url_for('dashboard') }}" class="brand">
+          UrbaneTrack
+        </a>
+      </div>
+
+      <div class="topbar-right">
+        <span>
+          {{ session["user"]["full_name"] }}
+        </span>
+
+        <a href="{{ url_for('logout') }}" class="btn small">
+          Log Out
+        </a>
+      </div>
+    </header>
+
+    <!-- Role-based sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h2>UrbaneTrack</h2>
+
+        <button
+          type="button"
+          id="closeMenu"
+          class="close-menu"
+          aria-label="Close menu"
+        >
+          ×
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="{{ url_for('dashboard') }}">
+          Dashboard
+        </a>
+
+        {% if session["user"]["role"] == "ADMIN" %}
+          <a href="{{ url_for('admin_appointments') }}">
+            Appointments
+          </a>
+
+          <a href="{{ url_for('admin_users') }}">
+            User Account Management
+          </a>
+
+        {% elif session["user"]["role"] == "THERAPIST" %}
+          <a href="{{ url_for('therapist_dashboard') }}">
+            Assigned Sessions
+          </a>
+
+          <a href="{{ url_for('therapist_dashboard') }}#progress-notes">
+            Progress Notes
+          </a>
+
+        {% elif session["user"]["role"] == "PARENT" %}
+          <a href="{{ url_for('parent_dashboard') }}">
+            My Appointments
+          </a>
+        {% endif %}
+
+        <a href="{{ url_for('change_password') }}">
+          Change Password
+        </a>
+
+        <a href="{{ url_for('logout') }}">
+          Log Out
+        </a>
+      </nav>
+    </aside>
+
+    <div id="menuOverlay" class="menu-overlay"></div>
+
+  {% else %}
+    <!-- Public navigation -->
+  <header class="topbar public-topbar">
+    <div class="topbar-inner">
+      <a href="{{ url_for('home') }}" class="brand">
+        UrbaneTrack
+      </a>
+
+      <a
+        href="https://www.urbaneethos.center/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="website-link"
+      >
+        Visit Urbane Ethos ↗
+      </a>
+    </div>
+</header>
+  {% endif %}
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="page-content">
+    <div class="page-container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  {% if session.get("user") %}
+    <script
+      src="{{ url_for('static', filename='app.js') }}"
+    ></script>
+  {% endif %}
+
+</body>
+</html>

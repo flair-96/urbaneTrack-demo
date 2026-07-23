@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-card">
+  <h1>Create Account</h1>
+
+  <form method="POST" class="form">
+    <label for="role">Account Type</label>
+
+    <select id="role" name="role" required>
+      <option value="">Select account type</option>
+      <option value="PARENT">Parent</option>
+      <option value="THERAPIST">Therapist</option>
+    </select>
+
+    <p class="muted">
+      Therapist registrations require administrator approval.
+    </p>
+
+    <label for="full_name">Full Name</label>
+
+    <input
+      id="full_name"
+      type="text"
+      name="full_name"
+      required
+    >
+
+    <label for="email">Email</label>
+
+    <input
+      id="email"
+      type="email"
+      name="email"
+      required
+    >
+
+    <label for="password">Password</label>
+
+    <input
+      id="password"
+      type="password"
+      name="password"
+      minlength="8"
+      required
+    >
+
+    <label for="confirm_password">Confirm Password</label>
+
+    <input
+      id="confirm_password"
+      type="password"
+      name="confirm_password"
+      minlength="8"
+      required
+    >
+
+    <button type="submit" class="btn primary">
+      Create Account
+    </button>
+  </form>
+
+  <p class="muted auth-link">
+    Already have an account?
+    <a href="{{ url_for('login') }}">Log In</a>
+  </p>
+</div>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Manage Appointments</h1>
+
+<p>
+  <a href="{{ url_for('admin_dashboard') }}">
+    ← Back to Admin Dashboard
+  </a>
+</p>
+
+<section class="grid">
+  <!-- Schedule appointment -->
+  <div class="card">
+    <h2>Schedule Appointment</h2>
+    <form method="POST" action="{{ url_for('admin_schedule') }}" class="form">
+      <label>Client</label>
+      <select name="client_id" required>
+        <option value="">-- select client --</option>
+        {% for c in clients %}
+          <option value="{{ c.client_id }}">{{ c.client_name }} (Parent: {{ c.parent_name }})</option>
+        {% endfor %}
+      </select>
+
+      <label>Therapist</label>
+      <select name="therapist_id" required>
+        <option value="">-- select therapist --</option>
+        {% for t in therapists %}
+          <option value="{{ t.user_id }}">{{ t.full_name }}</option>
+        {% endfor %}
+      </select>
+
+      <label>Appointment Type</label>
+      <select name="appointment_type" required>
+        <option value="THERAPY" selected>THERAPY</option>
+        <option value="ASSESSMENT">ASSESSMENT</option>
+      </select>
+
+      <label>Date & Time</label>
+      <input type="datetime-local" name="date_time" required>
+
+      <label>Location</label>
+      <input type="text" name="location" placeholder="e.g., Therapy Room 1">
+
+      <label>Notes</label>
+      <textarea name="notes" rows="3" placeholder="Optional notes"></textarea>
+
+      <button class="btn primary" type="submit">Schedule</button>
+
+      <p class="muted" style="margin-top:10px;">
+        After scheduling, admin informs parent via WhatsApp (manual).
+        System records confirmation as <b>Pending</b>.
+      </p>
+    </form>
+  </div>
+
+  <!-- Recent appointments + actions -->
+  <div class="card" style="grid-column: 1 / -1;">
+    <h2>Recent Appointments</h2>
+    <div class="table">
+      <div class="row head">
+        <div>ID</div>
+        <div>Date/Time</div>
+        <div>Type</div>
+        <div>Client</div>
+        <div>Therapist</div>
+        <div>Status</div>
+        <div>Confirm</div>
+        <div>Actions</div>
+      </div>
+
+      {% for a in appointments %}
+      <div class="row">
+        <div>#{{ a.appointment_id }}</div>
+        <div>{{ a.date_time }}</div>
+        <div>{{ a.appointment_type }}</div>
+        <div>{{ a.client_name }}</div>
+        <div>{{ a.therapist_name }}</div>
+        <div>{{ a.status }}</div>
+        <div><b>{{ a.confirmation_status }}</b></div>
+
+        <div class="actions" style="gap:10px; display:flex; flex-wrap:wrap;">
+          <!-- Function 2: Update confirmation status -->
+          <form method="POST" action="{{ url_for('admin_update_confirmation', appointment_id=a.appointment_id) }}" class="form-inline">
+            <select name="confirmation_status" required>
+              <option value="Pending" {% if a.confirmation_status=='Pending' %}selected{% endif %}>Pending</option>
+              <option value="Accepted" {% if a.confirmation_status=='Accepted' %}selected{% endif %}>Accepted</option>
+              <option value="Declined" {% if a.confirmation_status=='Declined' %}selected{% endif %}>Declined</option>
+              <option value="Rescheduled" {% if a.confirmation_status=='Rescheduled' %}selected{% endif %}>Rescheduled</option>
+            </select>
+            <input type="text" name="update_note" placeholder="Update note (optional)" style="min-width:180px;">
+            <button class="btn small" type="submit">Save</button>
+          </form>
+
+          <!-- Function 3: Update appointment details (reschedule/change therapist/time) -->
+          <details>
+            <summary class="btn small">Edit</summary>
+            <form method="POST" action="{{ url_for('admin_update_appointment', appointment_id=a.appointment_id) }}" class="form" style="margin-top:10px;">
+              <label>New Therapist</label>
+              <select name="therapist_id" required>
+                {% for t in therapists %}
+                  <option value="{{ t.user_id }}" {% if t.full_name == a.therapist_name %}selected{% endif %}>
+                    {{ t.full_name }}
+                  </option>
+                {% endfor %}
+              </select>
+
+              <label>New Date & Time</label>
+              <input type="datetime-local" name="date_time" required>
+
+              <label>New Location</label>
+              <input type="text" name="location" value="{{ a.location or '' }}">
+
+              <label>Update Note</label>
+              <input type="text" name="update_note" placeholder="e.g., Rescheduled after WhatsApp discussion">
+
+              <button class="btn small primary" type="submit">Update</button>
+              <p class="muted" style="margin-top:8px;">
+                This will set confirmation status to <b>Rescheduled</b>.
+              </p>
+            </form>
+          </details>
+        </div>
+      </div>
+      {% else %}
+      <div class="muted">No appointments yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

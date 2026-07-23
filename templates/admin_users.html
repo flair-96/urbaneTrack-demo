@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>User Account Management</h1>
+
+<p class="muted">
+  Create therapist and parent login accounts.
+</p>
+
+<p>
+  <a href="{{ url_for('admin_dashboard') }}">
+    ← Back to Admin Dashboard
+  </a>
+</p>
+
+<section class="grid">
+  <div class="card">
+    <h2>Create New Account</h2>
+
+    <form method="POST" class="form">
+      <label for="role">Role</label>
+
+      <select id="role" name="role" required>
+        <option value="">-- select role --</option>
+        <option value="THERAPIST">Therapist</option>
+        <option value="PARENT">Parent</option>
+      </select>
+
+      <label for="full_name">Full Name</label>
+
+      <input
+        id="full_name"
+        type="text"
+        name="full_name"
+        required
+      >
+
+      <label for="email">Email</label>
+
+      <input
+        id="email"
+        type="email"
+        name="email"
+        required
+      >
+
+      <label for="temporary_password">
+        Temporary Password
+      </label>
+
+      <input
+        id="temporary_password"
+        type="password"
+        name="temporary_password"
+        minlength="8"
+        required
+      >
+
+      <button class="btn primary" type="submit">
+        Create Account
+      </button>
+    </form>
+  </div>
+
+<div class="card" style="grid-column: 1 / -1;">
+  <h2>Registered Accounts</h2>
+
+  <div class="table">
+    <div class="row head user-row">
+      <div>ID</div>
+      <div>Name</div>
+      <div>Email</div>
+      <div>Role</div>
+      <div>Approval</div>
+      <div>Account Status</div>
+      <div>Actions</div>
+    </div>
+
+    {% for user in users %}
+      <div class="row user-row">
+        <div>#{{ user.user_id }}</div>
+
+        <div>{{ user.full_name }}</div>
+
+        <div>{{ user.email }}</div>
+
+        <div>{{ user.role.title() }}</div>
+
+        <div>
+          {% if user.approval_status == "APPROVED" %}
+            <span class="status approved">
+              Approved
+            </span>
+
+          {% elif user.approval_status == "PENDING" %}
+            <span class="status pending">
+              Pending
+            </span>
+
+          {% else %}
+            <span class="status rejected">
+              Rejected
+            </span>
+          {% endif %}
+        </div>
+
+        <div>
+          {% if user.is_active == 1 %}
+            <span class="status active">
+              Active
+            </span>
+          {% else %}
+            <span class="status inactive">
+              Inactive
+            </span>
+          {% endif %}
+        </div>
+
+    <div class="actions">
+
+        {% if user.role == "THERAPIST" and user.approval_status == "PENDING" %}
+
+            <form method="POST"
+                action="{{ url_for('admin_approve_user', user_id=user.user_id) }}">
+                <button type="submit" class="btn small primary">
+                    Approve
+                </button>
+            </form>
+
+            <form method="POST"
+                action="{{ url_for('admin_reject_user', user_id=user.user_id) }}">
+                <button type="submit" class="btn small">
+                    Reject
+                </button>
+            </form>
+
+        {% else %}
+
+            <span>{{ user.approval_status.title() }}</span>
+
+        {% endif %}
+
+    </div>
+      </div>
+
+    {% else %}
+      <p class="muted">
+        No therapist or parent accounts found.
+      </p>
+    {% endfor %}
+  </div>
+</div>
+</section>
+{% endblock %}

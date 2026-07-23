@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Parent Portal</h1>
+<p class="muted">
+  Working function: View appointments and confirmation status.
+  For any changes, please contact admin via WhatsApp (manual).
+</p>
+
+<section class="grid">
+  <div class="card" style="grid-column: 1 / -1;">
+    <h2>My Appointments</h2>
+
+    <div class="muted" style="margin-bottom:10px;">
+      If you need to reschedule or change details, please contact the admin via WhatsApp.
+      The admin will update the schedule and status in the system.
+    </div>
+
+    <div class="table">
+      <div class="row head">
+        <div>ID</div>
+        <div>Date/Time</div>
+        <div>Type</div>
+        <div>Child</div>
+        <div>Therapist</div>
+        <div>Status</div>
+        <div>Confirmation</div>
+        <div>Update Note</div>
+      </div>
+
+      {% for a in appointments %}
+      <div class="row">
+        <div>#{{ a.appointment_id }}</div>
+        <div>{{ a.date_time }}</div>
+        <div>{{ a.appointment_type }}</div>
+        <div>{{ a.client_name }}</div>
+        <div>{{ a.therapist_name }}</div>
+        <div>{{ a.status }}</div>
+        <div><b>{{ a.confirmation_status }}</b></div>
+        <div>{{ a.update_note or "-" }}</div>
+      </div>
+      {% else %}
+      <div class="muted">No appointments yet. Please wait for admin to schedule one.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Help</h2>
+    <p class="muted" style="margin:0;">
+      Appointment confirmation and rescheduling are discussed via WhatsApp.
+      This portal is used to view the latest schedule and status recorded by the admin.
+    </p>
+  </div>
+</section>
+{% endblock %}
