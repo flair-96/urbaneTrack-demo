@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+
+  <div class="page-heading">
+    <h1>Progress Notes</h1>
+    <p class="muted">
+      Write and review therapy progress notes.
+    </p>
+  </div>
+
+  <section class="notes-layout">
+
+    <div class="card">
+      <h2>Write Progress Note</h2>
+
+      <form
+        method="POST"
+        action="{{ url_for('therapist_add_note') }}"
+        class="form"
+      >
+        <label for="appointment_id">Session</label>
+
+        <select
+          id="appointment_id"
+          name="appointment_id"
+          required
+        >
+          <option value="">
+            -- select session --
+          </option>
+
+          {% for s in sessions %}
+            <option value="{{ s.appointment_id }}">
+              #{{ s.appointment_id }} -
+              {{ s.client_name }}
+              ({{ s.appointment_type }})
+              - {{ s.date_time }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <label for="content">Progress Note</label>
+
+        <textarea
+          id="content"
+          name="content"
+          rows="6"
+          placeholder="Write session progress..."
+          required
+        ></textarea>
+
+        <label for="goal_score">
+          Goal Achievement (%)
+        </label>
+
+        <input
+          type="number"
+          id="goal_score"
+          name="goal_score"
+          min="0"
+          max="100"
+          placeholder="Example: 75"
+          required
+        >
+
+        <label for="attendance_rate">
+          Attendance Rate (%)
+        </label>
+
+        <input
+          type="number"
+          id="attendance_rate"
+          name="attendance_rate"
+          min="0"
+          max="100"
+          placeholder="Example: 80"
+          required
+        >
+
+        <label for="therapist_rating">
+          Therapist Rating
+        </label>
+
+        <select
+          id="therapist_rating"
+          name="therapist_rating"
+          required
+        >
+          <option value="">
+            -- select rating --
+          </option>
+          <option value="1">1 - Very Poor</option>
+          <option value="2">2 - Poor</option>
+          <option value="3">3 - Moderate</option>
+          <option value="4">4 - Good</option>
+          <option value="5">5 - Excellent</option>
+        </select>
+
+        <button
+          class="btn primary"
+          type="submit"
+        >
+          Save Note
+        </button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Recent Notes</h2>
+
+      <div class="table">
+        <div class="row head notes-row">
+          <div>Note</div>
+          <div>Client</div>
+          <div>Session</div>
+          <div>Created</div>
+          <div>Progress</div>
+          <div>Action</div>
+        </div>
+
+        {% for n in notes %}
+          <div class="row notes-row">
+            <div>#{{ n.note_id }}</div>
+            <div>{{ n.client_name }}</div>
+            <div>#{{ n.appointment_id }}</div>
+            <div>{{ n.created_at }}</div>
+
+            <div>
+              {{ n.progress_status or "Not evaluated" }}
+            </div>
+
+            <div>
+              <button
+                class="btn small view-note-btn"
+                type="button"
+                data-client="{{ n.client_name | e }}"
+                data-date="{{ n.created_at | e }}"
+                data-content="{{ n.content | e }}"
+                data-goal="{{ n.goal_score }}"
+                data-attendance="{{ n.attendance_rate }}"
+                data-rating="{{ n.therapist_rating }}"
+                data-status="{{ (n.progress_status or 'Not evaluated') | e }}"
+                data-recommendation="{{ (n.ai_recommendation or 'No recommendation available.') | e }}"
+              >
+                View
+              </button>
+            </div>
+          </div>
+        {% else %}
+          <p class="muted">
+            No notes yet.
+          </p>
+        {% endfor %}
+      </div>
+
+
+<!-- View Note Modal -->
+<div id="noteModal" class="modal hidden">
+  <div class="modal-box">
+    <h3 id="modalClient"></h3>
+    <p class="muted" id="modalDate"></p>
+
+    <h4>Progress Note</h4>
+    <div class="note-content" id="modalContent"></div>
+
+    <hr>
+
+    <h4>Progress Evaluation</h4>
+
+    <p>
+      <b>Goal achievement:</b>
+      <span id="modalGoal"></span>%
+    </p>
+
+    <p>
+      <b>Attendance rate:</b>
+      <span id="modalAttendance"></span>%
+    </p>
+
+    <p>
+      <b>Therapist rating:</b>
+      <span id="modalRating"></span>/5
+    </p>
+
+    <p>
+      <b>Progress status:</b>
+      <span id="modalStatus"></span>
+    </p>
+
+    <p>
+      <b>Recommendation:</b>
+    </p>
+
+    <div
+      class="note-content"
+      id="modalRecommendation"
+    ></div>
+
+    <button
+      class="btn"
+      id="closeNoteButton"
+      type="button"
+    >
+      Close
+    </button>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll(".view-note-btn").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.getElementById("modalClient").innerText =
+      "Client: " + button.dataset.client;
+
+    document.getElementById("modalDate").innerText =
+      button.dataset.date;
+
+    document.getElementById("modalContent").innerText =
+      button.dataset.content;
+
+    document.getElementById("modalGoal").innerText =
+      button.dataset.goal;
+
+    document.getElementById("modalAttendance").innerText =
+      button.dataset.attendance;
+
+    document.getElementById("modalRating").innerText =
+      button.dataset.rating;
+
+    document.getElementById("modalStatus").innerText =
+      button.dataset.status;
+
+    document.getElementById("modalRecommendation").innerText =
+      button.dataset.recommendation;
+
+    document
+      .getElementById("noteModal")
+      .classList.remove("hidden");
+  });
+});
+
+document
+  .getElementById("closeNoteButton")
+  .addEventListener("click", () => {
+    document
+      .getElementById("noteModal")
+      .classList.add("hidden");
+  });
+</script>
+
+
+</section>
+{% endblock %}

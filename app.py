@@ -685,6 +685,80 @@ def admin_users():
         users=users
     )
 
+@app.route("/admin/clients", methods=["GET", "POST"])
+@login_required(roles=["ADMIN"])
+def admin_clients():
+    db = get_db()
+
+    if request.method == "POST":
+        client_name = request.form.get("client_name", "").strip()
+        parent_user_id = request.form.get("parent_user_id")
+
+        if not client_name:
+            flash("Please enter the client's full name.", "error")
+
+        elif not parent_user_id:
+            flash("Please select a parent.", "error")
+
+        else:
+            parent = db.execute("""
+                SELECT user_id
+                FROM users
+                WHERE user_id = ?
+                  AND role = 'PARENT'
+                  AND is_active = 1
+            """, (parent_user_id,)).fetchone()
+
+            if not parent:
+                flash("The selected parent account is invalid.", "error")
+
+            else:
+                db.execute("""
+                    INSERT INTO clients (
+                        full_name,
+                        parent_user_id
+                    )
+                    VALUES (?, ?)
+                """, (
+                    client_name,
+                    parent_user_id
+                ))
+
+                db.commit()
+
+                flash("Client registered successfully.", "ok")
+                return redirect(url_for("admin_clients"))
+
+    parents = db.execute("""
+        SELECT
+            user_id,
+            full_name,
+            email
+        FROM users
+        WHERE role = 'PARENT'
+          AND is_active = 1
+          AND approval_status = 'APPROVED'
+        ORDER BY full_name
+    """).fetchall()
+
+    clients = db.execute("""
+        SELECT
+            c.client_id,
+            c.full_name AS client_name,
+            u.full_name AS parent_name,
+            u.email AS parent_email
+        FROM clients c
+        JOIN users u
+            ON u.user_id = c.parent_user_id
+        ORDER BY c.full_name
+    """).fetchall()
+
+    return render_template(
+        "admin_clients.html",
+        parents=parents,
+        clients=clients
+    )
+
 @app.post("/admin/user/<int:user_id>/approve")
 @login_required(roles=["ADMIN"])
 def admin_approve_user(user_id):
@@ -881,11 +955,14 @@ def admin_update_confirmation(appointment_id: int):
     db = get_db()
     db.execute("""
         UPDATE appointments
-        SET confirmation_status=?,
-            update_note=?,
-            last_updated_at=?
-        WHERE appointment_id=?
-    """, (confirmation_status, update_note, now, appointment_id))
+        SET confirmation_status = ?,
+            last_updated_at = ?
+        WHERE appointment_id = ?
+    """, (
+        confirmation_status,
+        now,
+        appointment_id
+    ))
     db.commit()
 
     flash("Confirmation status updated.", "ok")
@@ -893,7 +970,7 @@ def admin_update_confirmation(appointment_id: int):
 
 
 # ----------------------------
-# THERAPIST: write progress note
+# THERAPIST: dashboard
 # ----------------------------
 @app.get("/therapist")
 @login_required(roles=["THERAPIST"])
@@ -901,15 +978,92 @@ def therapist_dashboard():
     therapist_id = session["user"]["user_id"]
     db = get_db()
 
+    # Count all appointments assigned to the therapist
+    session_count = db.execute("""
+        SELECT COUNT(*) AS total
+        FROM appointments
+        WHERE therapist_user_id = ?
+    """, (therapist_id,)).fetchone()["total"]
+
+    # Count all progress notes
+    note_count = db.execute("""
+        SELECT COUNT(*) AS total
+        FROM progress_notes
+        WHERE therapist_user_id = ?
+    """, (therapist_id,)).fetchone()["total"]
+
+    # Count all AI progress evaluations
+    progress_status_count = db.execute("""
+        SELECT COUNT(*) AS total
+        FROM progress_notes
+        WHERE therapist_user_id = ?
+          AND progress_status IS NOT NULL
+          AND TRIM(progress_status) <> ''
+    """, (therapist_id,)).fetchone()["total"]
+
+    print("Therapist ID:", therapist_id)
+    print("Session count:", session_count)
+    print("Note count:", note_count)
+    print("Progress status count:", progress_status_count)
+
+    return render_template(
+        "therapist_dashboard.html",
+        session_count=session_count,
+        note_count=note_count,
+        progress_status_count=progress_status_count
+    )
+
+
+# ----------------------------
+# THERAPIST: assigned sessions
+# ----------------------------
+@app.get("/therapist/sessions")
+@login_required(roles=["THERAPIST"])
+def therapist_sessions():
+    therapist_id = session["user"]["user_id"]
+    db = get_db()
+
     sessions = db.execute("""
-        SELECT a.appointment_id, a.date_time, a.status, a.location,
-               a.confirmation_status,
-               c.full_name AS client_name
+        SELECT
+            a.appointment_id,
+            a.date_time,
+            a.status,
+            a.location,
+            a.confirmation_status,
+            c.full_name AS client_name
         FROM appointments a
-        JOIN clients c ON c.client_id = a.client_id
-        WHERE a.therapist_user_id=? AND a.appointment_type='THERAPY'
+        JOIN clients c
+            ON c.client_id = a.client_id
+        WHERE a.therapist_user_id = ?
         ORDER BY a.date_time DESC
-        LIMIT 20
+    """, (therapist_id,)).fetchall()
+
+    return render_template(
+        "therapist_sessions.html",
+        sessions=sessions
+    )
+
+
+# ----------------------------
+# THERAPIST: progress notes page
+# ----------------------------
+@app.get("/therapist/progress-notes")
+@login_required(roles=["THERAPIST"])
+def therapist_progress_notes():
+    therapist_id = session["user"]["user_id"]
+    db = get_db()
+
+    sessions = db.execute("""
+        SELECT
+            a.appointment_id,
+            a.date_time,
+            a.confirmation_status,
+            c.full_name AS client_name
+        FROM appointments a
+        JOIN clients c
+            ON c.client_id = a.client_id
+        WHERE a.therapist_user_id = ?
+        ORDER BY a.date_time DESC
     """, (therapist_id,)).fetchall()
 
     notes = db.execute("""
@@ -934,9 +1088,16 @@ def therapist_dashboard():
         LIMIT 10
     """, (therapist_id,)).fetchall()
 
-    return render_template("therapist.html", sessions=sessions, notes=notes)
+    return render_template(
+        "therapist_progress_notes.html",
+        sessions=sessions,
+        notes=notes
+    )
 
 
+# ----------------------------
+# THERAPIST: save progress note
+# ----------------------------
 @app.post("/therapist/note")
 @login_required(roles=["THERAPIST"])
 def therapist_add_note():
@@ -950,42 +1111,36 @@ def therapist_add_note():
         therapist_rating = int(request.form.get("therapist_rating", 0))
     except ValueError:
         flash("Please enter valid progress values.", "error")
-        return redirect(url_for("therapist_dashboard"))
+        return redirect(url_for("therapist_progress_notes"))
 
     if not appointment_id or not content:
         flash("Please select a session and write a note.", "error")
-        return redirect(url_for("therapist_dashboard"))
+        return redirect(url_for("therapist_progress_notes"))
 
     if not 0 <= goal_score <= 100:
         flash("Goal score must be between 0 and 100.", "error")
-        return redirect(url_for("therapist_dashboard"))
+        return redirect(url_for("therapist_progress_notes"))
 
     if not 0 <= attendance_rate <= 100:
         flash("Attendance rate must be between 0 and 100.", "error")
-        return redirect(url_for("therapist_dashboard"))
+        return redirect(url_for("therapist_progress_notes"))
 
     if not 1 <= therapist_rating <= 5:
         flash("Therapist rating must be between 1 and 5.", "error")
-        return redirect(url_for("therapist_dashboard"))
+        return redirect(url_for("therapist_progress_notes"))
 
-    now = now_str()
     db = get_db()
 
-    # Therapist must own the selected appointment
-    appt = db.execute(
-        """
+    appt = db.execute("""
         SELECT appointment_id
         FROM appointments
         WHERE appointment_id = ?
           AND therapist_user_id = ?
-          AND appointment_type = 'THERAPY'
-        """,
-        (appointment_id, therapist_id)
-    ).fetchone()
+    """, (appointment_id, therapist_id)).fetchone()
 
     if not appt:
         flash("You cannot write a note for this session.", "error")
-        return redirect(url_for("therapist_dashboard"))
+        return redirect(url_for("therapist_progress_notes"))
 
     ai_result = evaluate_patient_progress(
         goal_score,
@@ -993,8 +1148,7 @@ def therapist_add_note():
         therapist_rating
     )
 
-    db.execute(
-        """
+    db.execute("""
         INSERT INTO progress_notes (
             appointment_id,
             therapist_user_id,
@@ -1007,91 +1161,57 @@ def therapist_add_note():
             ai_recommendation
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            appointment_id,
-            therapist_id,
-            now,
-            content,
-            goal_score,
-            attendance_rate,
-            therapist_rating,
-            ai_result["status"],
-            ai_result["recommendation"]
-        )
-    )
+    """, (
+        appointment_id,
+        therapist_id,
+        now_str(),
+        content,
+        goal_score,
+        attendance_rate,
+        therapist_rating,
+        ai_result["status"],
+        ai_result["recommendation"]
+    ))
 
     db.commit()
 
     flash("Progress note and progress evaluation saved.", "ok")
-    return redirect(url_for("therapist_dashboard"))
+    return redirect(url_for("therapist_progress_notes"))
 
-"""
-@app.route("/therapist/progress-note/<int:appointment_id>", methods=["GET", "POST"])
-def add_progress_note(appointment_id):
-    if request.method == "POST":
-        subjective = request.form.get("subjective")
-        objective = request.form.get("objective")
-        assessment = request.form.get("assessment")
-        plan = request.form.get("plan")
 
-        goal_score = int(request.form.get("goal_score", 0))
-        attendance_rate = int(request.form.get("attendance_rate", 0))
-        therapist_rating = int(request.form.get("therapist_rating", 0))
+# ----------------------------
+# THERAPIST: AI progress status
+# ----------------------------
+@app.get("/therapist/progress-status")
+@login_required(roles=["THERAPIST"])
+def therapist_progress_status():
+    therapist_id = session["user"]["user_id"]
+    db = get_db()
 
-        ai_result = evaluate_patient_progress(
-            goal_score,
-            attendance_rate,
-            therapist_rating
-        )
+    results = db.execute("""
+        SELECT
+            pn.note_id,
+            pn.created_at,
+            pn.goal_score,
+            pn.attendance_rate,
+            pn.therapist_rating,
+            pn.progress_status,
+            pn.ai_recommendation,
+            a.appointment_id,
+            c.full_name AS client_name
+        FROM progress_notes pn
+        JOIN appointments a
+            ON a.appointment_id = pn.appointment_id
+        JOIN clients c
+            ON c.client_id = a.client_id
+        WHERE pn.therapist_user_id = ?
+        ORDER BY pn.note_id DESC
+    """, (therapist_id,)).fetchall()
 
-        progress_status = ai_result["status"]
-        recommendation = ai_result["recommendation"]
-
-        conn = get_db_connection()
-
-        conn.execute(
-            """
-#           INSERT INTO progress_notes (
-#              appointment_id,
-#                subjective,
-#               objective,
-#                assessment,
-#               plan,
-#                goal_score,
-#               attendance_rate,
-#                therapist_rating,
-#               progress_status,
-#               ai_recommendation
-#            )
-#           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-#           """,
-#             (
-#                 appointment_id,
-#                 subjective,
-#                 objective,
-#                 assessment,
-#                 plan,
-#                 goal_score,
-#                 attendance_rate,
-#                 therapist_rating,
-#                 progress_status,
-#                 recommendation
-#             )
-#         )
-
-#         conn.commit()
-#         conn.close()
-
-#         flash("Progress note saved successfully.")
-#         return redirect(url_for("therapist_dashboard"))
-
-#     return render_template(
-#         "therapist_progress_note.html",
-#         appointment_id=appointment_id
-#     )
-# """
-
+    return render_template(
+        "therapist_progress_status.html",
+        results=results
+    )
 
 # ----------------------------
 # PARENT: view appointments (NO reschedule request in system)

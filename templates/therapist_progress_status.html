@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Progress Status</h1>
+
+<p class="muted">
+  Rule-based AI evaluations generated from therapy progress records.
+</p>
+
+<section class="grid">
+
+  {% for result in results %}
+    <div class="card">
+
+      <h2>{{ result.client_name }}</h2>
+
+      <p class="muted">
+        Session #{{ result.appointment_id }}
+        ·
+        {{ result.created_at }}
+      </p>
+
+      <div class="progress-details">
+        <p>
+          <b>Goal Achievement:</b>
+          {{ result.goal_score }}%
+        </p>
+
+        <p>
+          <b>Attendance Rate:</b>
+          {{ result.attendance_rate }}%
+        </p>
+
+        <p>
+          <b>Therapist Rating:</b>
+          {{ result.therapist_rating }}/5
+        </p>
+      </div>
+
+      <hr>
+
+      <p>
+        <b>Progress Status</b>
+      </p>
+
+      <div
+        class="progress-status
+        {% if result.progress_status == 'Excellent Progress' %}
+          status-excellent
+        {% elif result.progress_status == 'Good Progress' %}
+          status-good
+        {% elif result.progress_status == 'Moderate Progress' %}
+          status-moderate
+        {% else %}
+          status-attention
+        {% endif %}
+        "
+      >
+        {{ result.progress_status or "Not Evaluated" }}
+      </div>
+
+      <p style="margin-top: 16px;">
+        <b>AI Recommendation</b>
+      </p>
+
+      <div class="note-content">
+        {{ result.ai_recommendation or "No recommendation available." }}
+      </div>
+
+    </div>
+
+  {% else %}
+
+    <div class="card">
+      <p class="muted">
+        No AI progress evaluations are available yet.
+      </p>
+    </div>
+
+  {% endfor %}
+
+</section>
+{% endblock %}

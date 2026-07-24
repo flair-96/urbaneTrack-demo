@@ -459,3 +459,148 @@ input:focus, select:focus, textarea:focus{border-color:#5f7cff}
   width: 100%;
   border: none;
 }
+
+.progress-details p {
+  margin: 8px 0;
+}
+
+.progress-status {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.status-excellent {
+  background: rgba(34, 197, 94, 0.16);
+  color: #86efac;
+}
+
+.status-good {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
+.status-moderate {
+  background: rgba(234, 179, 8, 0.16);
+  color: #fde047;
+}
+
+.status-attention {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+.auth-card{
+    max-width:600px;
+    margin:50px auto;
+    padding:40px;
+}
+
+.auth-card h1{
+    text-align:center;
+    margin-bottom:35px;
+}
+
+.auth-card .form{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.auth-card label{
+    font-weight:600;
+}
+
+.auth-card input{
+    width:100%;
+}
+
+.auth-card button{
+    margin-top:15px;
+}
+
+.page-container {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 48px 0 72px;
+}
+
+.page-heading {
+  margin-bottom: 24px;
+}
+
+.page-heading h1 {
+  margin-bottom: 8px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.dashboard-card {
+  min-height: 240px;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.dashboard-card h2 {
+  margin: 0;
+}
+
+.dashboard-number {
+  margin: 28px 0 0;
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.notes-layout {
+  display: grid;
+  gap: 24px;
+}
+
+.notes-layout > .card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.notes-row {
+  grid-template-columns:
+    0.6fr
+    1.2fr
+    0.8fr
+    1.3fr
+    1.2fr
+    0.7fr;
+}
+
+.form input,
+.form select,
+.form textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 800px) {
+  .page-container {
+    width: min(100% - 28px, 1180px);
+    padding-top: 30px;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .notes-row {
+    grid-template-columns: 1fr;
+  }
+}

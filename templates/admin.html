@@ -13,11 +13,6 @@
   <div class="card">
     <h2>Appointments</h2>
 
-    <p>
-      Schedule therapy or assessment appointments, assign therapists,
-      update confirmation status and reschedule sessions.
-    </p>
-
     <a
       href="{{ url_for('admin_appointments') }}"
       class="btn primary"
@@ -29,15 +24,18 @@
   <div class="card">
     <h2>User Accounts</h2>
 
-    <p>
-      Create and manage therapist and parent accounts.
-    </p>
-
     <a
       href="{{ url_for('admin_create_user') }}"
       class="btn primary"
     >
       Manage User Accounts
+    </a>
+
+    <a
+      href="{{ url_for('admin_clients') }}"
+      class="btn primary"
+    >
+      Register Client
     </a>
   </div>
 

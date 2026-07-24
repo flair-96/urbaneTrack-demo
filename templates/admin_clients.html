@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Client Registration</h1>
+
+<section class="grid">
+
+  <div class="card">
+    <h2>Register New Client</h2>
+
+    <form
+      method="POST"
+      action="{{ url_for('admin_clients') }}"
+      class="form"
+    >
+      <label for="client_name">
+        Client / Child Full Name
+      </label>
+
+      <input
+        type="text"
+        id="client_name"
+        name="client_name"
+        placeholder="Enter child's full name"
+        required
+      >
+
+      <label for="parent_user_id">
+        Parent Account
+      </label>
+
+      <select
+        id="parent_user_id"
+        name="parent_user_id"
+        required
+      >
+        <option value="">
+          -- select parent --
+        </option>
+
+        {% for parent in parents %}
+          <option value="{{ parent.user_id }}">
+            {{ parent.full_name }} — {{ parent.email }}
+          </option>
+        {% endfor %}
+      </select>
+
+      {% if not parents %}
+        <p class="muted">
+          No parent accounts are available. Create a parent account first.
+        </p>
+      {% endif %}
+
+      <button
+        class="btn primary"
+        type="submit"
+        {% if not parents %}disabled{% endif %}
+      >
+        Register Client
+      </button>
+    </form>
+  </div>
+
+  <div
+    class="card"
+    style="grid-column: 1 / -1;"
+  >
+    <h2>Registered Clients</h2>
+
+    <div class="table">
+      <div class="row head">
+        <div>ID</div>
+        <div>Client</div>
+        <div>Parent</div>
+        <div>Parent Email</div>
+      </div>
+
+      {% for client in clients %}
+        <div class="row">
+          <div>#{{ client.client_id }}</div>
+          <div>{{ client.client_name }}</div>
+          <div>{{ client.parent_name }}</div>
+          <div>{{ client.parent_email }}</div>
+        </div>
+      {% else %}
+        <div class="muted">
+          No clients registered yet.
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</section>
+
+{% endblock %}

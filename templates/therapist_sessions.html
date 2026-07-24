@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Assigned Sessions</h1>
+
+<p class="muted">
+  View all sessions assigned to you.
+</p>
+
+<section class="grid">
+
+  <div class="card" style="grid-column: 1 / -1;">
+    <h2>My Assigned Sessions</h2>
+
+    <div class="table">
+      <div class="row head">
+        <div>ID</div>
+        <div>Date/Time</div>
+        <div>Type</div>
+        <div>Client</div>
+        <div>Location</div>
+        <div>Status</div>
+        <div>Confirmation</div>
+      </div>
+
+      {% for s in sessions %}
+        <div class="row">
+          <div>#{{ s.appointment_id }}</div>
+          <div>{{ s.date_time }}</div>
+          <div>{{ s.appointment_type }}</div>
+          <div>{{ s.client_name }}</div>
+          <div>{{ s.location or "-" }}</div>
+          <div>{{ s.status }}</div>
+          <div>
+            <b>{{ s.confirmation_status }}</b>
+          </div>
+        </div>
+      {% else %}
+        <div class="muted">
+          No sessions assigned yet.
+        </div>
+      {% endfor %}
+    </div>
+
+    <p class="muted" style="margin-top: 12px;">
+      Appointment confirmation is updated by the admin after discussion with the parent.
+    </p>
+  </div>
+
+</section>
+{% endblock %}

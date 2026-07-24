@@ -65,32 +65,45 @@
       </div>
 
       <nav class="sidebar-nav">
-        <a href="{{ url_for('dashboard') }}">
-          Dashboard
-        </a>
 
         {% if session["user"]["role"] == "ADMIN" %}
-          <a href="{{ url_for('admin_appointments') }}">
-            Appointments
+          <a href="{{ url_for('admin_dashboard') }}">
+            Dashboard
           </a>
 
           <a href="{{ url_for('admin_users') }}">
             User Account Management
           </a>
 
-        {% elif session["user"]["role"] == "THERAPIST" %}
-          <a href="{{ url_for('therapist_dashboard') }}">
-            Assigned Sessions
+          <a href="{{ url_for('admin_appointments') }}">
+            Appointments
           </a>
 
-          <a href="{{ url_for('therapist_dashboard') }}#progress-notes">
-            Progress Notes
-          </a>
+
+        {% elif session["user"]["role"] == "THERAPIST" %}
+
+        <a href="{{ url_for('therapist_dashboard') }}">
+          Dashboard
+        </a>
+
+        <a href="{{ url_for('therapist_sessions') }}">
+          Assigned Sessions
+        </a>
+
+        <a href="{{ url_for('therapist_progress_notes') }}">
+          Progress Notes
+        </a>
+
+        <a href="{{ url_for('therapist_progress_status') }}">
+          Progress Status
+        </a>
 
         {% elif session["user"]["role"] == "PARENT" %}
-          <a href="{{ url_for('parent_dashboard') }}">
-            My Appointments
-          </a>
+
+        <a href="{{ url_for('parent_dashboard') }}">
+          Dashboard
+        </a>
+
         {% endif %}
 
         <a href="{{ url_for('change_password') }}">
