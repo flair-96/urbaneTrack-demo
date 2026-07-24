@@ -17,45 +17,63 @@ Progress Status | UrbaneTrack
   </div>
 
   {% if statuses %}
-    <div class="dashboard-grid">
+    <div class="progress-grid">
 
       {% for status in statuses %}
-        <div class="card">
+        <div class="card progress-card">
 
-          <div class="card-header">
+          <div class="progress-card-header">
             <div>
               <h3>{{ status.client_name }}</h3>
-              <p class="muted">
+
+              <p class="muted progress-therapist">
                 Therapist: {{ status.therapist_name }}
               </p>
             </div>
 
-            <span class="badge">
-              {{ status.progress_status }}
+            <span class="progress-badge
+                {% if status.progress_status == 'Excellent Progress' %}
+                    progress-excellent
+
+                {% elif status.progress_status == 'Good Progress' %}
+                    progress-good
+
+                {% elif status.progress_status == 'Moderate Progress' %}
+                    progress-moderate
+
+                {% else %}
+                    progress-poor
+                {% endif %}
+            ">
+                {{ status.progress_status }}
             </span>
           </div>
 
-          <div class="detail-row">
+          <div class="progress-session">
             <strong>Session:</strong>
             {{ status.date_time }}
           </div>
 
-          <div class="detail-row">
-            <strong>Goal Achievement:</strong>
-            {{ status.goal_score }}%
+          <div class="progress-stats">
+
+            <div class="progress-stat">
+              <span>Goal Achievement</span>
+              <strong>{{ status.goal_score }}%</strong>
+            </div>
+
+            <div class="progress-stat">
+              <span>Attendance</span>
+              <strong>{{ status.attendance_rate }}%</strong>
+            </div>
+
+            <div class="progress-stat">
+              <span>Therapist Rating</span>
+              <strong>{{ status.therapist_rating }}/5</strong>
+            </div>
+
           </div>
 
-          <div class="detail-row">
-            <strong>Attendance:</strong>
-            {{ status.attendance_rate }}%
-          </div>
-
-          <div class="detail-row">
-            <strong>Therapist Rating:</strong>
-            {{ status.therapist_rating }}
-          </div>
-
-          <div class="note-content">
+          <div class="recommendation-box">
             <strong>AI Recommendation</strong>
             <p>{{ status.ai_recommendation }}</p>
           </div>

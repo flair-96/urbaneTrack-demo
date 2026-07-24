@@ -26,11 +26,27 @@
       {% for s in sessions %}
         <div class="row">
           <div>#{{ s.appointment_id }}</div>
-          <div>{{ s.date_time }}</div>
+          <div>{{ s.date_time | datetime }}</div>
           <div>{{ s.appointment_type }}</div>
-          <div>{{ s.client_name }}</div>
+          <div class ="client-name">
+            {{ s.client_name }}
+          </div>
           <div>{{ s.location or "-" }}</div>
-          <div>{{ s.status }}</div>
+          <div>
+            <span class="
+                {% if s.status == 'Completed' %}
+                status-completed
+                {% elif s.status == 'Cancelled' %}
+                status-cancelled
+                {% elif s.status == 'No Show' %}
+                status-no-show
+                {% else %}
+                status-scheduled
+                {% endif %}
+            ">
+                {{ s.status }}
+            </span>
+          </div>
           <div>
             <b>{{ s.confirmation_status }}</b>
           </div>

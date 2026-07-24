@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, redirect, url_for, session, g, flash, abort
 
 app = Flask(__name__)
+
 app.secret_key = "dev-secret-change-this"  # for sessions
 
 DB_PATH = "urbaneTrack.db"
@@ -30,6 +31,22 @@ def close_db(_error):
 def now_str():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+def format_datetime(value):
+    if not value:
+        return "-"
+
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"):
+        try:
+            return datetime.strptime(
+                value,
+                fmt
+            ).strftime("%d %b %Y • %I:%M %p")
+        except ValueError:
+            pass
+
+    return value
+
+app.jinja_env.filters["datetime"] = format_datetime
 
 def init_db():
     db = sqlite3.connect(DB_PATH)
@@ -667,20 +684,15 @@ def admin_users():
             approval_status
         FROM users
         WHERE role IN ('THERAPIST', 'PARENT')
-        ORDER BY
-            CASE
-                WHEN approval_status = 'PENDING' THEN 1
-                WHEN approval_status = 'APPROVED' THEN 2
-                ELSE 3
-            END,
-            role,
-            full_name
+        ORDER BY full_name
     """).fetchall()
 
     return render_template(
         "admin_users.html",
         users=users
     )
+
+
 
 @app.route("/admin/clients", methods=["GET", "POST"])
 @login_required(roles=["ADMIN"])
@@ -790,6 +802,96 @@ def admin_reject_user(user_id):
     db.commit()
 
     flash("Therapist account rejected.", "ok")
+    return redirect(url_for("admin_users"))
+
+@app.post("/admin/users/<int:user_id>/<action>")
+@login_required(roles=["ADMIN"])
+def admin_user_action(user_id, action):
+    db = get_db()
+
+    user = db.execute("""
+        SELECT
+            user_id,
+            role,
+            approval_status,
+            is_active
+        FROM users
+        WHERE user_id = ?
+          AND role IN ('PARENT', 'THERAPIST')
+    """, (user_id,)).fetchone()
+
+    if not user:
+        flash("User account not found.", "error")
+        return redirect(url_for("admin_users"))
+
+    if action == "approve":
+        if user["role"] != "THERAPIST":
+            flash(
+                "Only therapist registrations require approval.",
+                "error"
+            )
+            return redirect(url_for("admin_users"))
+
+        db.execute("""
+            UPDATE users
+            SET approval_status = 'APPROVED',
+                is_active = 1
+            WHERE user_id = ?
+        """, (user_id,))
+
+        flash("Therapist account approved.", "ok")
+
+    elif action == "reject":
+        if user["role"] != "THERAPIST":
+            flash(
+                "Only therapist registrations can be rejected.",
+                "error"
+            )
+            return redirect(url_for("admin_users"))
+
+        db.execute("""
+            UPDATE users
+            SET approval_status = 'REJECTED',
+                is_active = 0
+            WHERE user_id = ?
+        """, (user_id,))
+
+        flash("Therapist account rejected.", "ok")
+
+    elif action == "activate":
+        if (
+            user["role"] == "THERAPIST"
+            and user["approval_status"] != "APPROVED"
+        ):
+            flash(
+                "Approve the therapist account before activating it.",
+                "error"
+            )
+            return redirect(url_for("admin_users"))
+
+        db.execute("""
+            UPDATE users
+            SET is_active = 1
+            WHERE user_id = ?
+        """, (user_id,))
+
+        flash("Account activated.", "ok")
+
+    elif action == "deactivate":
+        db.execute("""
+            UPDATE users
+            SET is_active = 0
+            WHERE user_id = ?
+        """, (user_id,))
+
+        flash("Account deactivated.", "ok")
+
+    else:
+        flash("Invalid account action.", "error")
+        return redirect(url_for("admin_users"))
+
+    db.commit()
+
     return redirect(url_for("admin_users"))
 
 @app.get("/admin/appointments")
@@ -1085,6 +1187,7 @@ def therapist_sessions():
         SELECT
             a.appointment_id,
             a.date_time,
+            a.appointment_type,
             a.status,
             a.location,
             a.confirmation_status,
@@ -1229,6 +1332,17 @@ def therapist_add_note():
         therapist_rating,
         ai_result["status"],
         ai_result["recommendation"]
+    ))
+
+     # Automatically mark the appointment as completed
+    db.execute("""
+        UPDATE appointments
+        SET status = 'Completed'
+        WHERE appointment_id = ?
+          AND therapist_user_id = ?
+    """, (
+        appointment_id,
+        therapist_id
     ))
 
     db.commit()

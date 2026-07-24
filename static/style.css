@@ -604,3 +604,336 @@ input:focus, select:focus, textarea:focus{border-color:#5f7cff}
     grid-template-columns: 1fr;
   }
 }
+
+.page-container {
+  width: min(1100px, calc(100% - 40px));
+  margin: 40px auto;
+}
+
+.accounts-card {
+  margin-top: 20px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.account-table {
+  min-width: 850px;
+}
+
+.account-row {
+  display: grid;
+  grid-template-columns:
+    70px
+    1.1fr
+    1.6fr
+    0.8fr
+    1fr
+    1.2fr;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  margin-top: 8px;
+  border: 1px solid #263650;
+  border-radius: 12px;
+}
+
+.account-head {
+  background: #202b3d;
+  font-weight: 700;
+  color: #d8e0f4;
+}
+
+.account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.account-actions form {
+  margin: 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.status-active {
+  background: rgba(46, 204, 113, 0.15);
+  color: #7ee2a4;
+}
+
+.status-inactive {
+  background: rgba(149, 165, 166, 0.16);
+  color: #c7d0d4;
+}
+
+.status-pending {
+  background: rgba(241, 196, 15, 0.15);
+  color: #f5d76e;
+}
+
+.status-rejected {
+  background: rgba(231, 76, 60, 0.15);
+  color: #ff9288;
+}
+
+.btn.danger {
+  background: rgba(231, 76, 60, 0.15);
+  border: 1px solid rgba(231, 76, 60, 0.55);
+  color: #ff9288;
+}
+
+@media (max-width: 900px) {
+  .accounts-card {
+    overflow-x: auto;
+  }
+}
+
+.progress-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.progress-card {
+  height: auto;
+  min-height: 0;
+  padding: 20px;
+}
+
+.progress-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.progress-card-header h3 {
+  margin: 0 0 6px;
+}
+
+.progress-therapist {
+  margin: 0;
+}
+
+.progress-badge {
+  display: inline-block;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(111, 79, 255, 0.15);
+  border: 1px solid rgba(111, 79, 255, 0.35);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.progress-session {
+  margin-bottom: 14px;
+  font-size: 0.95rem;
+}
+
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.progress-stat {
+  padding: 12px;
+  border: 1px solid #263650;
+  border-radius: 10px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.progress-stat span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.progress-stat strong {
+  font-size: 1rem;
+}
+
+.recommendation-box {
+  margin-top: 14px;
+  padding: 13px 14px;
+  border-left: 4px solid #6f4fff;
+  border-radius: 10px;
+  background: rgba(111, 79, 255, 0.08);
+}
+
+.recommendation-box p {
+  margin: 7px 0 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .progress-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Progress Notes ---------- */
+
+.note-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.note-card {
+    padding: 20px;
+    min-height: 0;
+    height: auto;
+}
+
+.note-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.note-card-header h3 {
+    margin: 0 0 6px;
+}
+
+.note-type {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(111, 79, 255, 0.15);
+    border: 1px solid rgba(111, 79, 255, 0.35);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.note-meta {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-bottom: 16px;
+    font-size: 0.92rem;
+}
+
+.note-box {
+    padding: 14px;
+    background: rgba(255,255,255,0.03);
+    border-left: 4px solid #6f4fff;
+    border-radius: 10px;
+}
+
+.note-box strong {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.note-box p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+
+    .note-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .note-meta {
+        flex-direction: column;
+    }
+
+}
+
+/* Therapy */
+.therapy-badge {
+    background: rgba(111, 79, 255, 0.15);
+    border: 1px solid rgba(111, 79, 255, 0.35);
+    color: #c9b8ff;
+}
+
+/* Assessment */
+.assessment-badge {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #ffd27a;
+}
+
+.progress-excellent{
+    background:rgba(34,197,94,.15);
+    border:1px solid rgba(34,197,94,.35);
+    color:#86efac;
+}
+
+.progress-good{
+    background:rgba(59,130,246,.15);
+    border:1px solid rgba(59,130,246,.35);
+    color:#93c5fd;
+}
+
+.progress-moderate{
+    background:rgba(245,158,11,.15);
+    border:1px solid rgba(245,158,11,.35);
+    color:#fcd34d;
+}
+
+.progress-poor{
+    background:rgba(239,68,68,.15);
+    border:1px solid rgba(239,68,68,.35);
+    color:#fca5a5;
+}
+.status-completed,
+.status-scheduled,
+.status-cancelled,
+.status-no-show{
+    display:inline-block;
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:.82rem;
+    font-weight:700;
+}
+
+.status-completed{
+    background:rgba(34,197,94,.15);
+    color:#86efac;
+    border:1px solid rgba(34,197,94,.35);
+}
+
+.status-scheduled{
+    background:rgba(59,130,246,.15);
+    color:#93c5fd;
+    border:1px solid rgba(59,130,246,.35);
+}
+
+.status-cancelled{
+    background:rgba(239,68,68,.15);
+    color:#fca5a5;
+    border:1px solid rgba(239,68,68,.35);
+}
+
+.status-no-show{
+    background:rgba(148,163,184,.15);
+    color:#cbd5e1;
+    border:1px solid rgba(148,163,184,.35);
+}
+.client-name{
+    font-weight:700;
+    color:#fff;
+}
