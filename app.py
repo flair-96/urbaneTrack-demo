@@ -173,7 +173,7 @@ def login_required(roles=None):
 
 @app.get("/")
 def home():
-    return render_template("home.html")
+    return redirect(url_for("login"))
 
 @app.route("/setup-admin", methods=["GET", "POST"])
 def setup_admin():
@@ -307,9 +307,6 @@ def login():
             "email": user["email"],
             "role": user["role"]
         }
-
-        if user["must_change_password"] == 1:
-            return redirect(url_for("change_password"))
 
         return redirect(url_for("dashboard"))
 
@@ -568,7 +565,7 @@ def dashboard():
     role = session["user"]["role"]
 
     if role == "ADMIN":
-        return redirect(url_for("admin_appointments"))
+        return redirect(url_for("admin_dashboard"))
 
     if role == "THERAPIST":
         return redirect(url_for("therapist_dashboard"))
@@ -968,6 +965,67 @@ def admin_update_confirmation(appointment_id: int):
     flash("Confirmation status updated.", "ok")
     return redirect(url_for("admin_appointments"))
 
+@app.get("/admin/progress-notes")
+@login_required(roles=["ADMIN"])
+def admin_progress_notes():
+    db = get_db()
+
+    notes = db.execute("""
+        SELECT
+            pn.note_id,
+            pn.content,
+            pn.created_at,
+            c.full_name AS client_name,
+            u.full_name AS therapist_name,
+            a.appointment_type,
+            a.date_time
+        FROM progress_notes pn
+        JOIN appointments a
+            ON a.appointment_id = pn.appointment_id
+        JOIN clients c
+            ON c.client_id = a.client_id
+        JOIN users u
+            ON u.user_id = pn.therapist_user_id
+        ORDER BY pn.created_at DESC
+    """).fetchall()
+
+    return render_template(
+        "admin_progress_notes.html",
+        notes=notes
+    )
+
+@app.get("/admin/progress-status")
+@login_required(roles=["ADMIN"])
+def admin_progress_status():
+    db = get_db()
+
+    statuses = db.execute("""
+        SELECT
+            pn.note_id,
+            pn.goal_score,
+            pn.attendance_rate,
+            pn.therapist_rating,
+            pn.progress_status,
+            pn.ai_recommendation,
+            pn.created_at,
+            c.full_name AS client_name,
+            u.full_name AS therapist_name,
+            a.appointment_type,
+            a.date_time
+        FROM progress_notes pn
+        JOIN appointments a
+            ON a.appointment_id = pn.appointment_id
+        JOIN clients c
+            ON c.client_id = a.client_id
+        JOIN users u
+            ON u.user_id = pn.therapist_user_id
+        ORDER BY pn.created_at DESC
+    """).fetchall()
+
+    return render_template(
+        "admin_progress_status.html",
+        statuses=statuses
+    )
 
 # ----------------------------
 # THERAPIST: dashboard

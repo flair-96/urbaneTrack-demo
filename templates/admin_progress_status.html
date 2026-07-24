@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}
+Progress Status | UrbaneTrack
+{% endblock %}
+
+{% block content %}
+<section class="page-container">
+
+  <div class="page-header">
+    <div>
+      <h1>Progress Status</h1>
+      <p class="muted">
+        View patient progress scores and AI recommendations.
+      </p>
+    </div>
+  </div>
+
+  {% if statuses %}
+    <div class="dashboard-grid">
+
+      {% for status in statuses %}
+        <div class="card">
+
+          <div class="card-header">
+            <div>
+              <h3>{{ status.client_name }}</h3>
+              <p class="muted">
+                Therapist: {{ status.therapist_name }}
+              </p>
+            </div>
+
+            <span class="badge">
+              {{ status.progress_status }}
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <strong>Session:</strong>
+            {{ status.date_time }}
+          </div>
+
+          <div class="detail-row">
+            <strong>Goal Achievement:</strong>
+            {{ status.goal_score }}%
+          </div>
+
+          <div class="detail-row">
+            <strong>Attendance:</strong>
+            {{ status.attendance_rate }}%
+          </div>
+
+          <div class="detail-row">
+            <strong>Therapist Rating:</strong>
+            {{ status.therapist_rating }}
+          </div>
+
+          <div class="note-content">
+            <strong>AI Recommendation</strong>
+            <p>{{ status.ai_recommendation }}</p>
+          </div>
+
+        </div>
+      {% endfor %}
+
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>No progress status found</h3>
+      <p>AI progress results will appear here.</p>
+    </div>
+  {% endif %}
+
+</section>
+{% endblock %}

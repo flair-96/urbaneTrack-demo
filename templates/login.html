@@ -8,38 +8,42 @@
 
     <h1>Log In</h1>
 
-    <form method="POST" class="auth-form">
+<form
+  method="POST"
+  action="{{ url_for('login') }}"
+  class="auth-form"
+>
 
-      <div class="form-group">
-        <label for="email">Email</label>
+  <div class="form-group">
+    <label for="email">Email</label>
 
-        <input
-          id="email"
-          type="email"
-          name="email"
-          placeholder="Enter your email"
-          autocomplete="email"
-          required
-        >
-      </div>
+    <input
+      id="email"
+      type="email"
+      name="email"
+      placeholder="Enter your email"
+      autocomplete="email"
+      required
+    >
+  </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
+  <div class="form-group">
+    <label for="password">Password</label>
 
-        <input
-          id="password"
-          type="password"
-          name="password"
-          placeholder="Enter your password"
-          autocomplete="current-password"
-          required
-        >
-      </div>
+    <input
+      id="password"
+      type="password"
+      name="password"
+      placeholder="Enter your password"
+      autocomplete="current-password"
+      required
+    >
+  </div>
 
-      <button type="submit" class="btn primary auth-submit">
-        Log In
-      </button>
-    </form>
+  <button type="submit" class="btn primary auth-submit">
+    Log In
+  </button>
+</form>
 
     <p class="auth-link">
       Do not have an account?
