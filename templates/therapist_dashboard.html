@@ -1,65 +1,203 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="page-container">
+{% block title %}Therapist Dashboard | UrbaneTrack{% endblock %}
 
-  <div class="page-heading">
-    <h1>Therapist Dashboard</h1>
-    <p class="muted">
-      Overview of your assigned sessions and progress records.
+{% block content %}
+
+<section class="dashboard-welcome">
+  <div>
+    <span class="dashboard-eyebrow">Therapist dashboard</span>
+
+    <h1>
+      Welcome back, {{ session["user"]["full_name"] }}
+    </h1>
+
+    <p>
+      Review your assigned sessions, progress notes and client progress.
     </p>
   </div>
 
-  <section class="dashboard-grid">
+  <div class="dashboard-date">
+    <i class="bi bi-calendar3"></i>
 
-    <div class="dashboard-card">
-      <div>
-        <h2>Assigned Sessions</h2>
-        <p class="dashboard-number">
-          {{ session_count }}
-        </p>
+    <span id="currentDate"></span>
+  </div>
+</section>
+
+
+<section class="modern-stat-grid">
+
+  <article class="modern-stat-card stat-primary">
+    <div class="stat-card-top">
+      <div class="stat-icon">
+        <i class="bi bi-calendar-check"></i>
       </div>
 
-      <a
-        href="{{ url_for('therapist_sessions') }}"
-        class="btn primary"
-      >
-        View Assigned Sessions
-      </a>
+      <span class="stat-badge">
+        Assigned
+      </span>
     </div>
 
-    <div class="dashboard-card">
-      <div>
-        <h2>Progress Notes</h2>
-        <p class="dashboard-number">
-          {{ note_count }}
-        </p>
+    <div class="stat-content">
+      <span class="stat-label">Assigned Sessions</span>
+
+      <strong class="stat-number">
+        {{ assigned_sessions_count }}
+      </strong>
+
+      <p>Sessions currently assigned to you.</p>
+    </div>
+
+    <a
+      href="{{ url_for('therapist_sessions') }}"
+      class="stat-link"
+    >
+      View sessions
+      <i class="bi bi-arrow-right"></i>
+    </a>
+  </article>
+
+
+  <article class="modern-stat-card stat-success">
+    <div class="stat-card-top">
+      <div class="stat-icon">
+        <i class="bi bi-journal-medical"></i>
       </div>
 
-      <a
-        href="{{ url_for('therapist_progress_notes') }}"
-        class="btn primary"
-      >
-        Write Progress Note
-      </a>
+      <span class="stat-badge">
+        Notes
+      </span>
     </div>
 
-    <div class="dashboard-card">
-      <div>
-        <h2>Progress Status</h2>
-        <p class="dashboard-number">
-          {{ progress_status_count }}
-        </p>
+    <div class="stat-content">
+      <span class="stat-label">Progress Notes</span>
+
+      <strong class="stat-number">
+        {{ progress_notes_count }}
+      </strong>
+
+      <p>Notes recorded for therapy sessions.</p>
+    </div>
+
+    <a
+      href="{{ url_for('therapist_progress_notes') }}"
+      class="stat-link"
+    >
+      Write progress note
+      <i class="bi bi-arrow-right"></i>
+    </a>
+  </article>
+
+
+  <article class="modern-stat-card stat-warning">
+    <div class="stat-card-top">
+      <div class="stat-icon">
+        <i class="bi bi-graph-up-arrow"></i>
       </div>
 
-      <a
-        href="{{ url_for('therapist_progress_status') }}"
-        class="btn primary"
-      >
-        View Progress Status
-      </a>
+      <span class="stat-badge">
+        Tracking
+      </span>
     </div>
 
-  </section>
-</div>
+    <div class="stat-content">
+      <span class="stat-label">Progress Status</span>
+
+      <strong class="stat-number">
+        {{ progress_status_count }}
+      </strong>
+
+      <p>Client progress records under monitoring.</p>
+    </div>
+
+    <a
+      href="{{ url_for('therapist_progress_status') }}"
+      class="stat-link"
+    >
+      View progress
+      <i class="bi bi-arrow-right"></i>
+    </a>
+  </article>
+
+</section>
+
+
+<section class="dashboard-section">
+
+  <div class="section-heading">
+    <div>
+      <h2>Quick Actions</h2>
+      <p>Common tasks available for your therapist account.</p>
+    </div>
+  </div>
+
+  <div class="quick-action-grid">
+
+    <a
+      href="{{ url_for('therapist_sessions') }}"
+      class="quick-action-card"
+    >
+      <span class="quick-action-icon">
+        <i class="bi bi-calendar2-week"></i>
+      </span>
+
+      <span>
+        <strong>View Schedule</strong>
+        <small>Review all assigned sessions</small>
+      </span>
+
+      <i class="bi bi-chevron-right"></i>
+    </a>
+
+    <a
+      href="{{ url_for('therapist_progress_notes') }}"
+      class="quick-action-card"
+    >
+      <span class="quick-action-icon">
+        <i class="bi bi-pencil-square"></i>
+      </span>
+
+      <span>
+        <strong>Add Progress Note</strong>
+        <small>Record therapy session details</small>
+      </span>
+
+      <i class="bi bi-chevron-right"></i>
+    </a>
+
+    <a
+      href="{{ url_for('therapist_progress_status') }}"
+      class="quick-action-card"
+    >
+      <span class="quick-action-icon">
+        <i class="bi bi-activity"></i>
+      </span>
+
+      <span>
+        <strong>Client Progress</strong>
+        <small>Monitor progress and recommendations</small>
+      </span>
+
+      <i class="bi bi-chevron-right"></i>
+    </a>
+
+  </div>
+
+</section>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const dateElement = document.getElementById("currentDate");
+
+    if (dateElement) {
+      dateElement.textContent = new Intl.DateTimeFormat("en-MY", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }).format(new Date());
+    }
+  });
+</script>
+
 {% endblock %}

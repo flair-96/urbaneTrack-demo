@@ -1,67 +1,304 @@
 {% extends "base.html" %}
 
+{% block title %}Assigned Sessions | UrbaneTrack{% endblock %}
+
 {% block content %}
-<h1>Assigned Sessions</h1>
 
-<p class="muted">
-  View all sessions assigned to you.
-</p>
+<section class="page-header-modern">
+  <div>
+    <span class="page-eyebrow">Therapist</span>
+    <h1>Assigned Sessions</h1>
+    <p>
+      View all therapy sessions currently assigned to you.
+    </p>
+  </div>
 
-<section class="grid">
+  <div class="page-header-summary">
+    <i class="bi bi-calendar-check"></i>
 
-  <div class="card" style="grid-column: 1 / -1;">
-    <h2>My Assigned Sessions</h2>
+    <div>
+      <strong>{{ sessions | length }}</strong>
+      <span>Total Sessions</span>
+    </div>
+  </div>
+</section>
 
-    <div class="table">
-      <div class="row head">
-        <div>ID</div>
-        <div>Date/Time</div>
-        <div>Type</div>
-        <div>Client</div>
-        <div>Location</div>
-        <div>Status</div>
-        <div>Confirmation</div>
-      </div>
 
-      {% for s in sessions %}
-        <div class="row">
-          <div>#{{ s.appointment_id }}</div>
-          <div>{{ s.date_time | datetime }}</div>
-          <div>{{ s.appointment_type }}</div>
-          <div class ="client-name">
-            {{ s.client_name }}
-          </div>
-          <div>{{ s.location or "-" }}</div>
-          <div>
-            <span class="
-                {% if s.status == 'Completed' %}
-                status-completed
-                {% elif s.status == 'Cancelled' %}
-                status-cancelled
-                {% elif s.status == 'No Show' %}
-                status-no-show
-                {% else %}
-                status-scheduled
-                {% endif %}
-            ">
-                {{ s.status }}
-            </span>
-          </div>
-          <div>
-            <b>{{ s.confirmation_status }}</b>
-          </div>
-        </div>
-      {% else %}
-        <div class="muted">
-          No sessions assigned yet.
-        </div>
-      {% endfor %}
+<section class="table-card">
+
+  <div class="table-card-header">
+    <div>
+      <h2>My Assigned Sessions</h2>
+      <p>
+        Search, sort and review your scheduled appointments.
+      </p>
     </div>
 
-    <p class="muted" style="margin-top: 12px;">
-      Appointment confirmation is updated by the admin after discussion with the parent.
+    <span class="table-count">
+      {{ sessions | length }} sessions
+    </span>
+  </div>
+
+
+  {% if sessions %}
+
+    <div class="table-responsive">
+
+      <table
+        id="sessionsTable"
+        class="table table-hover align-middle modern-data-table"
+        style="width: 100%;"
+      >
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Date and Time</th>
+            <th>Type</th>
+            <th>Client</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Confirmation</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for s in sessions %}
+            <tr>
+
+              <td data-order="{{ s.appointment_id }}">
+                <span class="appointment-id">
+                  #{{ s.appointment_id }}
+                </span>
+              </td>
+
+
+              <td data-order="{{ s.date_time }}">
+                <div class="session-date-cell">
+                  <span class="session-date-icon">
+                    <i class="bi bi-calendar-event"></i>
+                  </span>
+
+                  <div>
+                    <strong>
+                      {{ s.date_time | datetime }}
+                    </strong>
+
+                    <small>
+                      Appointment schedule
+                    </small>
+                  </div>
+                </div>
+              </td>
+
+
+              <td>
+                <span class="session-type-badge">
+                  <i class="bi bi-heart-pulse"></i>
+                  {{ s.appointment_type }}
+                </span>
+              </td>
+
+
+              <td>
+                <div class="table-person">
+                  <span class="table-avatar">
+                    {{ s.client_name[0] | upper }}
+                  </span>
+
+                  <div>
+                    <strong>
+                      {{ s.client_name }}
+                    </strong>
+
+                    <small>
+                      Client
+                    </small>
+                  </div>
+                </div>
+              </td>
+
+
+              <td>
+                <div class="location-cell">
+                  <i class="bi bi-geo-alt"></i>
+
+                  <span>
+                    {{ s.location or "-" }}
+                  </span>
+                </div>
+              </td>
+
+
+              <td>
+                {% if s.status == "Completed" %}
+
+                  <span class="status-badge status-completed">
+                    <i class="bi bi-check-circle"></i>
+                    Completed
+                  </span>
+
+                {% elif s.status == "Cancelled" %}
+
+                  <span class="status-badge status-cancelled">
+                    <i class="bi bi-x-circle"></i>
+                    Cancelled
+                  </span>
+
+                {% elif s.status == "No Show" %}
+
+                  <span class="status-badge status-no-show">
+                    <i class="bi bi-person-x"></i>
+                    No Show
+                  </span>
+
+                {% else %}
+
+                  <span class="status-badge status-scheduled">
+                    <i class="bi bi-clock"></i>
+                    {{ s.status }}
+                  </span>
+
+                {% endif %}
+              </td>
+
+
+              <td>
+                {% set confirmation =
+                  s.confirmation_status or "Pending"
+                %}
+
+                {% if confirmation == "Confirmed" %}
+
+                  <span class="confirmation-badge confirmation-confirmed">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Confirmed
+                  </span>
+
+                {% elif confirmation == "Rejected" %}
+
+                  <span class="confirmation-badge confirmation-rejected">
+                    <i class="bi bi-x-circle-fill"></i>
+                    Rejected
+                  </span>
+
+                {% elif confirmation == "Cancelled" %}
+
+                  <span class="confirmation-badge confirmation-rejected">
+                    <i class="bi bi-x-circle-fill"></i>
+                    Cancelled
+                  </span>
+
+                {% else %}
+
+                  <span class="confirmation-badge confirmation-pending">
+                    <i class="bi bi-hourglass-split"></i>
+                    {{ confirmation }}
+                  </span>
+
+                {% endif %}
+              </td>
+
+            </tr>
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  {% else %}
+
+    <div class="empty-state">
+      <span class="empty-state-icon">
+        <i class="bi bi-calendar-x"></i>
+      </span>
+
+      <h3>No sessions assigned yet</h3>
+
+      <p>
+        New therapy sessions assigned to you will appear here.
+      </p>
+    </div>
+
+  {% endif %}
+
+
+  <div class="table-information-note">
+    <i class="bi bi-info-circle"></i>
+
+    <p>
+      Appointment confirmation is updated by the administrator
+      after discussion with the parent.
     </p>
   </div>
 
 </section>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tableElement = document.getElementById("sessionsTable");
+
+    if (
+      tableElement &&
+      typeof DataTable !== "undefined"
+    ) {
+      new DataTable(tableElement, {
+        responsive: true,
+        pageLength: 10,
+
+        lengthMenu: [
+          [5, 10, 25, 50],
+          [5, 10, 25, 50]
+        ],
+
+        order: [
+          [1, "desc"]
+        ],
+
+        columnDefs: [
+          {
+            targets: [6],
+            orderable: false
+          }
+        ],
+
+        language: {
+          search: "",
+          searchPlaceholder: "Search sessions...",
+
+          lengthMenu:
+            "Show _MENU_ records",
+
+          info:
+            "Showing _START_ to _END_ of _TOTAL_ sessions",
+
+          infoEmpty:
+            "No sessions available",
+
+          zeroRecords:
+            "No matching sessions found",
+
+          paginate: {
+            previous: "Previous",
+            next: "Next"
+          }
+        },
+
+        layout: {
+          topStart: "pageLength",
+          topEnd: "search",
+          bottomStart: "info",
+          bottomEnd: "paging"
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}
