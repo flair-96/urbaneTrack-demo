@@ -8,166 +8,398 @@
     content="width=device-width, initial-scale=1.0"
   >
 
+  <meta
+    name="description"
+    content="UrbaneTrack therapy and client management system"
+  >
+
   <title>
     {% block title %}UrbaneTrack{% endblock %}
   </title>
 
-  <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='style.css') }}"
-  >
+  <!-- Bootstrap 5 -->
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+>
+
+<!-- DataTables Bootstrap 5 -->
+<link
+  href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
+  rel="stylesheet"
+>
+
+<link
+  href="https://cdn.datatables.net/responsive/3.0.7/css/responsive.bootstrap5.min.css"
+  rel="stylesheet"
+>
+
+<!-- Bootstrap Icons -->
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+  rel="stylesheet"
+>
+
+<!-- Your custom CSS must remain last -->
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='style.css') }}"
+>
 </head>
 
-<body>
+<body class="{% if session.get('user') %}app-body{% else %}public-body{% endif %}">
 
   {% if session.get("user") %}
-    <!-- Logged-in top navigation -->
-    <header class="topbar">
-      <div class="topbar-left">
+
+    <!-- Mobile and desktop top navigation -->
+    <header class="modern-topbar">
+      <div class="modern-topbar-left">
+
         <button
           type="button"
           id="menuButton"
-          class="menu-button"
-          aria-label="Open menu"
+          class="modern-menu-button"
+          aria-label="Open navigation menu"
+          aria-controls="sidebar"
+          aria-expanded="false"
         >
-          ☰
+          &#9776;
         </button>
 
-        <a href="{{ url_for('dashboard') }}" class="brand">
-          UrbaneTrack
+        <a
+          href="{{ url_for('dashboard') }}"
+          class="modern-brand"
+        >
+          <span class="modern-brand-logo">UT</span>
+
+          <span class="modern-brand-text">
+            <strong>UrbaneTrack</strong>
+            <small>Therapy Management</small>
+          </span>
         </a>
+
       </div>
 
-      <div class="topbar-right">
-        <span>
-          {{ session["user"]["full_name"] }}
-        </span>
+      <div class="modern-topbar-right">
 
-        <a href="{{ url_for('logout') }}" class="btn small">
+        <div class="modern-user-info">
+          <div class="modern-user-avatar">
+            {{ session["user"]["full_name"][0] | upper }}
+          </div>
+
+          <div class="modern-user-details">
+            <strong>
+              {{ session["user"]["full_name"] }}
+            </strong>
+
+            <span>
+              {{ session["user"]["role"] | title }}
+            </span>
+          </div>
+        </div>
+
+        <a
+          href="{{ url_for('logout') }}"
+          class="modern-logout-button"
+        >
           Log Out
         </a>
+
       </div>
     </header>
 
-    <!-- Role-based sidebar -->
-    <aside id="sidebar" class="sidebar">
-      <div class="sidebar-header">
-        <h2>UrbaneTrack</h2>
+
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="modern-sidebar"
+      aria-label="Main navigation"
+    >
+
+      <div class="modern-sidebar-header">
+
+        <a
+          href="{{ url_for('dashboard') }}"
+          class="modern-sidebar-brand"
+        >
+          <span class="modern-brand-logo">UT</span>
+
+          <span>
+            <strong>UrbaneTrack</strong>
+            <small>Management System</small>
+          </span>
+        </a>
 
         <button
           type="button"
           id="closeMenu"
-          class="close-menu"
-          aria-label="Close menu"
+          class="modern-close-menu"
+          aria-label="Close navigation menu"
         >
-          ×
+          &times;
         </button>
+
       </div>
 
-      <nav class="sidebar-nav">
+      <div class="modern-sidebar-profile">
+        <div class="modern-sidebar-avatar">
+          {{ session["user"]["full_name"][0] | upper }}
+        </div>
+
+        <div>
+          <strong>
+            {{ session["user"]["full_name"] }}
+          </strong>
+
+          <span class="modern-role-badge">
+            {{ session["user"]["role"] | title }}
+          </span>
+        </div>
+      </div>
+
+      <nav class="modern-sidebar-nav">
+
+        <span class="modern-nav-label">
+          Main Menu
+        </span>
 
         {% if session["user"]["role"] == "ADMIN" %}
-          <a href="{{ url_for('admin_dashboard') }}">
-            Dashboard
+
+          <a
+            href="{{ url_for('admin_dashboard') }}"
+            class="{% if request.endpoint == 'admin_dashboard' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">D</span>
+            <span>Dashboard</span>
           </a>
 
-          <a href="{{ url_for('admin_clients') }}">
-            Register Client
+          <a
+            href="{{ url_for('admin_clients') }}"
+            class="{% if request.endpoint == 'admin_clients' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">C</span>
+            <span>Register Client</span>
           </a>
 
-          <a href="{{ url_for('admin_users') }}">
-            Manage Users
+          <a
+            href="{{ url_for('admin_users') }}"
+            class="{% if request.endpoint == 'admin_users' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">U</span>
+            <span>Manage Users</span>
           </a>
 
-          <a href="{{ url_for('admin_appointments') }}">
-            Appointments
+          <a
+            href="{{ url_for('admin_appointments') }}"
+            class="{% if request.endpoint == 'admin_appointments' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">A</span>
+            <span>Appointments</span>
           </a>
 
-          <a href="{{ url_for('admin_progress_notes') }}">
-            Progress Notes
+          <a
+            href="{{ url_for('admin_progress_notes') }}"
+            class="{% if request.endpoint == 'admin_progress_notes' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">N</span>
+            <span>Progress Notes</span>
           </a>
 
-          <a href="{{ url_for('admin_progress_status') }}">
-            Progress Status
+          <a
+            href="{{ url_for('admin_progress_status') }}"
+            class="{% if request.endpoint == 'admin_progress_status' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">P</span>
+            <span>Progress Status</span>
           </a>
 
 
         {% elif session["user"]["role"] == "THERAPIST" %}
 
-        <a href="{{ url_for('therapist_dashboard') }}">
-          Dashboard
-        </a>
+          <a
+            href="{{ url_for('therapist_dashboard') }}"
+            class="{% if request.endpoint == 'therapist_dashboard' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">D</span>
+            <span>Dashboard</span>
+          </a>
 
-        <a href="{{ url_for('therapist_sessions') }}">
-          Assigned Sessions
-        </a>
+          <a
+            href="{{ url_for('therapist_sessions') }}"
+            class="{% if request.endpoint == 'therapist_sessions' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">S</span>
+            <span>Assigned Sessions</span>
+          </a>
 
-        <a href="{{ url_for('therapist_progress_notes') }}">
-          Progress Notes
-        </a>
+          <a
+            href="{{ url_for('therapist_progress_notes') }}"
+            class="{% if request.endpoint == 'therapist_progress_notes' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">N</span>
+            <span>Progress Notes</span>
+          </a>
 
-        <a href="{{ url_for('therapist_progress_status') }}">
-          Progress Status
-        </a>
+          <a
+            href="{{ url_for('therapist_progress_status') }}"
+            class="{% if request.endpoint == 'therapist_progress_status' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">P</span>
+            <span>Progress Status</span>
+          </a>
+
 
         {% elif session["user"]["role"] == "PARENT" %}
 
-        <a href="{{ url_for('parent_dashboard') }}">
-          Dashboard
-        </a>
+          <a
+            href="{{ url_for('parent_dashboard') }}"
+            class="{% if request.endpoint == 'parent_dashboard' %}active{% endif %}"
+          >
+            <span class="modern-nav-icon">D</span>
+            <span>Dashboard</span>
+          </a>
 
         {% endif %}
 
-        <a href="{{ url_for('change_password') }}">
-          Change Password
+        <span class="modern-nav-label modern-nav-label-secondary">
+          Account
+        </span>
+
+        <a
+          href="{{ url_for('change_password') }}"
+          class="{% if request.endpoint == 'change_password' %}active{% endif %}"
+        >
+          <span class="modern-nav-icon">S</span>
+          <span>Change Password</span>
         </a>
 
-        <a href="{{ url_for('logout') }}">
-          Log Out
+        <a
+          href="{{ url_for('logout') }}"
+          class="modern-sidebar-logout"
+        >
+          <span class="modern-nav-icon">X</span>
+          <span>Log Out</span>
         </a>
+
       </nav>
+
+      <div class="modern-sidebar-footer">
+        <small>UrbaneTrack</small>
+        <span>Version 1.0</span>
+      </div>
+
     </aside>
 
-    <div id="menuOverlay" class="menu-overlay"></div>
+    <div
+      id="menuOverlay"
+      class="modern-menu-overlay"
+    ></div>
+
 
   {% else %}
-    <!-- Public navigation -->
-  <header class="topbar public-topbar">
-    <div class="topbar-inner">
-      <a href="{{ url_for('home') }}" class="brand">
-        UrbaneTrack
-      </a>
 
-      <a
-        href="https://www.urbaneethos.center/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="website-link"
-      >
-        Visit Urbane Ethos ↗
-      </a>
-    </div>
-</header>
+    <!-- Public navigation -->
+    <header class="modern-public-topbar">
+
+      <div class="modern-public-inner">
+
+        <a
+          href="{{ url_for('home') }}"
+          class="modern-brand"
+        >
+          <span class="modern-brand-logo">UT</span>
+
+          <span class="modern-brand-text">
+            <strong>UrbaneTrack</strong>
+            <small>Therapy Management</small>
+          </span>
+        </a>
+
+        <a
+          href="https://www.urbaneethos.center/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="modern-website-link"
+        >
+          Visit Urbane Ethos &nearr;
+        </a>
+
+      </div>
+
+    </header>
+
   {% endif %}
+
 
   <!-- Flash messages -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <div class="flash-container">
+
+      <div class="modern-flash-container">
+
         {% for category, message in messages %}
-          <div class="flash {{ category }}">
-            {{ message }}
+          <div
+            class="modern-flash-message {{ category }}"
+            role="alert"
+          >
+            <span class="modern-flash-indicator"></span>
+
+            <span>
+              {{ message }}
+            </span>
+
+            <button
+              type="button"
+              class="modern-flash-close"
+              aria-label="Close message"
+            >
+              &times;
+            </button>
           </div>
         {% endfor %}
+
       </div>
+
     {% endif %}
   {% endwith %}
 
-  <main class="page-content">
-    <div class="page-container">
+
+  <!-- Main page -->
+  <main class="{% if session.get('user') %}modern-app-content{% else %}modern-public-content{% endif %}">
+
+    <div class="modern-page-container">
       {% block content %}{% endblock %}
     </div>
+
   </main>
+
+
+
+  <!-- Bootstrap JavaScript -->
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+></script>
+
+<!-- DataTables -->
+<script
+  src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"
+></script>
+
+<script
+  src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"
+></script>
+
+<script
+  src="https://cdn.datatables.net/responsive/3.0.7/js/dataTables.responsive.min.js"
+></script>
+
+<script
+  src="https://cdn.datatables.net/responsive/3.0.7/js/responsive.bootstrap5.min.js"
+></script>
+
+<!-- <script
+  src="{{ url_for('static', filename='app.js') }}"
+></script> -->
 
   {% if session.get("user") %}
     <script
@@ -175,5 +407,18 @@
     ></script>
   {% endif %}
 
+  <script>
+    document.querySelectorAll(".modern-flash-close").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const message = button.closest(".modern-flash-message");
+
+        if (message) {
+          message.remove();
+        }
+      });
+    });
+  </script>
+
+{% block scripts %}{% endblock %}
 </body>
 </html>
