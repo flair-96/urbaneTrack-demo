@@ -316,7 +316,7 @@ input:focus, select:focus, textarea:focus{border-color:#5f7cff}
    ===================================================== */
 
 .page-content {
-  padding: 48px 0 70px;
+  padding: 28px 0 60px;
 }
 
 .page-container {
@@ -936,4 +936,17 @@ input:focus, select:focus, textarea:focus{border-color:#5f7cff}
 .client-name{
     font-weight:700;
     color:#fff;
+}
+
+/*overrides normal dashboard page*/
+.page-content {
+  display: block;
+  min-height: auto;
+  height: auto;
+  padding: 28px 0 60px;
+}
+
+.page-container {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
 }
