@@ -15,41 +15,56 @@
       The admin will update the schedule and status in the system.
     </div>
 
-    <div class="table">
-      <div class="row head">
-        <div>ID</div>
-        <div>Date/Time</div>
-        <div>Type</div>
-        <div>Child</div>
-        <div>Therapist</div>
-        <div>Status</div>
-        <div>Confirmation</div>
-        <div>Update Note</div>
-      </div>
+     <div class="table-responsive">
+      <table
+        id="parentAppointmentsTable"
+        class="table table-striped table-hover align-middle"
+      >
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Date/Time</th>
+            <th>Type</th>
+            <th>Child</th>
+            <th>Therapist</th>
+            <th>Status</th>
+            <th>Confirmation</th>
+            <th>Update Note</th>
+          </tr>
+        </thead>
 
-      {% for a in appointments %}
-      <div class="row">
-        <div>#{{ a.appointment_id }}</div>
-        <div>{{ a.date_time }}</div>
-        <div>{{ a.appointment_type }}</div>
-        <div>{{ a.client_name }}</div>
-        <div>{{ a.therapist_name }}</div>
-        <div>{{ a.status }}</div>
-        <div><b>{{ a.confirmation_status }}</b></div>
-        <div>{{ a.update_note or "-" }}</div>
-      </div>
-      {% else %}
-      <div class="muted">No appointments yet. Please wait for admin to schedule one.</div>
-      {% endfor %}
+        <tbody>
+          {% for a in appointments %}
+          <tr>
+            <td>#{{ a.appointment_id }}</td>
+            <td>{{ a.date_time }}</td>
+            <td>{{ a.appointment_type }}</td>
+            <td>{{ a.client_name }}</td>
+            <td>{{ a.therapist_name }}</td>
+            <td>{{ a.status }}</td>
+            <td><strong>{{ a.confirmation_status }}</strong></td>
+            <td>{{ a.update_note or "-" }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="8" class="text-center text-muted">
+              No appointments yet. Please wait for admin to schedule one.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 
   <div class="card">
     <h2>Help</h2>
-    <p class="muted" style="margin:0;">
+
+    <p class="muted" style="margin: 0;">
       Appointment confirmation and rescheduling are discussed via WhatsApp.
       This portal is used to view the latest schedule and status recorded by the admin.
     </p>
   </div>
 </section>
 {% endblock %}
+Then check Bootstrap

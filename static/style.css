@@ -81,7 +81,8 @@ body {
 
 body.app-body {
   padding-top: var(--ut-topbar-height);
-  padding-left: var(--ut-sidebar-width);
+  /* padding-left: var(--ut-sidebar-width); */
+  padding-left: 0;
 }
 
 body.public-body {
@@ -114,7 +115,8 @@ textarea {
   position: fixed;
   top: 0;
   right: 0;
-  left: var(--ut-sidebar-width);
+  /* left: var(--ut-sidebar-width); */
+  left: 0;
   z-index: 900;
 
   height: var(--ut-topbar-height);
@@ -144,7 +146,10 @@ textarea {
 }
 
 .modern-menu-button {
-  display: none;
+  /* display: none; */
+  display: grid;
+  place-items: center;
+
   width: 42px;
   height: 42px;
 
@@ -291,14 +296,18 @@ textarea {
   position: fixed;
   top: 0;
   bottom: 0;
-  left: 0;
-  z-index: 1000;
+  /* left: 0; */
+  left: calc(var(--ut-sidebar-width) * -1);
+  /* z-index: 1000; */
+  z-index: 1200;
 
   width: var(--ut-sidebar-width);
   padding: 18px 14px;
 
   display: flex;
   flex-direction: column;
+
+  transition: left 0.24s ease;
 
   color: #e2e8f0;
   background:
@@ -311,6 +320,11 @@ textarea {
   border-right: 1px solid rgba(255, 255, 255, 0.07);
   overflow-y: auto;
 }
+
+.modern-sidebar.open {
+  left: 0;
+}
+
 
 .modern-sidebar-header {
   min-height: 48px;
@@ -613,7 +627,7 @@ textarea {
 }
 
 .dashboard-card {
-  min-height: 190px;
+  min-height: 110px;
   padding: 24px;
   border-radius: var(--ut-radius-large);
   transition:
@@ -628,8 +642,11 @@ textarea {
 
 .dashboard-card h2 {
   color: var(--ut-muted);
-  font-size: 0.92rem;
-  font-weight: 650;
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin-bottom: 18px;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
 }
 
 .dashboard-number {
@@ -732,11 +749,19 @@ button.btn {
   transform: translateY(1px);
 }
 
-.btn.primary,
+/* .btn.primary,
 .auth-submit {
   color: #ffffff;
   background: var(--ut-primary);
   border-color: var(--ut-primary);
+} */
+
+.btn.primary,
+.auth-submit {
+    color: #ffffff;
+    background: var(--ut-primary);
+    border: 2px solid var(--ut-primary-dark);
+    box-shadow: 0 0 0 2px rgba(27, 63, 153, 0.2);
 }
 
 .btn.primary:hover,
@@ -763,6 +788,44 @@ button.btn {
   font-size: 0.76rem;
 }
 
+/* Dashboard buttons only */
+.dashboard-card .btn.primary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 60%;
+    height: 54px;
+
+    margin: 14px auto 0;
+
+    border-radius: 14px;
+
+    font-weight: 700;
+
+    border: 2px solid var(--ut-primary-dark);
+    box-shadow:
+        0 3px 0 rgba(27, 63, 153, 0.18),
+        0 6px 12px rgba(27, 63, 153, 0.12);
+
+    transition: all .2s ease;
+}
+
+.dashboard-card .btn.primary:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 4px 0 rgba(27, 63, 153, 0.20),
+        0 8px 16px rgba(27, 63, 153, 0.15);
+}
+
+.dashboard-card .btn.primary + .btn.primary {
+    margin-top: 8px;
+}
+
+.dashboard-card {
+    margin-bottom: 15px;
+}
 
 /* =========================================================
    AUTHENTICATION
@@ -1037,10 +1100,10 @@ button.btn {
     padding: 0 18px;
   }
 
-  .modern-menu-button {
+  /* .modern-menu-button {
     display: grid;
     place-items: center;
-  }
+  } */
 
   .modern-topbar .modern-brand {
     display: none;
@@ -1051,9 +1114,9 @@ button.btn {
     transition: left 0.24s ease;
   }
 
-  .modern-sidebar.open {
+  /* .modern-sidebar.open {
     left: 0;
-  }
+  } */
 
   .modern-close-menu {
     display: block;
@@ -1063,7 +1126,6 @@ button.btn {
     padding: 23px 18px;
   }
 }
-
 
 @media (max-width: 700px) {
 
@@ -1132,6 +1194,7 @@ button.btn {
     width: auto;
   }
 
+}
   /* =========================================================
    MODERN THERAPIST DASHBOARD
    ========================================================= */
@@ -2308,3 +2371,235 @@ div.dt-container .dt-paging .dt-paging-button.current {
   width: min(1180px, calc(100% - 48px));
   margin: 0 auto;
 }
+
+/* Admin appointments table */
+#adminAppointmentsTable {
+  width: 100%;
+}
+
+#adminAppointmentsTable th,
+#adminAppointmentsTable td {
+  padding: 12px 14px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+#adminAppointmentsTable th {
+  font-weight: 700;
+}
+
+#adminAppointmentsTable td:last-child {
+  min-width: 270px;
+}
+
+/* Save and Edit controls */
+.appointment-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+.confirmation-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.confirmation-form .form-select {
+  height: 48px;
+  min-width: 170px;
+}
+
+.appointment-actions .btn {
+  min-width: 82px;
+  height: 50px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 18px;
+  border-radius: 12px;
+
+  font-weight: 700;
+  line-height: 1;
+
+  box-shadow:
+    0 3px 0 rgba(15, 23, 42, 0.18),
+    0 5px 12px rgba(15, 23, 42, 0.10);
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+/* .appointment-edit {
+  position: relative;
+}
+
+.appointment-edit summary {
+  width: fit-content;
+  list-style: none;
+  cursor: pointer;
+}
+
+.appointment-edit summary::-webkit-details-marker {
+  display: none;
+} */
+
+/* .appointment-edit-form {
+  min-width: 280px;
+  margin-top: 10px;
+  padding: 14px;
+
+  background: #ffffff;
+  border: 1px solid var(--ut-border);
+  border-radius: 10px;
+}
+
+.appointment-edit-note {
+  margin-top: 8px;
+  margin-bottom: 0;
+} */
+
+/* Clean appointment edit panel */
+/* .appointment-edit-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 50;
+
+  width: min(620px, 80vw);
+  padding: 18px;
+
+  background: #ffffff;
+  border: 1px solid var(--ut-border);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+}
+
+.appointment-edit-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.appointment-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+} */
+
+/* .appointment-edit-field label {
+  font-weight: 650;
+}
+
+.appointment-edit-field input,
+.appointment-edit-field select {
+  width: 100%;
+  min-width: 0;
+} */
+
+/* .appointment-edit-field-wide {
+  grid-column: 1 / -1;
+}
+
+.appointment-edit-footer {
+  grid-column: 1 / -1;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.appointment-edit-footer p {
+  margin: 0;
+} */
+
+/* @media (max-width: 768px) {
+  .appointment-edit-panel {
+    width: min(90vw, 680px);
+  }
+
+  .appointment-edit-form {
+    grid-template-columns: 1fr;
+  }
+
+  .appointment-edit-field-wide,
+  .appointment-edit-footer {
+    grid-column: auto;
+  }
+
+  .appointment-edit-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .appointment-edit-footer .btn {
+    width: 100%;
+  }
+} */
+
+/* Allow horizontal scrolling on narrower screens */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Save button */
+.btn.small.success {
+    color: #ffffff;
+    background: #25ab6c;
+    border: 1px solid #29a169;
+    border-radius: 9px;
+}
+
+.btn.small.success:hover {
+  /* background: #157347; */
+  background: #1fa064;
+  border-color: #1b8453;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 0 rgba(15, 23, 42, 0.20),
+    0 7px 14px rgba(15, 23, 42, 0.12);
+}
+
+/* Edit button */
+.appointment-actions > .btn.small {
+  color: #ffffff;
+  background: #1769e8;
+  border: 1px solid #0e4fb8;
+  border-radius: 9px;
+}
+
+.appointment-actions > .btn.small:hover {
+  background: #0f5fd8;
+  border-color: #0b49aa;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 0 rgba(15, 23, 42, 0.20),
+    0 7px 14px rgba(15, 23, 42, 0.12);
+}
+
+/* Pressed effect */
+.appointment-actions .btn:active {
+  transform: translateY(2px);
+
+  box-shadow:
+    0 1px 0 rgba(15, 23, 42, 0.18),
+    0 2px 5px rgba(15, 23, 42, 0.10);
+}
+
+ /* color: #334155;
+  background: var(--ut-surface);
+  border: 1px solid #cbd5e1;
+  border-radius: 9px; */
