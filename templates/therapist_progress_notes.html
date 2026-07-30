@@ -34,7 +34,7 @@
           {% for s in sessions %}
             <option value="{{ s.appointment_id }}">
               #{{ s.appointment_id }} -
-              {{ s.client_name }}
+              {{ s.client_name | title }}
               ({{ s.appointment_type }})
               - {{ s.date_time }}
             </option>
@@ -107,149 +107,292 @@
       </form>
     </div>
 
-    <div class="card">
+  <section class="table-card therapist-notes-card">
+
+  <div class="table-card-header">
+
+    <div>
       <h2>Recent Notes</h2>
 
-      <div class="table">
-        <div class="row head notes-row">
-          <div>Note</div>
-          <div>Client</div>
-          <div>Session</div>
-          <div>Created</div>
-          <div>Progress</div>
-          <div>Action</div>
-        </div>
+      <p>
+        Review progress notes recorded for your recent sessions.
+      </p>
+    </div>
 
-        {% for n in notes %}
-          <div class="row notes-row">
-            <div>#{{ n.note_id }}</div>
-            <div>{{ n.client_name }}</div>
-            <div>#{{ n.appointment_id }}</div>
-            <div>{{ n.created_at }}</div>
+    <span class="table-count">
+      {{ notes | length }} notes
+    </span>
 
-            <div>
-              {{ n.progress_status or "Not evaluated" }}
-            </div>
+  </div>
 
-            <div>
-              <button
-                class="btn small view-note-btn"
-                type="button"
-                data-client="{{ n.client_name | e }}"
-                data-date="{{ n.created_at | e }}"
-                data-content="{{ n.content | e }}"
-                data-goal="{{ n.goal_score }}"
-                data-attendance="{{ n.attendance_rate }}"
-                data-rating="{{ n.therapist_rating }}"
-                data-status="{{ (n.progress_status or 'Not evaluated') | e }}"
-                data-recommendation="{{ (n.ai_recommendation or 'No recommendation available.') | e }}"
-              >
-                View
-              </button>
-            </div>
-          </div>
-        {% else %}
-          <p class="muted">
-            No notes yet.
-          </p>
-        {% endfor %}
-      </div>
+  {% if notes %}
 
+    <div class="table-responsive">
+
+      <table
+        id="therapistRecentNotesTable"
+        class="table table-hover align-middle modern-data-table"
+        style="width: 100%;"
+      >
+
+        <thead>
+          <tr>
+            <th>Note</th>
+            <th>Client</th>
+            <th>Session</th>
+            <th>Note Created</th>
+            <th>Progress</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for n in notes %}
+
+            <tr>
+
+              <!-- Note number -->
+              <td>
+                <span class="note-id">
+                  #{{ n.note_id }}
+                </span>
+              </td>
+
+              <!-- Client -->
+              <td>
+                <div class="table-person">
+
+                  <span class="table-avatar">
+                    {{ n.client_name[0] | upper }}
+                  </span>
+
+                  <div>
+                    <strong>
+                      {{ n.client_name | title }}
+                    </strong>
+
+                    <small>
+                      Client
+                    </small>
+                  </div>
+
+                </div>
+              </td>
+
+              <!-- Session -->
+              <td>
+                <div class="recent-note-session">
+
+                  <strong>
+                    #{{ n.appointment_id }}
+                  </strong>
+
+                </div>
+              </td>
+
+              <!-- Created date -->
+              <td>
+                <div class="recent-note-date">
+
+                  <strong>
+                    {{ n.created_at | datetime }}
+                  </strong>
+
+                </div>
+              </td>
+
+              <!-- Progress status -->
+              <td>
+
+                {% if n.progress_status == "Excellent Progress" %}
+
+                  <span class="progress-status-badge status-excellent">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Excellent
+                  </span>
+
+                {% elif n.progress_status == "Good Progress" %}
+
+                  <span class="progress-status-badge status-good">
+                    <i class="bi bi-arrow-up-circle-fill"></i>
+                    Good
+                  </span>
+
+                {% elif n.progress_status == "Moderate Progress" %}
+
+                  <span class="progress-status-badge status-moderate">
+                    <i class="bi bi-dash-circle-fill"></i>
+                    Moderate
+                  </span>
+
+                {% else %}
+
+                  <span class="progress-status-badge status-poor">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    {{ n.progress_status or "Not Evaluated" }}
+                  </span>
+
+                {% endif %}
+
+              </td>
+
+              <!-- View action -->
+              <td>
+
+                <button
+                  type="button"
+                  class="progress-note-view-btn view-note-btn"
+
+                  data-client="{{ n.client_name | title | e }}"
+                  data-date="{{ n.created_at | datetime | e }}"
+                  data-content="{{ n.content | e }}"
+                >
+                  <i class="bi bi-eye"></i>
+                  View
+                </button>
+
+              </td>
+
+            </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  {% else %}
+
+    <div class="empty-state">
+
+      <i class="bi bi-journal-text"></i>
+
+      <h3>No recent notes</h3>
+
+      <p>
+        Your recorded progress notes will appear here.
+      </p>
+
+    </div>
+
+  {% endif %}
+
+  </section>
+
+</section>
+</div>
 
 <!-- View Note Modal -->
-<div id="noteModal" class="modal hidden">
-  <div class="modal-box">
-    <h3 id="modalClient"></h3>
-    <p class="muted" id="modalDate"></p>
+<div
+  id="noteModal"
+  class="note-modal-overlay hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modalClient"
+>
+  <div class="modern-note-modal">
 
-    <h4>Progress Note</h4>
-    <div class="note-content" id="modalContent"></div>
+    <div class="modern-note-modal-header">
 
-    <hr>
+      <div>
+        <span class="page-eyebrow">
+          Progress Note
+        </span>
 
-    <h4>Progress Evaluation</h4>
+        <h3 id="modalClient"></h3>
 
-    <p>
-      <b>Goal achievement:</b>
-      <span id="modalGoal"></span>%
-    </p>
+        <p
+          class="modern-note-modal-date"
+          id="modalDate"
+        ></p>
+      </div>
 
-    <p>
-      <b>Attendance rate:</b>
-      <span id="modalAttendance"></span>%
-    </p>
+      <button
+        type="button"
+        class="note-modal-close-icon"
+        id="closeNoteButton"
+        aria-label="Close progress note"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
 
-    <p>
-      <b>Therapist rating:</b>
-      <span id="modalRating"></span>/5
-    </p>
+    </div>
 
-    <p>
-      <b>Progress status:</b>
-      <span id="modalStatus"></span>
-    </p>
+    <div class="modern-note-modal-body">
 
-    <p>
-      <b>Recommendation:</b>
-    </p>
+      <div class="therapist-note-content-box">
 
-    <div
-      class="note-content"
-      id="modalRecommendation"
-    ></div>
+        <div
+          class="therapist-note-content"
+          id="modalContent"
+        ></div>
 
-    <button
-      class="btn"
-      id="closeNoteButton"
-      type="button"
-    >
-      Close
-    </button>
+      </div>
+
+    </div>
+
   </div>
 </div>
 
+
 <script>
-document.querySelectorAll(".view-note-btn").forEach((button) => {
-  button.addEventListener("click", () => {
-    document.getElementById("modalClient").innerText =
-      "Client: " + button.dataset.client;
+document.addEventListener("DOMContentLoaded", function () {
 
-    document.getElementById("modalDate").innerText =
-      button.dataset.date;
+  const modal = document.getElementById("noteModal");
+  const closeButton = document.getElementById("closeNoteButton");
+  const viewButtons = document.querySelectorAll(".view-note-btn");
 
-    document.getElementById("modalContent").innerText =
-      button.dataset.content;
+  if (!modal || !closeButton) {
+    console.error("Progress note modal elements were not found.");
+    return;
+  }
 
-    document.getElementById("modalGoal").innerText =
-      button.dataset.goal;
+  viewButtons.forEach(function (button) {
 
-    document.getElementById("modalAttendance").innerText =
-      button.dataset.attendance;
+    button.addEventListener("click", function () {
 
-    document.getElementById("modalRating").innerText =
-      button.dataset.rating;
+      document.getElementById("modalClient").textContent =
+        button.dataset.client || "Client";
 
-    document.getElementById("modalStatus").innerText =
-      button.dataset.status;
+      document.getElementById("modalDate").textContent =
+        button.dataset.date || "";
 
-    document.getElementById("modalRecommendation").innerText =
-      button.dataset.recommendation;
+      document.getElementById("modalContent").textContent =
+        button.dataset.content || "No progress note available.";
 
-    document
-      .getElementById("noteModal")
-      .classList.remove("hidden");
+      modal.classList.remove("hidden");
+      document.body.classList.add("modal-open");
+
+    });
+
   });
+
+  function closeNoteModal() {
+    modal.classList.add("hidden");
+    document.body.classList.remove("modal-open");
+  }
+
+  closeButton.addEventListener("click", closeNoteModal);
+
+  modal.addEventListener("click", function (event) {
+    if (event.target === modal) {
+      closeNoteModal();
+    }
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (
+      event.key === "Escape" &&
+      !modal.classList.contains("hidden")
+    ) {
+      closeNoteModal();
+    }
+  });
+
 });
-
-document
-  .getElementById("closeNoteButton")
-  .addEventListener("click", () => {
-    document
-      .getElementById("noteModal")
-      .classList.add("hidden");
-  });
 </script>
 
-
-</section>
 {% endblock %}

@@ -89,7 +89,7 @@
 
           <div class="modern-user-details">
             <strong>
-              {{ session["user"]["full_name"] }}
+              {{ session["user"]["full_name"] | title }}
             </strong>
 
             <span>
@@ -148,7 +148,7 @@
 
         <div>
           <strong>
-            {{ session["user"]["full_name"] }}
+            {{ session["user"]["full_name"] | title }}
           </strong>
 
           <span class="modern-role-badge">
@@ -396,10 +396,6 @@
 <script
   src="https://cdn.datatables.net/responsive/3.0.7/js/responsive.bootstrap5.min.js"
 ></script>
-
-<!-- <script
-  src="{{ url_for('static', filename='app.js') }}"
-></script> -->
 
   {% if session.get("user") %}
     <script

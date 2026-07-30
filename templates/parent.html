@@ -1,70 +1,367 @@
 {% extends "base.html" %}
-{% block content %}
-<h1>Parent Portal</h1>
-<p class="muted">
-  View appointments and confirmation status.
-  For any changes, please contact admin via WhatsApp (manual).
-</p>
 
-<section class="grid">
-  <div class="card" style="grid-column: 1 / -1;">
-    <h2>My Appointments</h2>
-
-    <div class="muted" style="margin-bottom:10px;">
-      If you need to reschedule or change details, please contact the admin via WhatsApp.
-      The admin will update the schedule and status in the system.
-    </div>
-
-     <div class="table-responsive">
-      <table
-        id="parentAppointmentsTable"
-        class="table table-striped table-hover align-middle"
-      >
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Date/Time</th>
-            <th>Type</th>
-            <th>Child</th>
-            <th>Therapist</th>
-            <th>Status</th>
-            <th>Confirmation</th>
-            <th>Update Note</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for a in appointments %}
-          <tr>
-            <td>#{{ a.appointment_id }}</td>
-            <td>{{ a.date_time }}</td>
-            <td>{{ a.appointment_type }}</td>
-            <td>{{ a.client_name }}</td>
-            <td>{{ a.therapist_name }}</td>
-            <td>{{ a.status }}</td>
-            <td><strong>{{ a.confirmation_status }}</strong></td>
-            <td>{{ a.update_note or "-" }}</td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="8" class="text-center text-muted">
-              No appointments yet. Please wait for admin to schedule one.
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Help</h2>
-
-    <p class="muted" style="margin: 0;">
-      Appointment confirmation and rescheduling are discussed via WhatsApp.
-      This portal is used to view the latest schedule and status recorded by the admin.
-    </p>
-  </div>
-</section>
+{% block title %}
+Parent Portal | UrbaneTrack
 {% endblock %}
-Then check Bootstrap
+
+{% block content %}
+
+<div class="page-container">
+
+  <!-- Page header -->
+  <section class="page-header-modern">
+
+    <div>
+      <span class="page-eyebrow">
+        Parent
+      </span>
+
+      <h1>Parent Portal</h1>
+
+      <p>
+        View your child’s appointments and latest confirmation status.
+      </p>
+    </div>
+
+    <div class="page-header-summary">
+
+      <i class="bi bi-calendar-check"></i>
+
+      <div>
+        <strong>{{ appointments | length }}</strong>
+        <span>Total Appointments</span>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- Appointments table -->
+  <section class="table-card">
+
+    <div class="table-card-header">
+
+      <div>
+        <h2>My Appointments</h2>
+
+        <p>
+          Review appointment schedules, therapists and confirmation details.
+        </p>
+      </div>
+
+      <span class="table-count">
+        {{ appointments | length }} appointments
+      </span>
+
+    </div>
+
+    {% if appointments %}
+
+      <div class="table-responsive">
+
+        <table
+          id="parentAppointmentsTable"
+          class="table table-hover align-middle modern-data-table"
+          style="width: 100%;"
+        >
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date & Time</th>
+              <th>Type</th>
+              <th>Child</th>
+              <th>Therapist</th>
+              <th>Status</th>
+              <th>Confirmation</th>
+              <th>Update Note</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {% for a in appointments %}
+
+              <tr>
+
+                <!-- Appointment ID -->
+                <td>
+                  <span class="appointment-id">
+                    #{{ a.appointment_id }}
+                  </span>
+                </td>
+
+                <!-- Date and time -->
+                <td>
+                  <div class="appointment-date-cell">
+
+                    <span class="appointment-date-icon">
+                      <i class="bi bi-calendar3"></i>
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ a.date_time | datetime }}
+                      </strong>
+                      
+                    </div>
+
+                  </div>
+                </td>
+
+                <!-- Type -->
+                <td>
+
+                  {% if a.appointment_type == "THERAPY" %}
+
+                    <span class="session-type-badge type-therapy">
+                      <i class="bi bi-heart-pulse"></i>
+                      Therapy
+                    </span>
+
+                  {% else %}
+
+                    <span class="session-type-badge type-assessment">
+                      <i class="bi bi-clipboard-pulse"></i>
+                      Assessment
+                    </span>
+
+                  {% endif %}
+
+                </td>
+
+                <!-- Child -->
+                <td>
+                  <div class="table-person">
+
+                    <span class="table-avatar">
+                      {{ a.client_name[0] | upper }}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ a.client_name | title }}
+                      </strong>
+
+                      <small>
+                        Child
+                      </small>
+                    </div>
+
+                  </div>
+                </td>
+
+                <!-- Therapist -->
+                <td>
+                  <div class="table-person">
+
+                    <span class="table-avatar">
+                      {{ a.therapist_name[0] | upper }}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ a.therapist_name | title }}
+                      </strong>
+
+                      <small>
+                        Therapist
+                      </small>
+                    </div>
+
+                  </div>
+                </td>
+
+                <!-- Appointment status -->
+                <td>
+
+                  {% set appointment_status = a.status | lower %}
+
+                  {% if appointment_status == "completed" %}
+
+                    <span class="status-badge status-completed">
+                      <i class="bi bi-check-circle-fill"></i>
+                      Completed
+                    </span>
+
+                  {% elif appointment_status == "cancelled" %}
+
+                    <span class="status-badge status-cancelled">
+                      <i class="bi bi-x-circle-fill"></i>
+                      Cancelled
+                    </span>
+
+                  {% else %}
+
+                    <span class="status-badge status-scheduled">
+                      <i class="bi bi-clock-fill"></i>
+                      {{ a.status | title }}
+                    </span>
+
+                  {% endif %}
+
+                </td>
+
+                <!-- Confirmation -->
+                <td>
+
+                  {% set confirmation =
+                    (a.confirmation_status or "Pending") | lower
+                  %}
+
+                  {% if confirmation == "accepted" %}
+
+                    <span class="confirmation-badge confirmation-accepted">
+                      <i class="bi bi-check-circle-fill"></i>
+                      Accepted
+                    </span>
+
+                  {% elif confirmation == "rescheduled" %}
+
+                    <span class="confirmation-badge confirmation-rescheduled">
+                      <i class="bi bi-arrow-repeat"></i>
+                      Rescheduled
+                    </span>
+
+                  {% elif confirmation == "declined" %}
+
+                    <span class="confirmation-badge confirmation-declined">
+                      <i class="bi bi-x-circle-fill"></i>
+                      Declined
+                    </span>
+
+                  {% else %}
+
+                    <span class="confirmation-badge confirmation-pending">
+                      <i class="bi bi-hourglass-split"></i>
+                      Pending
+                    </span>
+
+                  {% endif %}
+
+                </td>
+
+                <!-- Update note -->
+                <td>
+                  {% if a.update_note %}
+
+                    <p class="parent-update-note">
+                      {{ a.update_note }}
+                    </p>
+
+                  {% else %}
+
+                    <span class="no-update-note">
+                      No update
+                    </span>
+
+                  {% endif %}
+                </td>
+
+              </tr>
+
+            {% endfor %}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    {% else %}
+
+      <div class="empty-state">
+
+        <i class="bi bi-calendar-x"></i>
+
+        <h3>No appointments yet</h3>
+
+        <p>
+          Appointments will appear after the administrator schedules a session.
+        </p>
+
+      </div>
+
+    {% endif %}
+
+  </section>
+
+
+  <!-- Help section -->
+  <section class="parent-help-card">
+
+    <span class="parent-help-icon">
+      <i class="bi bi-info-circle"></i>
+    </span>
+
+    <div>
+      <h2>Need to make a change?</h2>
+
+      <p>
+        Appointment confirmation and rescheduling are handled through
+        WhatsApp. Please contact the administrator if you need to update
+        the schedule or appointment details.
+      </p>
+    </div>
+
+  </section>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const table =
+    document.getElementById("parentAppointmentsTable");
+
+  if (
+    table &&
+    typeof DataTable !== "undefined"
+  ) {
+    new DataTable(table, {
+      responsive: true,
+      autoWidth: false,
+      pageLength: 10,
+
+      lengthMenu: [
+        [5, 10, 25, 50],
+        [5, 10, 25, 50]
+      ],
+
+      order: [
+        [1, "asc"]
+      ],
+
+      layout: {
+        topStart: "pageLength",
+        topEnd: "search",
+        bottomStart: "info",
+        bottomEnd: "paging"
+      },
+
+      language: {
+        search: "",
+        searchPlaceholder: "Search appointments...",
+        lengthMenu: "Show _MENU_ appointments",
+        info: "Showing _START_ to _END_ of _TOTAL_ appointments",
+        infoEmpty: "No appointments available",
+        zeroRecords: "No matching appointments found",
+
+        paginate: {
+          previous: "Previous",
+          next: "Next"
+        }
+      }
+    });
+  }
+
+});
+</script>
+
+{% endblock %}

@@ -208,7 +208,7 @@ def setup_admin():
         return redirect(url_for("home"))
 
     if request.method == "POST":
-        full_name = request.form.get("full_name", "").strip()
+        full_name = " ".join(request.form.get("full_name", "").split()).title()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         confirm_password = request.form.get("confirm_password", "")
@@ -403,7 +403,7 @@ def change_password():
 @login_required(roles=["ADMIN"])
 def admin_create_user():
     if request.method == "POST":
-        full_name = request.form.get("full_name", "").strip()
+        full_name = " ".join(request.form.get("full_name", "").split()).title()
         email = request.form.get("email", "").strip().lower()
         temporary_password = request.form.get(
             "temporary_password",
@@ -474,7 +474,7 @@ def register():
         return redirect(url_for("dashboard"))
 
     if request.method == "POST":
-        full_name = request.form.get("full_name", "").strip()
+        full_name = " ".join(request.form.get("full_name", "").split()).title()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         confirm_password = request.form.get(
@@ -614,7 +614,7 @@ def admin_users():
     db = get_db()
 
     if request.method == "POST":
-        full_name = request.form.get("full_name", "").strip()
+        full_name = " ".join(request.form.get("full_name", "").split()).title()
         email = request.form.get("email", "").strip().lower()
         temporary_password = request.form.get(
             "temporary_password",
@@ -700,7 +700,7 @@ def admin_clients():
     db = get_db()
 
     if request.method == "POST":
-        client_name = request.form.get("client_name", "").strip()
+        client_name = " ".join(request.form.get("client_name", "").split()).title()
         parent_user_id = request.form.get("parent_user_id")
 
         if not client_name:

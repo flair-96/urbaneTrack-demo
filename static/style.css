@@ -1,6 +1,5 @@
 /* =========================================================
    URBANETRACK MODERN UI OVERRIDES
-   Add this section at the bottom of static/style.css
    ========================================================= */
 
 :root {
@@ -661,7 +660,13 @@ textarea {
 
 .form,
 .auth-form {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
+}
+
+.auth-submit {
+    margin-top: 8px;
 }
 
 label,
@@ -864,6 +869,7 @@ button.btn {
 
 .auth-link {
   color: var(--ut-muted);
+  margin-top: 8px;
 }
 
 .auth-link a {
@@ -2009,6 +2015,11 @@ div.dt-container .dt-layout-row {
   white-space: nowrap;
 }
 
+.confirmation-badge {
+  justify-content: center;
+  min-width: 108px;
+}
+
 .session-type-badge {
   color: #6d28d9;
   background: #f5f3ff;
@@ -2077,6 +2088,29 @@ div.dt-container .dt-layout-row {
   border-color: #fecaca;
 }
 
+.confirmation-accepted {
+  color: #047857;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.confirmation-rescheduled {
+  color: #b45309;
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.confirmation-pending {
+  color: #475569;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.confirmation-declined {
+  color: #b91c1c;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
 
 /* Information note */
 
@@ -2379,227 +2413,954 @@ div.dt-container .dt-paging .dt-paging-button.current {
 
 #adminAppointmentsTable th,
 #adminAppointmentsTable td {
-  padding: 12px 14px;
+  padding: 14px 16px;
   vertical-align: middle;
-  white-space: nowrap;
 }
 
 #adminAppointmentsTable th {
   font-weight: 700;
+  white-space: nowrap;
 }
 
+#adminAppointmentsTable th:last-child,
 #adminAppointmentsTable td:last-child {
-  min-width: 270px;
+  white-space: nowrap;
 }
 
-/* Save and Edit controls */
-.appointment-actions {
+/* Date and time cell */
+.appointment-date-cell {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-wrap: nowrap;
+  min-width: 230px;
 }
 
-.confirmation-form {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
-}
-
-.confirmation-form .form-select {
-  height: 48px;
-  min-width: 170px;
-}
-
-.appointment-actions .btn {
-  min-width: 82px;
-  height: 50px;
+.appointment-date-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  padding: 0 18px;
+  color: #2563eb;
+  background: #eff6ff;
   border-radius: 12px;
+}
 
+.appointment-date-cell strong,
+.table-person strong {
+  display: block;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.appointment-date-cell small,
+.table-person small {
+  display: block;
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+/* Actions column */
+.admin-appointment-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 145px;
+}
+
+/* Confirmation form */
+.confirmation-update-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0;
+}
+
+/* Confirmation dropdown */
+.confirmation-select {
+  width: 145px;
+  min-height: 38px;
+  padding: 7px 34px 7px 12px;
+
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #d8e1ec;
+  border-radius: 10px;
+
+  font-size: 0.82rem;
+  font-weight: 500;
+
+  outline: none;
+  box-shadow: none;
+}
+
+.confirmation-select:focus {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Clean action buttons */
+.appointment-action-btn {
+  width: 96px;
+  min-height: 34px;
+  padding: 6px 13px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+  box-shadow: none;
+
+  font-size: 0.82rem;
   font-weight: 700;
   line-height: 1;
 
-  box-shadow:
-    0 3px 0 rgba(15, 23, 42, 0.18),
-    0 5px 12px rgba(15, 23, 42, 0.10);
+  cursor: pointer;
 
   transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background-color 0.15s ease;
-}
-
-/* .appointment-edit {
-  position: relative;
-}
-
-.appointment-edit summary {
-  width: fit-content;
-  list-style: none;
-  cursor: pointer;
-}
-
-.appointment-edit summary::-webkit-details-marker {
-  display: none;
-} */
-
-/* .appointment-edit-form {
-  min-width: 280px;
-  margin-top: 10px;
-  padding: 14px;
-
-  background: #ffffff;
-  border: 1px solid var(--ut-border);
-  border-radius: 10px;
-}
-
-.appointment-edit-note {
-  margin-top: 8px;
-  margin-bottom: 0;
-} */
-
-/* Clean appointment edit panel */
-/* .appointment-edit-panel {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  z-index: 50;
-
-  width: min(620px, 80vw);
-  padding: 18px;
-
-  background: #ffffff;
-  border: 1px solid var(--ut-border);
-  border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
-}
-
-.appointment-edit-form {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.appointment-edit-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-} */
-
-/* .appointment-edit-field label {
-  font-weight: 650;
-}
-
-.appointment-edit-field input,
-.appointment-edit-field select {
-  width: 100%;
-  min-width: 0;
-} */
-
-/* .appointment-edit-field-wide {
-  grid-column: 1 / -1;
-}
-
-.appointment-edit-footer {
-  grid-column: 1 / -1;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.appointment-edit-footer p {
-  margin: 0;
-} */
-
-/* @media (max-width: 768px) {
-  .appointment-edit-panel {
-    width: min(90vw, 680px);
-  }
-
-  .appointment-edit-form {
-    grid-template-columns: 1fr;
-  }
-
-  .appointment-edit-field-wide,
-  .appointment-edit-footer {
-    grid-column: auto;
-  }
-
-  .appointment-edit-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .appointment-edit-footer .btn {
-    width: 100%;
-  }
-} */
-
-/* Allow horizontal scrolling on narrower screens */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 /* Save button */
-.btn.small.success {
-    color: #ffffff;
-    background: #25ab6c;
-    border: 1px solid #29a169;
-    border-radius: 9px;
+.action-save {
+  color: #047857;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
 }
 
-.btn.small.success:hover {
-  /* background: #157347; */
-  background: #1fa064;
-  border-color: #1b8453;
-
-  transform: translateY(-1px);
-
-  box-shadow:
-    0 4px 0 rgba(15, 23, 42, 0.20),
-    0 7px 14px rgba(15, 23, 42, 0.12);
+.action-save:hover {
+  color: #065f46;
+  background: #d1fae5;
+  border-color: #6ee7b7;
 }
 
 /* Edit button */
-.appointment-actions > .btn.small {
-  color: #ffffff;
-  background: #1769e8;
-  border: 1px solid #0e4fb8;
-  border-radius: 9px;
+.action-edit {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #bfdbfe;
 }
 
-.appointment-actions > .btn.small:hover {
-  background: #0f5fd8;
-  border-color: #0b49aa;
+.action-edit:hover {
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .admin-appointment-actions,
+  .confirmation-update-form {
+    align-items: stretch;
+  }
+
+  .confirmation-select,
+  .appointment-action-btn {
+    width: 100%;
+  }
+}
+
+/* Let Bootstrap and DataTables control the column layout */
+#usersTable {
+  width: 100% !important;
+}
+
+#usersTable th,
+#usersTable td {
+  vertical-align: middle;
+}
+
+#usersTable td:nth-child(3) {
+  overflow-wrap: anywhere;
+}
+
+
+/* Status and Actions */
+#usersTable th:nth-child(4),
+#usersTable th:nth-child(5) {
+  text-align: left;
+}
+
+#usersTable td:nth-child(4),
+#usersTable td:nth-child(5) {
+  text-align: left;
+  vertical-align: middle;
+}
+
+#usersTable th:last-child,
+#usersTable td:last-child {
+  white-space: nowrap;
+}
+
+/* Button container */
+/* .account-actions {
+  display: flex;
+  flex-direction: column;
+  /* align-items: flex-start; 
+  justify-content: center;
+  gap: 6px;
+  margin: 0; 
+  margin: 0 auto;
+}
+
+.account-actions form {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+} */
+
+.account-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+  width: fit-content;
+  margin: 0;
+}
+
+.account-actions form {
+  display: flex;
+  justify-content: flex-start;
+  margin: 0;
+}
+
+/* Action buttons */
+.account-action-btn {
+  min-width: 96px;
+  min-height: 34px;
+  padding: 6px 14px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+  border: 1px solid transparent;
+  box-shadow: none;
+
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Activate */
+.action-activate {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.action-activate:hover {
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+/* Deactivate */
+.action-deactivate {
+  color: #475569;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.action-deactivate:hover {
+  color: #2a3646;
+  background: #dde1e4;
+  border-color: #94a3b8;
+}
+
+/* Approve */
+.action-approve {
+  color: #047857;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.action-approve:hover {
+  color: #065f46;
+  background: #d1fae5;
+  border-color: #6ee7b7;
+}
+
+/* Reject */
+.action-reject {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.action-reject:hover {
+  color: #b91c1c;
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* Register new clients */
+#clientsTable {
+  width: 100% !important;
+}
+
+#clientsTable th,
+#clientsTable td {
+  vertical-align: middle;
+}
+
+#clientsTable td:last-child {
+  min-width: 220px;
+}
+
+.client-email strong {
+  display: block;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.client-email small {
+  display: block;
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+/*Progress note view button*/
+.progress-note-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-width: 74px;
+  height: 32px;
+  padding: 0 12px;
+
+  color: #1e3a5f;
+  background: #f8fafc;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1;
+
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.progress-note-view-btn i {
+  font-size: 0.9rem;
+}
+
+.progress-note-view-btn:hover {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #93c5fd;
+
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.12);
 
   transform: translateY(-1px);
-
-  box-shadow:
-    0 4px 0 rgba(15, 23, 42, 0.20),
-    0 7px 14px rgba(15, 23, 42, 0.12);
 }
 
-/* Pressed effect */
-.appointment-actions .btn:active {
-  transform: translateY(2px);
-
-  box-shadow:
-    0 1px 0 rgba(15, 23, 42, 0.18),
-    0 2px 5px rgba(15, 23, 42, 0.10);
+.progress-note-view-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
- /* color: #334155;
-  background: var(--ut-surface);
-  border: 1px solid #cbd5e1;
-  border-radius: 9px; */
+.progress-note-view-btn:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.2);
+  outline-offset: 2px;
+}
+
+#progressNotesTable th:last-child,
+#progressNotesTable td:last-child {
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Admin progress note view content*/
+.progress-note-modal {
+  border: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+.progress-note-modal-header {
+  padding: 24px 26px 20px;
+  align-items: flex-start;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.progress-note-modal-header .modal-title {
+  margin-top: 6px;
+  color: #1e293b;
+  font-size: 1.45rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.progress-note-modal-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin: 7px 0 0;
+
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.progress-note-modal-subtitle span {
+  color: #cbd5e1;
+}
+
+.progress-note-modal-body {
+  padding: 24px 26px 30px;
+  background: #f8fafc;
+}
+
+.progress-note-full {
+  min-height: 180px;
+  padding: 22px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.progress-note-content {
+  color: #334155;
+  font-size: 0.96rem;
+  line-height: 1.8;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/*Admin progress Status*/
+.progress-session-date {
+  min-width: 165px;
+}
+
+.progress-session-date strong {
+  display: block;
+  color: #1e293b;
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.progress-session-date small {
+  display: block;
+  margin-top: 4px;
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+
+/* Status badge */
+.progress-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  min-width: 112px;
+  padding: 7px 12px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.progress-status-badge i {
+  font-size: 0.78rem;
+}
+
+.status-excellent {
+  color: #047857;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.status-good {
+  color: #1d4ed8;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.status-moderate {
+  color: #b45309;
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.status-attention {
+  color: #b91c1c;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+
+/* Score values */
+.metric-value {
+  min-width: 88px;
+  text-align: center;
+}
+
+.metric-value strong {
+  display: block;
+  color: #1e293b;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.metric-value small {
+  display: block;
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 0.7rem;
+}
+
+
+/* Rating */
+.rating-display {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  min-width: 68px;
+}
+
+.rating-display i {
+  color: #f59e0b;
+  font-size: 0.9rem;
+}
+
+.rating-display strong {
+  color: #334155;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+
+/* Ai Recommendation */
+.recommendation-preview {
+  width: 230px;
+  max-width: 230px;
+  margin: 0;
+
+  color: #475569;
+  font-size: 0.83rem;
+  line-height: 1.5;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+/* Alignment */
+#progressStatusTable th,
+#progressStatusTable td {
+  vertical-align: middle;
+}
+
+#progressStatusTable th:nth-child(5),
+#progressStatusTable td:nth-child(5),
+#progressStatusTable th:nth-child(6),
+#progressStatusTable td:nth-child(6),
+#progressStatusTable th:nth-child(7),
+#progressStatusTable td:nth-child(7) {
+  text-align: center;
+}
+
+/*therapist recent progress notes*/
+.therapist-notes-card {
+  min-width: 0;
+}
+
+.note-id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 42px;
+  height: 32px;
+  padding: 0 10px;
+
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.recent-note-session {
+  min-width: 74px;
+}
+
+.recent-note-session strong,
+.recent-note-date strong {
+  display: block;
+  color: #1e293b;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.recent-note-session small,
+.recent-note-date small {
+  display: block;
+  margin-top: 4px;
+
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+.recent-note-date {
+  min-width: 165px;
+}
+
+.recent-note-date strong {
+  white-space: nowrap;
+}
+
+#therapistRecentNotesTable th,
+#therapistRecentNotesTable td {
+  vertical-align: middle;
+}
+
+#therapistRecentNotesTable th:last-child,
+#therapistRecentNotesTable td:last-child {
+  text-align: center;
+  white-space: nowrap;
+}
+
+/*modern note modal*/
+.modern-note-modal {
+  width: min(760px, calc(100% - 32px));
+  max-height: calc(100vh - 48px);
+
+  padding: 0;
+  overflow-y: auto;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+}
+
+.modern-note-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 24px 26px 20px;
+
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modern-note-modal-header h3 {
+  margin: 7px 0 0;
+
+  color: #1e293b;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.modern-note-modal-date {
+  margin: 7px 0 0;
+
+  color: #64748b;
+  font-size: 0.86rem;
+}
+
+.note-modal-close-icon {
+  width: 38px;
+  height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #64748b;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+
+  cursor: pointer;
+}
+
+.note-modal-close-icon:hover {
+  color: #1e293b;
+  background: #f1f5f9;
+}
+
+.modern-note-modal-body {
+  padding: 24px 26px 30px;
+  background: #f8fafc;
+}
+
+.note-modal-section {
+  padding: 20px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.note-modal-section h4 {
+  margin: 0 0 14px;
+
+  color: #1e293b;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.note-modal-content,
+.recommendation-modal-content {
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.75;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.note-evaluation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.note-evaluation-item {
+  padding: 12px 14px;
+
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+}
+
+.note-evaluation-item span {
+  display: block;
+
+  color: #64748b;
+  font-size: 0.73rem;
+}
+
+.note-evaluation-item strong {
+  display: block;
+  margin-top: 5px;
+
+  color: #1e293b;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 650px) {
+  .note-evaluation-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.note-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.note-modal-overlay.hidden {
+  display: none;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.therapist-note-content-box {
+  min-height: 180px;
+
+  padding: 22px 24px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.therapist-note-content {
+  color: #334155;
+  font-size: 0.95rem;
+  line-height: 1.8;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Therapist progress status table alignment */
+#therapistProgressStatusTable th,
+#therapistProgressStatusTable td {
+  vertical-align: middle;
+}
+
+#therapistProgressStatusTable th:nth-child(4),
+#therapistProgressStatusTable td:nth-child(4),
+#therapistProgressStatusTable th:nth-child(5),
+#therapistProgressStatusTable td:nth-child(5),
+#therapistProgressStatusTable th:nth-child(6),
+#therapistProgressStatusTable td:nth-child(6) {
+  text-align: center;
+}
+
+/* Parent appointment update note */
+.parent-update-note {
+  width: 190px;
+  max-width: 190px;
+  margin: 0;
+
+  color: #475569;
+  font-size: 0.82rem;
+  line-height: 1.5;
+
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.no-update-note {
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+
+/* Parent help card */
+.parent-help-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+
+  margin-top: 22px;
+  padding: 22px 24px;
+
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 16px;
+}
+
+.parent-help-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #2563eb;
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+
+  font-size: 1.1rem;
+}
+
+.parent-help-card h2 {
+  margin: 0 0 6px;
+
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.parent-help-card p {
+  margin: 0;
+
+  color: #475569;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+
+/* Parent table alignment */
+#parentAppointmentsTable th,
+#parentAppointmentsTable td {
+  vertical-align: middle;
+}
+
+#parentAppointmentsTable th:first-child,
+#parentAppointmentsTable td:first-child {
+  text-align: center;
+  white-space: nowrap;
+}
+
+#parentAppointmentsTable th:nth-child(6),
+#parentAppointmentsTable td:nth-child(6),
+#parentAppointmentsTable th:nth-child(7),
+#parentAppointmentsTable td:nth-child(7) {
+  text-align: center;
+}
+
+
+/* Responsive help section */
+@media (max-width: 600px) {
+  .parent-help-card {
+    padding: 18px;
+  }
+}

@@ -5,89 +5,228 @@ Progress Status | UrbaneTrack
 {% endblock %}
 
 {% block content %}
-<section>
 
-  <div class="page-header">
+<!-- Page header -->
+<section class="page-header-modern">
+
+  <div>
+    <span class="page-eyebrow">
+      Administrator
+    </span>
+
+    <h1>Progress Status</h1>
+
+    <p>
+      View client progress scores and AI recommendations.
+    </p>
+  </div>
+
+  <div class="page-header-summary">
+
+    <i class="bi bi-graph-up-arrow"></i>
+
     <div>
-      <h1>Progress Status</h1>
-      <p class="muted">
-        View patient progress scores and AI recommendations.
+      <strong>{{ statuses | length }}</strong>
+      <span>Total Records</span>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- Progress status table -->
+<section class="table-card">
+
+  <div class="table-card-header">
+
+    <div>
+      <h2>Client Progress Overview</h2>
+
+      <p>
+        Review progress scores, status and AI recommendations.
       </p>
     </div>
+
+    <span class="table-count">
+      {{ statuses | length }} records
+    </span>
+
   </div>
 
   {% if statuses %}
-    <div class="progress-grid">
 
-      {% for status in statuses %}
-        <div class="card progress-card">
+    <div class="table-responsive">
 
-          <div class="progress-card-header">
-            <div>
-              <h3>{{ status.client_name }}</h3>
+      <table
+        id="progressStatusTable"
+        class="table table-hover align-middle modern-data-table"
+        style="width: 100%;"
+      >
 
-              <p class="muted progress-therapist">
-                Therapist: {{ status.therapist_name }}
-              </p>
-            </div>
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Therapist</th>
+            <th>Session</th>
+            <th>Status</th>
+            <th>Goal</th>
+            <th>Attendance</th>
+            <th>Rating</th>
+            <th>Recommendation</th>
+          </tr>
+        </thead>
 
-            <span class="progress-badge
-                {% if status.progress_status == 'Excellent Progress' %}
-                    progress-excellent
+        <tbody>
 
-                {% elif status.progress_status == 'Good Progress' %}
-                    progress-good
+          {% for status in statuses %}
 
-                {% elif status.progress_status == 'Moderate Progress' %}
-                    progress-moderate
+            <tr>
+
+              <!-- Client -->
+              <td>
+                <div class="table-person">
+
+                  <span class="table-avatar">
+                    {{ status.client_name[0] | upper }}
+                  </span>
+
+                  <div>
+                    <strong>{{ status.client_name | title }}</strong>
+                    <small>Client</small>
+                  </div>
+
+                </div>
+              </td>
+
+              <!-- Therapist -->
+              <td>
+                <div class="table-person">
+
+                  <span class="table-avatar">
+                    {{ status.therapist_name[0] | upper }}
+                  </span>
+
+                  <div>
+                    <strong>{{ status.therapist_name | title }}</strong>
+                    <small>Therapist</small>
+                  </div>
+
+                </div>
+              </td>
+
+              <!-- Session -->
+              <td>
+                <div class="progress-session-date">
+
+                  <strong>
+                    {{ status.date_time | datetime }}
+                  </strong>
+
+                  <small>
+                    Therapy session
+                  </small>
+
+                </div>
+              </td>
+
+              <!-- Status -->
+              <td>
+
+                {% if status.progress_status == "Excellent Progress" %}
+
+                  <span class="progress-status-badge status-excellent">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Excellent
+                  </span>
+
+                {% elif status.progress_status == "Good Progress" %}
+
+                  <span class="progress-status-badge status-good">
+                    <i class="bi bi-arrow-up-circle-fill"></i>
+                    Good
+                  </span>
+
+                {% elif status.progress_status == "Moderate Progress" %}
+
+                  <span class="progress-status-badge status-moderate">
+                    <i class="bi bi-dash-circle-fill"></i>
+                    Moderate
+                  </span>
 
                 {% else %}
-                    progress-poor
+
+                  <span class="progress-status-badge status-poor">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    {{ status.progress_status }}
+                  </span>
+
                 {% endif %}
-            ">
-                {{ status.progress_status }}
-            </span>
-          </div>
 
-          <div class="progress-session">
-            <strong>Session:</strong>
-            {{ status.date_time }}
-          </div>
+              </td>
 
-          <div class="progress-stats">
+              <!-- Goal -->
+              <td>
+                <div class="metric-value">
+                  <strong>{{ status.goal_score }}%</strong>
+                  <small>Achievement</small>
+                </div>
+              </td>
 
-            <div class="progress-stat">
-              <span>Goal Achievement</span>
-              <strong>{{ status.goal_score }}%</strong>
-            </div>
+              <!-- Attendance -->
+              <td>
+                <div class="metric-value">
+                  <strong>{{ status.attendance_rate }}%</strong>
+                  <small>Attendance</small>
+                </div>
+              </td>
 
-            <div class="progress-stat">
-              <span>Attendance</span>
-              <strong>{{ status.attendance_rate }}%</strong>
-            </div>
+              <!-- Rating -->
+              <td>
+                <div class="rating-display">
 
-            <div class="progress-stat">
-              <span>Therapist Rating</span>
-              <strong>{{ status.therapist_rating }}/5</strong>
-            </div>
+                  <i class="bi bi-star-fill"></i>
 
-          </div>
+                  <strong>
+                    {{ status.therapist_rating }}/5
+                  </strong>
 
-          <div class="recommendation-box">
-            <strong>AI Recommendation</strong>
-            <p>{{ status.ai_recommendation }}</p>
-          </div>
+                </div>
+              </td>
 
-        </div>
-      {% endfor %}
+              <!-- Recommendation -->
+              <td>
+                <p class="recommendation-preview">
+                  {{ status.ai_recommendation }}
+                </p>
+              </td>
+
+            </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
 
     </div>
+
   {% else %}
+
     <div class="empty-state">
+
+      <i class="bi bi-graph-up-arrow"></i>
+
       <h3>No progress status found</h3>
-      <p>AI progress results will appear here.</p>
+
+      <p>
+        AI progress results will appear here.
+      </p>
+
     </div>
+
   {% endif %}
 
 </section>
+
 {% endblock %}

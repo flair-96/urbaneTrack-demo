@@ -5,77 +5,184 @@ Progress Notes | UrbaneTrack
 {% endblock %}
 
 {% block content %}
-<section>
 
-  <div class="page-header">
+<!-- Page header -->
+<section class="page-header-modern">
+
+  <div>
+    <span class="page-eyebrow">
+      Administrator
+    </span>
+
+    <h1>Progress Notes</h1>
+
+    <p>
+      View progress notes recorded by therapists.
+    </p>
+  </div>
+
+  <div class="page-header-summary">
+
+    <i class="bi bi-journal-text"></i>
+
     <div>
-      <h1>Progress Notes</h1>
-      <p class="muted">
-        View progress notes recorded by therapists.
+      <strong>{{ notes | length }}</strong>
+      <span>Total Notes</span>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- Progress notes table -->
+<section class="table-card">
+
+  <div class="table-card-header">
+
+    <div>
+      <h2>Recorded Progress Notes</h2>
+
+      <p>
+        Review clients' therapy notes and session information.
       </p>
     </div>
+
+    <span class="table-count">
+      {{ notes | length }} notes
+    </span>
+
   </div>
 
   {% if notes %}
-    <div class="note-grid">
 
-      {% for note in notes %}
-        <div class="card note-card">
+    <div class="table-responsive">
 
-          <div class="note-card-header">
+      <table
+        id="progressNotesTable"
+        class="table table-hover align-middle modern-data-table"
+        style="width: 100%;"
+      >
 
-            <div>
-              <h3>{{ note.client_name }}</h3>
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Therapist</th>
+            <th>Type</th>
+            <th>Session Date</th>
+            <th>Note Recorded</th>
+            <th>Note Preview</th>
+            <th>Action</th>
+          </tr>
+        </thead>
 
-              <p class="muted">
-                Therapist: {{ note.therapist_name }}
-              </p>
-            </div>
+        <tbody>
 
-            <span class="note-type
-                {% if note.appointment_type == 'THERAPY' %}
-                    therapy-badge
+          {% for note in notes %}
+
+            <tr>
+
+              <!-- Client -->
+              <td>
+                <div class="table-person">
+
+                  <span class="table-avatar">
+                    {{ note.client_name[0] | upper }}
+                  </span>
+
+                  <div>
+                    <strong>{{ note.client_name | title }}</strong>
+                    <small>Client</small>
+                  </div>
+
+                </div>
+              </td>
+
+              <!-- Therapist -->
+              <td>
+                <div class="table-person">
+
+                  <span class="table-avatar">
+                    {{ note.therapist_name[0] | upper }}
+                  </span>
+
+                  <div>
+                    <strong>{{ note.therapist_name | title }}</strong>
+                    <small>Therapist</small>
+                  </div>
+
+                </div>
+              </td>
+
+              <!-- Appointment type -->
+              <td>
+
+                {% if note.appointment_type == "THERAPY" %}
+
+                  <span class="session-type-badge type-therapy">
+                    <i class="bi bi-heart-pulse"></i>
+                    Therapy
+                  </span>
+
                 {% else %}
-                    assessment-badge
+
+                  <span class="session-type-badge type-assessment">
+                    <i class="bi bi-clipboard-pulse"></i>
+                    Assessment
+                  </span>
+
                 {% endif %}
-            ">
-                {{ note.appointment_type }}
-            </span>
 
-          </div>
+              </td>
 
-          <div class="note-meta">
+              <!-- Session date -->
+              <td>
+                <div class="progress-note-date">
+                  <strong>{{ note.date_time | datetime }}</strong>
+                </div>
+              </td>
 
-            <div>
-              <strong>Session:</strong>
-              {{ note.date_time }}
-            </div>
+              <!-- Recorded date -->
+              <td>
+                <div class="progress-note-date">
+                  <strong>{{ note.created_at | datetime }}</strong>
+                </div>
+              </td>
 
-            <div>
-              <strong>Recorded:</strong>
-              {{ note.created_at }}
-            </div>
+              <!-- Note preview -->
+              <td>
+                <p class="progress-note-preview">
+                  {{ note.content }}
+                </p>
+              </td>
 
-          </div>
+              <!-- Action -->
+              <td>
+                <button
+                  type="button"
+                  class="progress-note-view-btn"
+                  data-bs-toggle="modal"
+                  data-bs-target="#progressNoteModal{{ note.note_id }}"
+                >
+                  <i class="bi bi-eye"></i>
+                  View
+                </button>
+              </td>
 
-          <div class="note-box">
+            </tr>
 
-            <strong>Progress Note</strong>
+          {% endfor %}
 
-            <p>
-              {{ note.content }}
-            </p>
+        </tbody>
 
-          </div>
-
-        </div>
-      {% endfor %}
+      </table>
 
     </div>
 
   {% else %}
 
     <div class="empty-state">
+      <i class="bi bi-journal-text"></i>
       <h3>No progress notes found</h3>
       <p>Therapist progress notes will appear here.</p>
     </div>
@@ -83,4 +190,73 @@ Progress Notes | UrbaneTrack
   {% endif %}
 
 </section>
+
+
+<!-- Progress note modals -->
+{% for note in notes %}
+
+  <div
+    class="modal fade"
+    id="progressNoteModal{{ note.note_id }}"
+    tabindex="-1"
+    aria-labelledby="progressNoteLabel{{ note.note_id }}"
+    aria-hidden="true"
+  >
+
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+
+      <div class="modal-content progress-note-modal">
+
+        <div class="modal-header progress-note-modal-header">
+
+          <div>
+
+            <span class="page-eyebrow">
+              Progress Note
+            </span>
+
+            <h5
+              class="modal-title"
+              id="progressNoteLabel{{ note.note_id }}"
+            >
+              {{ note.client_name | title }}
+            </h5>
+
+            <p class="progress-note-modal-subtitle">
+              {{ note.appointment_type | title }}
+              <span>•</span>
+              {{ note.date_time | datetime }}
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+
+        </div>
+
+        <div class="modal-body progress-note-modal-body">
+
+          <div class="progress-note-full">
+
+            <div class="progress-note-content">
+              {{ note.content }}
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+{% endfor %}
+
 {% endblock %}

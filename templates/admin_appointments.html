@@ -18,7 +18,7 @@
       <select name="client_id" required>
         <option value="">-- select client --</option>
         {% for c in clients %}
-          <option value="{{ c.client_id }}">{{ c.client_name }} (Parent: {{ c.parent_name }})</option>
+          <option value="{{ c.client_id }}">{{ c.client_name | title }} (Parent: {{ c.parent_name  | title}})</option>
         {% endfor %}
       </select>
 
@@ -26,7 +26,7 @@
       <select name="therapist_id" required>
         <option value="">-- select therapist --</option>
         {% for t in therapists %}
-          <option value="{{ t.user_id }}">{{ t.full_name }}</option>
+          <option value="{{ t.user_id }}">{{ t.full_name | title }}</option>
         {% endfor %}
       </select>
 
@@ -54,204 +54,298 @@
     </form>
   </div>
 
-  <!-- Recent appointments + actions -->
-  <div class="card" style="grid-column: 1 / -1;">
-    <h2>Recent Appointments</h2>
+  <!-- Recent appointments -->
+  <section class="table-card" style="grid-column: 1 / -1;">
 
-     <div class="table-responsive">
-    <table
-      id="adminAppointmentsTable"
-      class="table table-striped table-hover align-middle"
-    >
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Date/Time</th>
-          <th>Type</th>
-          <th>Client</th>
-          <th>Therapist</th>
-          <th>Status</th>
-          <th>Confirm</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
+    <div class="table-card-header">
+      <div>
+        <h2>Recent Appointments</h2>
 
-      <tbody>
-        {% for a in appointments %}
-        <tr>
-          <td>#{{ a.appointment_id }}</td>
-          <td>{{ a.date_time }}</td>
-          <td>{{ a.appointment_type }}</td>
-          <td>{{ a.client_name }}</td>
-          <td>{{ a.therapist_name }}</td>
-          <td>{{ a.status }}</td>
-          <td>
-            <strong>{{ a.confirmation_status }}</strong>
-          </td>
+        <p>
+          Review appointment details, update confirmations and edit schedules.
+        </p>
+      </div>
 
-          <td>
-            <div class="appointment-actions">
+      <span class="table-count">
+        {{ appointments | length }} appointments
+      </span>
+    </div>
 
-              <!-- Update confirmation status -->
-              <form
-                method="POST"
-                action="{{ url_for(
-                  'admin_update_confirmation',
-                  appointment_id=a.appointment_id
-                ) }}"
-                class="confirmation-form"
-              >
-                <select
-                  name="confirmation_status"
-                  class="form-select form-select-sm"
-                  required
-                >
-                  <option
-                    value="Pending"
-                    {% if a.confirmation_status == 'Pending' %}selected{% endif %}
-                  >
-                    Pending
-                  </option>
+    {% if appointments %}
 
-                  <option
-                    value="Accepted"
-                    {% if a.confirmation_status == 'Accepted' %}selected{% endif %}
-                  >
-                    Accepted
-                  </option>
+      <div class="table-responsive">
 
-                  <option
-                    value="Declined"
-                    {% if a.confirmation_status == 'Declined' %}selected{% endif %}
-                  >
-                    Declined
-                  </option>
+        <table
+          id="adminAppointmentsTable"
+          class="table table-hover align-middle modern-data-table"
+          style="width: 100%;"
+        >
 
-                  <option
-                    value="Rescheduled"
-                    {% if a.confirmation_status == 'Rescheduled' %}selected{% endif %}
-                  >
-                    Rescheduled
-                  </option>
-                </select>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date and Time</th>
+              <th>Type</th>
+              <th>Client</th>
+              <th>Therapist</th>
+              <th>Status</th>
+              <th>Confirmation</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
 
-                <button class="btn small success" type="submit">
-                  Save
-                </button>
-              </form>
+          <tbody>
 
-              <!-- Update appointment details -->
-               <button
-                  type="button"
-                  class="btn small"
-                  data-bs-toggle="modal"
-                  data-bs-target="#editAppointmentModal{{ a.appointment_id }}"
-               >
-                  Edit
-                </button>
+            {% for a in appointments %}
 
-              <!-- <details class="appointment-edit">
-                <summary class="btn small">
-                  Edit
-                </summary>
+              <tr>
 
-                <div class="appointment-edit-panel">
-                  <form
-                    method="POST"
-                    action="{{ url_for(
-                      'admin_update_appointment',
-                      appointment_id=a.appointment_id
-                    ) }}"
-                    class="appointment-edit-form"
-                  >
-                    <div class="appointment-edit-field">
-                      <label for="therapist-{{ a.appointment_id }}">
-                        New Therapist
-                      </label>
+                <!-- ID -->
+                <td data-order="{{ a.appointment_id }}">
+                  <span class="appointment-id">
+                    #{{ a.appointment_id }}
+                  </span>
+                </td>
+
+                <!-- Date and time -->
+                <td>
+                  <div class="appointment-date-cell">
+
+                    <span class="appointment-date-icon">
+                      <i class="bi bi-calendar3"></i>
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ a.date_time | datetime }}
+                      </strong>
+
+                      <small>
+                        Appointment schedule
+                      </small>
+                    </div>
+
+                  </div>
+                </td>
+
+                <!-- Type -->
+                <td>
+                  {% if a.appointment_type == "ASSESSMENT" %}
+
+                    <span class="session-type-badge type-assessment">
+                      <i class="bi bi-clipboard-pulse"></i>
+                      Assessment
+                    </span>
+
+                  {% else %}
+
+                    <span class="session-type-badge type-therapy">
+                      <i class="bi bi-heart-pulse"></i>
+                      Therapy
+                    </span>
+
+                  {% endif %}
+                </td>
+
+                <!-- Client -->
+                <td>
+                  <div class="table-person">
+
+                    <span class="table-avatar">
+                      {{ a.client_name[0] | upper }}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ a.client_name | title }}
+                      </strong>
+
+                      <small>
+                        Client
+                      </small>
+                    </div>
+
+                  </div>
+                </td>
+
+                <!-- Therapist -->
+                <td>
+                  <div class="table-person">
+
+                    <span class="table-avatar">
+                      {{ a.therapist_name[0] | upper }}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ a.therapist_name | title }}
+                      </strong>
+
+                      <small>
+                        Therapist
+                      </small>
+                    </div>
+
+                  </div>
+                </td>
+
+                <!-- Appointment status -->
+                <td>
+                  {% if a.status == "Completed" %}
+
+                    <span class="status-badge status-completed">
+                      <i class="bi bi-check-circle"></i>
+                      Completed
+                    </span>
+
+                  {% elif a.status == "Cancelled" %}
+
+                    <span class="status-badge status-cancelled">
+                      <i class="bi bi-x-circle"></i>
+                      Cancelled
+                    </span>
+
+                  {% else %}
+
+                    <span class="status-badge status-scheduled">
+                      <i class="bi bi-clock"></i>
+                      Scheduled
+                    </span>
+
+                  {% endif %}
+                </td>
+
+                <!-- Confirmation status -->
+                <td>
+                  {% if a.confirmation_status == "Accepted" %}
+
+                    <span class="confirmation-badge confirmation-accepted">
+                      <i class="bi bi-check2-circle"></i>                      Accepted
+                    </span>
+
+                  {% elif a.confirmation_status == "Declined" %}
+
+                    <span class="confirmation-badge confirmation-declined">
+                      <i class="bi bi-x-circle"></i>
+                      Declined
+                    </span>
+
+                  {% elif a.confirmation_status == "Rescheduled" %}
+
+                    <span class="confirmation-badge confirmation-rescheduled">
+                      <i class="bi bi-hourglass-split"></i>
+                      Rescheduled
+                    </span>
+
+                  {% else %}
+
+                    <span class="confirmation-badge confirmation-pending">
+                      <i class="bi bi-clock-history"></i>
+                      Pending
+                    </span>
+
+                  {% endif %}
+                </td>
+
+                <!-- Actions -->
+                <td>
+                  <div class="admin-appointment-actions">
+
+                    <form
+                      method="POST"
+                      action="{{ url_for(
+                        'admin_update_confirmation',
+                        appointment_id=a.appointment_id
+                      ) }}"
+                      class="confirmation-update-form"
+                    >
 
                       <select
-                        id="therapist-{{ a.appointment_id }}"
-                        name="therapist_id"
+                        name="confirmation_status"
+                        class="confirmation-select"
                         required
+                        aria-label="Update confirmation status"
                       >
-                        {% for t in therapists %}
                         <option
-                          value="{{ t.user_id }}"
-                          {% if t.full_name == a.therapist_name %}selected{% endif %}
+                          value="Pending"
+                          {% if a.confirmation_status == "Pending" %}
+                            selected
+                          {% endif %}
                         >
-                          {{ t.full_name }}
+                          Pending
                         </option>
-                        {% endfor %}
+
+                        <option
+                          value="Accepted"
+                          {% if a.confirmation_status == "Accepted" %}
+                            selected
+                          {% endif %}
+                        >
+                          Accepted
+                        </option>
+
+                        <option
+                          value="Declined"
+                          {% if a.confirmation_status == "Declined" %}
+                            selected
+                          {% endif %}
+                        >
+                          Declined
+                        </option>
+
+                        <option
+                          value="Rescheduled"
+                          {% if a.confirmation_status == "Rescheduled" %}
+                            selected
+                          {% endif %}
+                        >
+                          Rescheduled
+                        </option>
                       </select>
-                    </div>
 
-                    <div class="appointment-edit-field">
-                      <label for="date-{{ a.appointment_id }}">
-                        New Date & Time
-                      </label>
-
-                      <input
-                        id="date-{{ a.appointment_id }}"
-                        type="datetime-local"
-                        name="date_time"
-                        required
+                      <button
+                        type="submit"
+                        class="appointment-action-btn action-save"
                       >
-                    </div>
-
-                    <div class="appointment-edit-field">
-                      <label for="location-{{ a.appointment_id }}">
-                        New Location
-                      </label>
-
-                      <input
-                        id="location-{{ a.appointment_id }}"
-                        type="text"
-                        name="location"
-                        value="{{ a.location or '' }}"
-                      >
-                    </div>
-
-                    <div class="appointment-edit-field appointment-edit-field-wide">
-                      <label for="note-{{ a.appointment_id }}">
-                        Update Note
-                      </label>
-
-                      <input
-                        id="note-{{ a.appointment_id }}"
-                        type="text"
-                        name="update_note"
-                        placeholder="e.g., Rescheduled after WhatsApp discussion"
-                      >
-                    </div>
-
-                    <div class="appointment-edit-footer">
-                      <p class="muted">
-                        This will set confirmation status to
-                        <strong>Rescheduled</strong>.
-                      </p>
-
-                      <button class="btn small primary" type="submit">
-                        Update Appointment
+                        <i class="bi bi-check2"></i>
+                        Save
                       </button>
-                    </div>
-                  </form>
-                </div>
-              </details> -->
 
-            </div>
-          </td>
-        </tr>
+                    </form>
 
-        {% else %}
-        <tr>
-          <td colspan="8" class="text-center text-muted">
-            No appointments yet.
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+                    <button
+                      type="button"
+                      class="appointment-action-btn action-edit"
+                      data-bs-toggle="modal"
+                      data-bs-target="#editAppointmentModal{{ a.appointment_id }}"
+                    >
+                      <i class="bi bi-pencil"></i>
+                      Edit
+                    </button>
+
+                  </div>
+                </td>
+
+              </tr>
+
+            {% endfor %}
+
+          </tbody>
+        </table>
+
+      </div>
+
+    {% else %}
+
+      <div class="empty-table-message">
+        <i class="bi bi-calendar-x"></i>
+        <p>No appointments yet.</p>
+      </div>
+
+    {% endif %}
+
+  </section>
+
     {% for a in appointments %}
     <div
       class="modal fade"
@@ -308,7 +402,7 @@
                       value="{{ t.user_id }}"
                       {% if t.full_name == a.therapist_name %}selected{% endif %}
                     >
-                      {{ t.full_name }}
+                      {{ t.full_name | title }}
                     </option>
                     {% endfor %}
                   </select>

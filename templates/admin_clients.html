@@ -6,6 +6,7 @@
 
 <section class="grid">
 
+  <!-- Register new client -->
   <div class="card">
     <h2>Register New Client</h2>
 
@@ -41,7 +42,7 @@
 
         {% for parent in parents %}
           <option value="{{ parent.user_id }}">
-            {{ parent.full_name }} — {{ parent.email }}
+            {{ parent.full_name | title }} — {{ parent.email }}
           </option>
         {% endfor %}
       </select>
@@ -62,35 +63,183 @@
     </form>
   </div>
 
-  <div
-    class="card"
+  <!-- Registered clients -->
+  <section
+    class="table-card"
     style="grid-column: 1 / -1;"
   >
-    <h2>Registered Clients</h2>
 
-    <div class="table">
-      <div class="row head">
-        <div>ID</div>
-        <div>Client</div>
-        <div>Parent</div>
-        <div>Parent Email</div>
+    <div class="table-card-header">
+      <div>
+        <h2>Registered Clients</h2>
+
+        <p>
+          View all registered clients and their assigned parent accounts.
+        </p>
       </div>
 
-      {% for client in clients %}
-        <div class="row">
-          <div>#{{ client.client_id }}</div>
-          <div>{{ client.client_name }}</div>
-          <div>{{ client.parent_name }}</div>
-          <div>{{ client.parent_email }}</div>
-        </div>
-      {% else %}
-        <div class="muted">
-          No clients registered yet.
-        </div>
-      {% endfor %}
+      <span class="table-count">
+        {{ clients | length }} clients
+      </span>
     </div>
-  </div>
+
+    {% if clients %}
+
+      <div class="table-responsive">
+
+        <table
+          id="clientsTable"
+          class="table table-hover align-middle modern-data-table"
+          style="width: 100%;"
+        >
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Client</th>
+              <th>Parent</th>
+              <th>Parent Email</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {% for client in clients %}
+
+              <tr>
+
+                <td data-order="{{ client.client_id }}">
+                  <span class="appointment-id">
+                    #{{ client.client_id }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="table-person">
+
+                    <span class="table-avatar">
+                      {{ client.client_name[0] | upper }}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ client.client_name | title }}
+                      </strong>
+
+                      <small>
+                        Client
+                      </small>
+                    </div>
+
+                  </div>
+                </td>
+
+                <td>
+                  <div class="table-person">
+
+                    <span class="table-avatar">
+                      {{ client.parent_name[0] | upper }}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ client.parent_name | title }}
+                      </strong>
+
+                      <small>
+                        Parent
+                      </small>
+                    </div>
+
+                  </div>
+                </td>
+
+                <td>
+                  <div class="client-email">
+
+                    <strong>
+                      {{ client.parent_email }}
+                    </strong>
+
+                    <small>
+                      Registered email
+                    </small>
+
+                  </div>
+                </td>
+
+              </tr>
+
+            {% endfor %}
+
+          </tbody>
+        </table>
+
+      </div>
+
+    {% else %}
+
+      <div class="empty-table-message">
+        <i class="bi bi-people"></i>
+        <p>No clients registered yet.</p>
+      </div>
+
+    {% endif %}
+
+  </section>
 
 </section>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tableElement =
+      document.getElementById("clientsTable");
+
+    if (
+      tableElement &&
+      typeof DataTable !== "undefined"
+    ) {
+      new DataTable(tableElement, {
+        responsive: true,
+        pageLength: 10,
+        autoWidth: false,
+
+        lengthMenu: [
+          [5, 10, 25, 50],
+          [5, 10, 25, 50]
+        ],
+
+        order: [
+          [0, "desc"]
+        ],
+
+        language: {
+          search: "",
+          searchPlaceholder: "Search clients...",
+          lengthMenu: "Show _MENU_ records",
+          info: "Showing _START_ to _END_ of _TOTAL_ clients",
+          infoEmpty: "No clients available",
+          zeroRecords: "No matching clients found",
+
+          paginate: {
+            previous: "Previous",
+            next: "Next"
+          }
+        },
+
+        layout: {
+          topStart: "pageLength",
+          topEnd: "search",
+          bottomStart: "info",
+          bottomEnd: "paging"
+        }
+      });
+    }
+  });
+</script>
 
 {% endblock %}

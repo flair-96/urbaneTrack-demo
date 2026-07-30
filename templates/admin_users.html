@@ -6,41 +6,95 @@ User Account Management | UrbaneTrack
 
 {% block content %}
 
-<section>
-
-  <div class="page-header">
+  <section class="page-header-modern">
     <div>
-      <h1>User Account Management</h1>
-    </div>
-  </div>
+      <span class="page-eyebrow">Administrator</span>
 
-  <section class="card accounts-card">
-    <h2>Registered Accounts</h2>
+      <h1>User Account Management</h1>
+
+      <p>
+        Review and manage registered therapist and parent accounts.
+      </p>
+    </div>
+
+    <div class="page-header-summary">
+      <i class="bi bi-people"></i>
+
+      <div>
+        <strong>{{ users | length }}</strong>
+        <span>Total Accounts</span>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="table-card">
+
+    <div class="table-card-header">
+      <div>
+        <h2>Registered Accounts</h2>
+
+        <p>
+          Search, review and manage user access.
+        </p>
+      </div>
+
+      <span class="table-count">
+        {{ users | length }} accounts
+      </span>
+    </div>
 
     {% if users %}
-      <div class="account-table">
+      <div class="table-responsive">
 
-        <div class="account-row account-head">
-          <div>ID</div>
-          <div>Name</div>
-          <div>Email</div>
-          <div>Role</div>
-          <div>Status</div>
-          <div>Actions</div>
-        </div>
+        <table id="usersTable" class="table table-hover align-middle modern-data-table" style="width:100%">
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
 
         {% for user in users %}
-          <div class="account-row">
+          <tr>
 
-            <div>#{{ user.user_id }}</div>
+            <td data-order="{{ user.user_id }}">
+              <span class="appointment-id">
+                #{{ user.user_id }}
+              </span>
+            </td>
 
-            <div>{{ user.full_name }}</div>
+            <td>
+              <div class="table-person">
 
-            <div>{{ user.email }}</div>
+                <span class="table-avatar">
+                  {{ user.full_name[0] | upper }}
+                </span>
 
-            <div>{{ user.role|title }}</div>
+                <div>
+                  <strong>
+                    {{ user.full_name | title }}
+                  </strong>
 
-            <div>
+                  <small>
+                    {{ user.role | title }}
+                  </small>
+                </div>
+
+              </div>
+            </td>
+
+            <td>
+              {{ user.email }}
+            </td>
+
+            <td>
+
               {% if user.role == "THERAPIST"
                     and user.approval_status == "PENDING" %}
 
@@ -68,8 +122,9 @@ User Account Management | UrbaneTrack
                 </span>
 
               {% endif %}
-            </div>
-
+              </td>
+            
+           <td> 
             <div class="account-actions">
 
               {% if user.role == "THERAPIST"
@@ -83,7 +138,7 @@ User Account Management | UrbaneTrack
                     action='approve'
                   ) }}"
                 >
-                  <button type="submit" class="btn small primary">
+                  <button type="submit" class="account-action-btn action-approve">
                     Approve
                   </button>
                 </form>
@@ -96,10 +151,10 @@ User Account Management | UrbaneTrack
                     action='reject'
                   ) }}"
                    onsubmit="return confirm(
-                      'Are you sure you want to reject {{ user.full_name }} registration? This therapist will not be able to access the system.'
+                      'Are you sure you want to reject {{ user.full_name | title }} registration? This therapist will not be able to access the system.'
                   );"
                 >
-                  <button type="submit" class="btn small danger">
+                  <button type="submit" class="account-action-btn action-reject">
                     Reject
                   </button>
                 </form>
@@ -115,7 +170,7 @@ User Account Management | UrbaneTrack
                     action='approve'
                   ) }}"
                 >
-                  <button type="submit" class="btn small primary">
+                  <button type="submit" class="account-action-btn action-approve">
                     Approve
                   </button>
                 </form>
@@ -130,10 +185,10 @@ User Account Management | UrbaneTrack
                     action='deactivate'
                   ) }}"
                   onsubmit="return confirm(
-                    'Are you sure you want to deactivate {{user.full_name}}? This user will no longer be able to log in.'
+                    'Are you sure you want to deactivate {{user.full_name | title }}? This user will no longer be able to log in.'
                   );"
                 >
-                  <button type="submit" class="btn small secondary">
+                  <button type="submit" class="account-action-btn action-deactivate">
                     Deactivate
                   </button>
                 </form>
@@ -148,17 +203,21 @@ User Account Management | UrbaneTrack
                     action='activate'
                   ) }}"
                 >
-                  <button type="submit" class="btn small primary">
+                  <button type="submit" class="account-action-btn action-activate">
                     Activate
                   </button>
                 </form>
 
               {% endif %}
 
-            </div>
+              </div>
+            </td>
 
-          </div>
+          </tr>
         {% endfor %}
+
+          </tbody>
+        </table>
 
       </div>
 
@@ -168,6 +227,61 @@ User Account Management | UrbaneTrack
 
   </section>
 
-</section>
+{% endblock %}
 
+{% block scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tableElement = document.getElementById("usersTable");
+
+    if (
+      tableElement &&
+      typeof DataTable !== "undefined"
+    ) {
+      new DataTable(tableElement, {
+        responsive: true,
+        pageLength: 10,
+        autoWidth: false,
+
+        lengthMenu: [
+          [5, 10, 25, 50],
+          [5, 10, 25, 50]
+        ],
+
+        order: [
+          [0, "desc"]
+        ],
+
+        columnDefs: [
+          {
+            targets: [4],
+            orderable: false,
+            searchable: false
+          }
+        ],
+
+        language: {
+          search: "",
+          searchPlaceholder: "Search accounts...",
+          lengthMenu: "Show _MENU_ records",
+          info: "Showing _START_ to _END_ of _TOTAL_ accounts",
+          infoEmpty: "No accounts available",
+          zeroRecords: "No matching accounts found",
+
+          paginate: {
+            previous: "Previous",
+            next: "Next"
+          }
+        },
+
+        layout: {
+          topStart: "pageLength",
+          topEnd: "search",
+          bottomStart: "info",
+          bottomEnd: "paging"
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}

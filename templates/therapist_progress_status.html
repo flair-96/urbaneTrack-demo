@@ -1,83 +1,279 @@
 {% extends "base.html" %}
 
+{% block title %}
+Progress Status | UrbaneTrack
+{% endblock %}
+
 {% block content %}
-<h1>Progress Status</h1>
 
-<p class="muted">
-  Rule-based AI evaluations generated from therapy progress records.
-</p>
+<div class="page-container">
 
-<section class="grid">
+  <section class="page-header-modern">
 
-  {% for result in results %}
-    <div class="card">
+    <div>
+      <span class="page-eyebrow">
+        Therapist
+      </span>
 
-      <h2>{{ result.client_name }}</h2>
-
-      <p class="muted">
-        Session #{{ result.appointment_id }}
-        ·
-        {{ result.created_at }}
-      </p>
-
-      <div class="progress-details">
-        <p>
-          <b>Goal Achievement:</b>
-          {{ result.goal_score }}%
-        </p>
-
-        <p>
-          <b>Attendance Rate:</b>
-          {{ result.attendance_rate }}%
-        </p>
-
-        <p>
-          <b>Therapist Rating:</b>
-          {{ result.therapist_rating }}/5
-        </p>
-      </div>
-
-      <hr>
+      <h1>Progress Status</h1>
 
       <p>
-        <b>Progress Status</b>
+        Review rule-based AI evaluations generated from therapy progress records.
       </p>
+    </div>
 
-      <div
-        class="progress-status
-        {% if result.progress_status == 'Excellent Progress' %}
-          status-excellent
-        {% elif result.progress_status == 'Good Progress' %}
-          status-good
-        {% elif result.progress_status == 'Moderate Progress' %}
-          status-moderate
-        {% else %}
-          status-attention
-        {% endif %}
-        "
-      >
-        {{ result.progress_status or "Not Evaluated" }}
-      </div>
+    <div class="page-header-summary">
 
-      <p style="margin-top: 16px;">
-        <b>AI Recommendation</b>
-      </p>
+      <i class="bi bi-graph-up-arrow"></i>
 
-      <div class="note-content">
-        {{ result.ai_recommendation or "No recommendation available." }}
+      <div>
+        <strong>{{ results | length }}</strong>
+        <span>Total Records</span>
       </div>
 
     </div>
 
-  {% else %}
+  </section>
 
-    <div class="card">
-      <p class="muted">
-        No AI progress evaluations are available yet.
-      </p>
+
+  <section class="table-card">
+
+    <div class="table-card-header">
+
+      <div>
+        <h2>Client Progress Overview</h2>
+
+        <p>
+          Review progress scores, evaluation status and AI recommendations.
+        </p>
+      </div>
+
+      <span class="table-count">
+        {{ results | length }} records
+      </span>
+
     </div>
 
-  {% endfor %}
+    {% if results %}
 
-</section>
+      <div class="table-responsive">
+
+        <table
+          id="therapistProgressStatusTable"
+          class="table table-hover align-middle modern-data-table"
+          style="width: 100%;"
+        >
+
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Session</th>
+              <th>Status</th>
+              <th>Goal</th>
+              <th>Attendance</th>
+              <th>Rating</th>
+              <th>Recommendation</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {% for result in results %}
+
+              <tr>
+
+                <!-- Client -->
+                <td>
+                  <div class="table-person">
+
+                    <span class="table-avatar">
+                      {{ result.client_name[0] | upper }}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ result.client_name | title }}
+                      </strong>
+
+                      <small>
+                        Client
+                      </small>
+                    </div>
+
+                  </div>
+                </td>
+
+                <!-- Session -->
+                <td>
+                  <div class="progress-session-date">
+
+                    <strong>
+                      {{ result.created_at | datetime }}
+                    </strong>
+
+                  </div>
+                </td>
+
+                <!-- Status -->
+                <td>
+
+                  {% if result.progress_status == "Excellent Progress" %}
+
+                    <span class="progress-status-badge status-excellent">
+                      <i class="bi bi-check-circle-fill"></i>
+                      Excellent
+                    </span>
+
+                  {% elif result.progress_status == "Good Progress" %}
+
+                    <span class="progress-status-badge status-good">
+                      <i class="bi bi-arrow-up-circle-fill"></i>
+                      Good
+                    </span>
+
+                  {% elif result.progress_status == "Moderate Progress" %}
+
+                    <span class="progress-status-badge status-moderate">
+                      <i class="bi bi-dash-circle-fill"></i>
+                      Moderate
+                    </span>
+
+                  {% else %}
+
+                    <span class="progress-status-badge status-attention">
+                      <i class="bi bi-exclamation-circle-fill"></i>
+                      {{ result.progress_status or "Not Evaluated" }}
+                    </span>
+
+                  {% endif %}
+
+                </td>
+
+                <!-- Goal -->
+                <td>
+                  <div class="metric-value">
+                    <strong>
+                      {{ result.goal_score }}%
+                    </strong>
+
+                    <small>
+                      Achievement
+                    </small>
+                  </div>
+                </td>
+
+                <!-- Attendance -->
+                <td>
+                  <div class="metric-value">
+                    <strong>
+                      {{ result.attendance_rate }}%
+                    </strong>
+
+                  </div>
+                </td>
+
+                <!-- Rating -->
+                <td>
+                  <div class="rating-display">
+
+                    <i class="bi bi-star-fill"></i>
+
+                    <strong>
+                      {{ result.therapist_rating }}/5
+                    </strong>
+
+                  </div>
+                </td>
+
+                <!-- Recommendation -->
+                <td>
+                  <p class="recommendation-preview">
+                    {{ result.ai_recommendation or "No recommendation available." }}
+                  </p>
+                </td>
+
+              </tr>
+
+            {% endfor %}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    {% else %}
+
+      <div class="empty-state">
+
+        <i class="bi bi-graph-up-arrow"></i>
+
+        <h3>No progress records found</h3>
+
+        <p>
+          AI progress evaluations will appear after progress notes are recorded.
+        </p>
+
+      </div>
+
+    {% endif %}
+
+  </section>
+
+</div>
+
+{% block scripts %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const table =
+    document.getElementById("therapistProgressStatusTable");
+
+  if (
+    table &&
+    typeof DataTable !== "undefined"
+  ) {
+    new DataTable(table, {
+      responsive: true,
+      autoWidth: false,
+      pageLength: 10,
+
+      lengthMenu: [
+        [5, 10, 25, 50],
+        [5, 10, 25, 50]
+      ],
+
+      order: [
+        [1, "desc"]
+      ],
+
+      layout: {
+        topStart: "pageLength",
+        topEnd: "search",
+        bottomStart: "info",
+        bottomEnd: "paging"
+      },
+
+      language: {
+        search: "",
+        searchPlaceholder: "Search progress records...",
+        lengthMenu: "Show _MENU_ records",
+        info: "Showing _START_ to _END_ of _TOTAL_ records",
+        infoEmpty: "No progress records available",
+        zeroRecords: "No matching progress records found",
+
+        paginate: {
+          previous: "Previous",
+          next: "Next"
+        }
+      }
+    });
+  }
+
+});
+</script>
+
+{% endblock %}
+
 {% endblock %}
