@@ -44,7 +44,7 @@ Progress Notes | UrbaneTrack
       <h2>Recorded Progress Notes</h2>
 
       <p>
-        Review clients' therapy notes and session information.
+        Review patients' therapy notes and session information.
       </p>
     </div>
 
@@ -66,13 +66,12 @@ Progress Notes | UrbaneTrack
 
         <thead>
           <tr>
-            <th>Client</th>
+            <th>Patient</th>
             <th>Therapist</th>
             <th>Type</th>
             <th>Session Date</th>
             <th>Note Recorded</th>
-            <th>Note Preview</th>
-            <th>Action</th>
+            <th>View Note</th>
           </tr>
         </thead>
 
@@ -92,7 +91,7 @@ Progress Notes | UrbaneTrack
 
                   <div>
                     <strong>{{ note.client_name | title }}</strong>
-                    <small>Client</small>
+                    <small>Patient</small>
                   </div>
 
                 </div>
@@ -149,14 +148,7 @@ Progress Notes | UrbaneTrack
                 </div>
               </td>
 
-              <!-- Note preview -->
-              <td>
-                <p class="progress-note-preview">
-                  {{ note.content }}
-                </p>
-              </td>
-
-              <!-- Action -->
+              <!-- View Note -->
               <td>
                 <button
                   type="button"
@@ -228,6 +220,10 @@ Progress Notes | UrbaneTrack
               {{ note.date_time | datetime }}
             </p>
 
+            <p class="progress-note-modal-therapist">
+              Recorded by {{ note.therapist_name | title }}
+            </p>
+
           </div>
 
           <button
@@ -239,24 +235,120 @@ Progress Notes | UrbaneTrack
 
         </div>
 
-        <div class="modal-body progress-note-modal-body">
+      <div class="modal-body progress-note-modal-body">
 
-          <div class="progress-note-full">
+        <!-- Child Information -->
+        <div class="progress-note-section">
 
-            <div class="progress-note-content">
-              {{ note.content }}
+          <h6>
+            <i class="bi bi-person"></i>
+            Child Information
+          </h6>
+
+          <div class="progress-note-info-grid progress-note-child-grid">
+
+            <div class="progress-info-card">
+              <small>Age</small>
+              <strong> 
+                {% if note.age is not none %}
+                  {{ note.age }} years
+                {% else %}
+                  Not Available
+                {% endif %}
+              </strong>
+            </div>
+
+            <div class="progress-info-card">
+              <small>Gender</small>
+              <strong>
+                {{ note.gender | title if note.gender else "Not Available" }}
+              </strong>
+            </div>
+
+            <div class="progress-info-card diagnosis-card">
+              <small>Diagnosis</small>
+              <strong>
+                {{ note.diagnosis or "Not Available" }}
+              </strong>
             </div>
 
           </div>
 
         </div>
 
+        <!-- Progress Report -->
+        <div class="progress-note-section">
+
+          <h6>
+            <i class="bi bi-journal-text"></i>
+            Progress Report
+          </h6>
+
+          <div class="progress-note-content">
+            {{ note.content }}
+          </div>
+
+        </div>
+
       </div>
 
-    </div>
+      </div>
+
+  </div>
 
   </div>
 
 {% endfor %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const progressNotesTable =
+    document.getElementById("progressNotesTable");
+
+  if (
+    progressNotesTable &&
+    typeof DataTable !== "undefined"
+  ) {
+
+    new DataTable(progressNotesTable, {
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50],
+
+      order: [[4, "desc"]],
+
+      language: {
+        search: "",
+        searchPlaceholder: "Search...",
+        lengthMenu: "Show _MENU_ records",
+        info: "Showing _START_ to _END_ of _TOTAL_ notes",
+        infoEmpty: "No progress notes available",
+        zeroRecords: "No matching progress notes found"
+      },
+
+      layout: {
+        topStart: "pageLength",
+        topEnd: "search",
+        bottomStart: "info",
+        bottomEnd: "paging"
+      },
+
+      columnDefs: [
+        {
+          targets: [0, 1, 2, 5],
+          orderable: false
+        },
+        {
+          targets: [5],
+          searchable: false
+        }
+      ]
+    });
+
+  }
+
+});
+</script>
 
 {% endblock %}

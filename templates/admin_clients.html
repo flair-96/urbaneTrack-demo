@@ -2,21 +2,137 @@
 
 {% block content %}
 
-<h1>Client Registration</h1>
+<!-- <h1>Patient Registration</h1>
 
-<section class="grid">
+<section class="grid"> -->
 
-  <!-- Register new client -->
-  <div class="card">
-    <h2>Register New Client</h2>
+<header class="page-header-modern">
+
+  <div>
+    <span class="page-eyebrow">
+      Patient Management
+    </span>
+
+    <h1>Patient Management</h1>
+
+    <p>
+      Register and manage patient records.
+    </p>
+  </div>
+
+  <div class="page-header-summary">
+
+    <i class="bi bi-people"></i>
+
+    <div>
+      <strong>
+        {{ clients | length }}
+      </strong>
+
+      <span>
+        Registered patients
+      </span>
+    </div>
+
+  </div>
+
+</header>
+
+<!-- Patient section selectors -->
+<div class="client-section-selectors">
+
+  <button
+    type="button"
+    class="client-section-card"
+    data-client-tab="register"
+    aria-controls="registerClientPanel"
+    aria-selected="false"
+  >
+
+    <span class="client-section-icon register-icon">
+      <i class="bi bi-person-plus"></i>
+    </span>
+
+    <span class="client-section-content">
+      <strong>Register New Patient</strong>
+
+      <small>
+        Create a patient record and link an account.
+      </small>
+
+      <span class="client-section-label">
+        Register patient
+        <i class="bi bi-arrow-right"></i>
+      </span>
+    </span>
+
+  </button>
+
+
+  <button
+    type="button"
+    class="client-section-card active"
+    data-client-tab="registered"
+    aria-controls="registeredClientsPanel"
+    aria-selected="true"
+  >
+
+    <span class="client-section-icon registered-icon">
+      <i class="bi bi-people"></i>
+    </span>
+
+    <span class="client-section-content">
+      <strong>Registered Patients</strong>
+
+      <small>
+        Search, review and update existing patient records.
+      </small>
+
+      <span class="client-section-label">
+        {{ clients | length }} patient records
+        <i class="bi bi-arrow-right"></i>
+      </span>
+    </span>
+
+  </button>
+
+</div>
+
+  <!-- Register new patient panel -->
+  <section
+    id="registerClientPanel"
+    class="client-tab-panel"
+    data-client-panel="register"
+    hidden
+  >
+
+    <div class="client-content-card">
+
+      <div class="client-content-header">
+
+        <div class="client-content-header-icon">
+          <i class="bi bi-person-plus"></i>
+        </div>
+
+        <div>
+          <h2>Register New Patient</h2>
+
+          <p>
+            Enter the patient's information and link the appropriate account.
+          </p>
+        </div>
+
+      </div>
 
     <form
       method="POST"
       action="{{ url_for('admin_clients') }}"
-      class="form"
+      class="form client-register-form"
     >
+
+    <div class="form-field-group">
       <label for="client_name">
-        Client / Child Full Name
+        Patient / Child Full Name
       </label>
 
       <input
@@ -26,60 +142,215 @@
         placeholder="Enter child's full name"
         required
       >
+    </div>
 
-      <label for="parent_user_id">
-        Parent Account
-      </label>
+      <div class="client-form-row">
 
-      <select
-        id="parent_user_id"
-        name="parent_user_id"
-        required
-      >
-        <option value="">
-          -- select parent --
-        </option>
+        <div class="client-form-group form-field-group">
+          <label for="date_of_birth">
+            Date of Birth
+          </label>
 
-        {% for parent in parents %}
-          <option value="{{ parent.user_id }}">
-            {{ parent.full_name | title }} — {{ parent.email }}
-          </option>
-        {% endfor %}
-      </select>
+          <input
+            type="date"
+            id="date_of_birth"
+            name="date_of_birth"
+            required
+          >
+        </div>
 
-      {% if not parents %}
-        <p class="muted">
-          No parent accounts are available. Create a parent account first.
-        </p>
-      {% endif %}
+        <div class="client-form-group form-field-group">
+          <label for="gender">
+            Gender
+          </label>
 
-      <button
-        class="btn primary"
-        type="submit"
-        {% if not parents %}disabled{% endif %}
-      >
-        Register Client
-      </button>
-    </form>
+          <select
+            id="gender"
+            name="gender"
+            required
+          >
+            <option value="">
+              -- select gender --
+            </option>
+
+            <option value="MALE">
+              Male
+            </option>
+
+            <option value="FEMALE">
+              Female
+            </option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="form-field-group">
+
+        <label for="diagnosis">
+          Diagnosis
+        </label>
+
+        <input
+          type="text"
+          id="diagnosis"
+          name="diagnosis"
+          placeholder="Enter patient's diagnosis (optional)"
+        >
+
+      </div>
+
+  <div class="form-field-group">
+
+    <label for="link_type">
+      Account Link
+    </label>
+
+    <select
+      id="link_type"
+      name="link_type"
+      required
+    >
+      <option value="">
+        -- select account type --
+      </option>
+
+      <option value="PARENT">
+        Parent / Guardian Account
+      </option>
+
+      <option value="PATIENT">
+        Patient Account
+      </option>
+
+    </select>
+
   </div>
 
-  <!-- Registered clients -->
-  <section
-    class="table-card"
-    style="grid-column: 1 / -1;"
+
+<!-- Parent Account -->
+<div
+  class="form-field-group"
+  id="parentAccountField"
+  hidden
+>
+
+  <label for="parent_user_id">
+    Parent Account
+  </label>
+
+  <select
+    id="parent_user_id"
+    name="parent_user_id"
   >
+
+    <option value="">
+      -- select parent --
+    </option>
+
+    {% for parent in parents %}
+
+      <option value="{{ parent.user_id }}">
+
+        {{ parent.full_name | title }}
+        — {{ parent.email }}
+
+      </option>
+
+    {% endfor %}
+
+  </select>
+
+
+  {% if not parents %}
+
+    <p class="muted">
+      No parent accounts are available.
+      Create a parent account first.
+    </p>
+
+  {% endif %}
+
+</div>
+
+
+<!-- Patient Account -->
+<div
+  class="form-field-group"
+  id="patientAccountField"
+  hidden
+>
+
+  <label for="patient_user_id">
+    Patient Account
+  </label>
+
+  <select
+    id="patient_user_id"
+    name="patient_user_id"
+  >
+
+    <option value="">
+      -- select patient account --
+    </option>
+
+    {% for patient in patient_accounts %}
+
+      <option value="{{ patient.user_id }}">
+
+        {{ patient.full_name | title }}
+        — {{ patient.email }}
+
+      </option>
+
+    {% endfor %}
+
+  </select>
+
+
+  {% if not patient_accounts %}
+
+    <p class="muted">
+      No unlinked patient accounts are available.
+      Create a patient account first.
+    </p>
+
+  {% endif %}
+
+</div>
+
+
+<button
+  class="btn primary"
+  type="submit"
+>
+  Register Patient
+</button>
+      </form>
+      </div>
+      </div>
+    </section>
+
+  <!-- Registered patients panel -->
+  <section
+    id="registeredClientsPanel"
+    class="client-tab-panel active"
+    data-client-panel="registered"
+  >
+
+    <section class="table-card">
 
     <div class="table-card-header">
       <div>
-        <h2>Registered Clients</h2>
+        <h2>Registered Patients</h2>
 
         <p>
-          View all registered clients and their assigned parent accounts.
+          View all registered patients and their linked accounts.
         </p>
       </div>
 
       <span class="table-count">
-        {{ clients | length }} clients
+        {{ clients | length }} patient{% if clients | length != 1 %}s{% endif %}
       </span>
     </div>
 
@@ -96,9 +367,10 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Client</th>
-              <th>Parent</th>
-              <th>Parent Email</th>
+              <th>Patient</th>
+              <th>Linked Account</th>
+              <th>Email</th>
+              <th>Actions</th>
             </tr>
           </thead>
 
@@ -127,7 +399,7 @@
                       </strong>
 
                       <small>
-                        Client
+                        Patient
                       </small>
                     </div>
 
@@ -135,39 +407,118 @@
                 </td>
 
                 <td>
-                  <div class="table-person">
 
-                    <span class="table-avatar">
-                      {{ client.parent_name[0] | upper }}
+                  {% if client.parent_user_id %}
+
+                    <div class="table-person">
+
+                      <span class="table-avatar">
+                        {{ client.parent_name[0] | upper }}
+                      </span>
+
+                      <div>
+
+                        <strong>
+                          {{ client.parent_name | title }}
+                        </strong>
+
+                        <small>
+                          Parent / Guardian
+                        </small>
+
+                      </div>
+
+                    </div>
+
+                  {% elif client.patient_user_id %}
+
+                    <div class="table-person">
+
+                      <span class="table-avatar">
+                        {{ client.patient_account_name[0] | upper }}
+                      </span>
+
+                      <div>
+
+                        <strong>
+                          {{ client.patient_account_name | title }}
+                        </strong>
+
+                        <small>
+                          Patient Account
+                        </small>
+
+                      </div>
+
+                    </div>
+
+                  {% else %}
+
+                    <span class="muted">
+                      Not linked
                     </span>
 
-                    <div>
+                  {% endif %}
+
+                </td>
+
+
+                <td>
+
+                  <div class="client-email">
+
+                    {% if client.parent_user_id %}
+
                       <strong>
-                        {{ client.parent_name | title }}
+                        {{ client.parent_email }}
                       </strong>
 
                       <small>
-                        Parent
+                        Parent email
                       </small>
-                    </div>
+
+                    {% elif client.patient_user_id %}
+
+                      <strong>
+                        {{ client.patient_account_email }}
+                      </strong>
+
+                      <small>
+                        Patient email
+                      </small>
+
+                    {% else %}
+
+                      <span class="muted">
+                        —
+                      </span>
+
+                    {% endif %}
 
                   </div>
+
                 </td>
 
                 <td>
-                  <div class="client-email">
+                  <button
+                    type="button"
+                    class="btn small client-edit-button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editClientModal"
 
-                    <strong>
-                      {{ client.parent_email }}
-                    </strong>
-
-                    <small>
-                      Registered email
-                    </small>
-
-                  </div>
+                    data-client-id="{{ client.client_id }}"
+                    data-client-name="{{ client.client_name }}"
+                    data-client-dob="{{ client.date_of_birth or '' }}"
+                    data-client-gender="{{ client.gender or '' }}"
+                    data-client-diagnosis="{{ client.diagnosis or '' }}"
+                    data-parent-id="{{ client.parent_user_id or '' }}"
+                    data-patient-id="{{ client.patient_user_id or '' }}"
+                    data-link-type="{% if client.parent_user_id %}PARENT{% elif client.patient_user_id %}PATIENT{% endif %}"
+                  >
+                    <i class="bi bi-pencil-square"></i>
+                    Edit
+                  </button>
                 </td>
-
               </tr>
 
             {% endfor %}
@@ -181,7 +532,7 @@
 
       <div class="empty-table-message">
         <i class="bi bi-people"></i>
-        <p>No clients registered yet.</p>
+        <p>No patients registered yet.</p>
       </div>
 
     {% endif %}
@@ -190,12 +541,328 @@
 
 </section>
 
+      <!-- Edit Patient Modal -->
+      <div
+        class="modal fade"
+        id="editClientModal"
+        tabindex="-1"
+        aria-labelledby="editClientModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content modern-modal">
+
+            <div class="modal-header">
+
+              <div>
+
+                <h2
+                  class="modal-title"
+                  id="editClientModalLabel"
+                >
+                  Edit Patient Information
+                </h2>
+
+                <p>
+                  Update the child's details and assigned parent account.
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+
+            </div>
+
+            <form
+              method="POST"
+              id="editClientForm"
+            >
+
+              <div class="modal-body">
+
+                <div class="client-modal-section">
+
+                  <div class="client-modal-section-heading">
+                    <i class="bi bi-person"></i>
+                    <span>Child Information</span>
+                  </div>
+
+
+                  <div class="client-form-group">
+
+                    <label for="edit_client_name">
+                      Patient / Child Full Name
+                    </label>
+
+                    <input
+                      type="text"
+                      id="edit_client_name"
+                      name="client_name"
+                      required
+                    >
+
+                  </div>
+
+
+                  <div class="client-form-row">
+
+                    <div class="client-form-group">
+
+                      <label for="edit_date_of_birth">
+                        Date of Birth
+                      </label>
+
+                      <input
+                        type="date"
+                        id="edit_date_of_birth"
+                        name="date_of_birth"
+                        required
+                      >
+
+                    </div>
+
+
+                    <div class="client-form-group">
+
+                      <label for="edit_gender">
+                        Gender
+                      </label>
+
+                      <select
+                        id="edit_gender"
+                        name="gender"
+                        required
+                      >
+                        <option value="">
+                          Select gender
+                        </option>
+
+                        <option value="MALE">
+                          Male
+                        </option>
+
+                        <option value="FEMALE">
+                          Female
+                        </option>
+                      </select>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="client-form-group diagnosis-form-group">
+
+                  <label for="edit_diagnosis">
+                    Diagnosis
+                  </label>
+
+                  <input
+                    type="text"
+                    id="edit_diagnosis"
+                    name="diagnosis"
+                    placeholder="Enter the child's diagnosis (optional)"
+                  >
+
+                </div>
+
+                <div class="client-modal-section">
+
+                  <div class="client-modal-section-heading">
+                    <i class="bi bi-link-45deg"></i>
+                    <span>Account Assignment</span>
+                  </div>
+
+
+                  <div class="client-form-group">
+
+                    <label for="edit_link_type">
+                      Account Link
+                    </label>
+
+                    <select
+                      id="edit_link_type"
+                      name="link_type"
+                      required
+                    >
+                      <option value="">
+                        Select account type
+                      </option>
+
+                      <option value="PARENT">
+                        Parent / Guardian Account
+                      </option>
+
+                      <option value="PATIENT">
+                        Patient Account
+                      </option>
+                    </select>
+
+                  </div>
+
+
+                  <div
+                    class="client-form-group"
+                    id="editParentAccountField"
+                    hidden
+                  >
+
+                    <label for="edit_parent_user_id">
+                      Parent Account
+                    </label>
+
+                    <select
+                      id="edit_parent_user_id"
+                      name="parent_user_id"
+                    >
+                      <option value="">
+                        Select parent account
+                      </option>
+
+                      {% for parent in parents %}
+                        <option value="{{ parent.user_id }}">
+                          {{ parent.full_name | title }}
+                          — {{ parent.email }}
+                        </option>
+                      {% endfor %}
+                    </select>
+
+                  </div>
+
+
+                  <div
+                    class="client-form-group"
+                    id="editPatientAccountField"
+                    hidden
+                  >
+
+                    <label for="edit_patient_user_id">
+                      Patient Account
+                    </label>
+
+                    <select
+                      id="edit_patient_user_id"
+                      name="patient_user_id"
+                    >
+                      <option value="">
+                        Select patient account
+                      </option>
+
+                      <!-- EDIT PATIENT -->
+                      {% for patient in edit_patient_accounts %}
+                        <option value="{{ patient.user_id }}">
+                          {{ patient.full_name | title }}
+                          — {{ patient.email }}
+                        </option>
+                      {% endfor %}
+                    </select>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="modal-footer">
+
+                <button
+                  type="button"
+                  class="btn"
+                  data-bs-dismiss="modal"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  class="btn primary"
+                >
+                  <i class="bi bi-check2-circle"></i>
+                  Save Changes
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+      </div>
+
+
 {% endblock %}
 
 
 {% block scripts %}
+
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+
+    /* -----------------------------------------
+       Patient section switching
+       ----------------------------------------- */
+
+    const clientTabButtons =
+      document.querySelectorAll("[data-client-tab]");
+
+    const clientTabPanels =
+      document.querySelectorAll("[data-client-panel]");
+
+    function showClientTab(tabName) {
+      clientTabButtons.forEach(function (button) {
+        const isActive =
+          button.dataset.clientTab === tabName;
+
+        button.classList.toggle(
+          "active",
+          isActive
+        );
+
+        button.setAttribute(
+          "aria-selected",
+          isActive ? "true" : "false"
+        );
+      });
+
+      clientTabPanels.forEach(function (panel) {
+        const isActive =
+          panel.dataset.clientPanel === tabName;
+
+        panel.classList.toggle(
+          "active",
+          isActive
+        );
+
+        panel.hidden = !isActive;
+      });
+    }
+
+    clientTabButtons.forEach(function (button) {
+      button.addEventListener(
+        "click",
+        function () {
+          showClientTab(
+            button.dataset.clientTab
+          );
+        }
+      );
+    });
+
+    /* Registered Clients is shown first */
+    showClientTab("registered");
+
+
+    /* -----------------------------------------
+       Registered clients DataTable
+       ----------------------------------------- */
+
     const tableElement =
       document.getElementById("clientsTable");
 
@@ -217,18 +884,29 @@
           [0, "desc"]
         ],
 
+        columnDefs: [
+          {
+            targets: 0,
+            width: "70px"
+          },
+          {
+            targets: [1, 2, 3, 4],
+            orderable: false
+          },
+          {
+            targets: [4],
+            searchable: false
+          }
+        ],
+
         language: {
           search: "",
-          searchPlaceholder: "Search clients...",
+          searchPlaceholder: "Search...",
           lengthMenu: "Show _MENU_ records",
-          info: "Showing _START_ to _END_ of _TOTAL_ clients",
+          info:
+            "Showing _START_ to _END_ of _TOTAL_ clients",
           infoEmpty: "No clients available",
           zeroRecords: "No matching clients found",
-
-          paginate: {
-            previous: "Previous",
-            next: "Next"
-          }
         },
 
         layout: {
@@ -239,7 +917,269 @@
         }
       });
     }
+
+
+    /* -----------------------------------------
+       Edit client modal
+       ----------------------------------------- */
+
+    const editClientModal =
+      document.getElementById("editClientModal");
+
+    if (editClientModal) {
+      editClientModal.addEventListener(
+        "show.bs.modal",
+        function (event) {
+          const button = event.relatedTarget;
+
+          if (!button) {
+            return;
+          }
+
+          const clientId =
+            button.getAttribute(
+              "data-client-id"
+            );
+
+          const clientName =
+            button.getAttribute(
+              "data-client-name"
+            );
+
+          const clientDob =
+            button.getAttribute(
+              "data-client-dob"
+            );
+
+          const clientGender =
+            button.getAttribute(
+              "data-client-gender"
+            );
+
+          const clientDiagnosis =
+            button.getAttribute(
+              "data-client-diagnosis"
+            );
+
+          const parentId =
+            button.getAttribute(
+              "data-parent-id"
+            );
+
+          const patientId =
+            button.getAttribute(
+              "data-patient-id"
+            );
+
+          const linkType =
+            button.getAttribute(
+              "data-link-type"
+            );
+
+          const editForm =
+            document.getElementById(
+              "editClientForm"
+            );
+
+          if (!editForm) {
+            return;
+          }
+
+          editForm.action =
+            `/admin/clients/${clientId}/update`;
+
+          document.getElementById(
+            "edit_client_name"
+          ).value = clientName || "";
+
+          document.getElementById(
+            "edit_date_of_birth"
+          ).value = clientDob || "";
+
+          document.getElementById(
+            "edit_gender"
+          ).value = clientGender || "";
+
+          document.getElementById(
+            "edit_diagnosis"
+          ).value = clientDiagnosis || "";
+
+          const editLinkType =
+            document.getElementById(
+              "edit_link_type"
+            );
+
+          const editParentField =
+            document.getElementById(
+              "editParentAccountField"
+            );
+
+          const editPatientField =
+            document.getElementById(
+              "editPatientAccountField"
+            );
+
+          const editParentSelect =
+            document.getElementById(
+              "edit_parent_user_id"
+            );
+
+          const editPatientSelect =
+            document.getElementById(
+              "edit_patient_user_id"
+            );
+
+
+          editLinkType.value = linkType || "";
+
+
+          function updateEditAccountFields() {
+
+            if (editLinkType.value === "PARENT") {
+
+              editParentField.hidden = false;
+              editPatientField.hidden = true;
+
+              editParentSelect.required = true;
+              editPatientSelect.required = false;
+
+              editParentSelect.value = parentId || "";
+              editPatientSelect.value = "";
+
+            }
+
+            else if (editLinkType.value === "PATIENT") {
+
+              editParentField.hidden = true;
+              editPatientField.hidden = false;
+
+              editParentSelect.required = false;
+              editPatientSelect.required = true;
+
+              editParentSelect.value = "";
+              editPatientSelect.value = patientId || "";
+
+            }
+
+            else {
+
+              editParentField.hidden = true;
+              editPatientField.hidden = true;
+
+              editParentSelect.required = false;
+              editPatientSelect.required = false;
+
+              editParentSelect.value = "";
+              editPatientSelect.value = "";
+
+            }
+
+          }
+
+
+          updateEditAccountFields();
+
+
+          editLinkType.onchange =
+            updateEditAccountFields;
+        }
+      );
+    }
+
   });
+</script>
+
+<script>
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+
+    const linkType =
+      document.getElementById(
+        "link_type"
+      );
+
+    const parentField =
+      document.getElementById(
+        "parentAccountField"
+      );
+
+    const patientField =
+      document.getElementById(
+        "patientAccountField"
+      );
+
+    const parentSelect =
+      document.getElementById(
+        "parent_user_id"
+      );
+
+    const patientSelect =
+      document.getElementById(
+        "patient_user_id"
+      );
+
+
+    if (!linkType) {
+      return;
+    }
+
+
+    function updateAccountFields() {
+
+      const selectedType =
+        linkType.value;
+
+
+      if (selectedType === "PARENT") {
+
+        parentField.hidden = false;
+        patientField.hidden = true;
+
+        parentSelect.required = true;
+        patientSelect.required = false;
+
+        patientSelect.value = "";
+
+      }
+
+      else if (selectedType === "PATIENT") {
+
+        parentField.hidden = true;
+        patientField.hidden = false;
+
+        parentSelect.required = false;
+        patientSelect.required = true;
+
+        parentSelect.value = "";
+
+      }
+
+      else {
+
+        parentField.hidden = true;
+        patientField.hidden = true;
+
+        parentSelect.required = false;
+        patientSelect.required = false;
+
+      }
+
+    }
+
+
+    linkType.addEventListener(
+      "change",
+      updateAccountFields
+    );
+
+
+    updateAccountFields();
+
+  }
+);
+
 </script>
 
 {% endblock %}

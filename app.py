@@ -1,6 +1,7 @@
 import sqlite3
 from datetime import datetime
 from functools import wraps
+from collections import Counter
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, redirect, url_for, session, g, flash, abort
 
@@ -31,6 +32,34 @@ def close_db(_error):
 def now_str():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+def calculate_age(date_of_birth):
+    if not date_of_birth:
+        return None
+
+    try:
+        birth_date = datetime.strptime(
+            date_of_birth,
+            "%Y-%m-%d"
+        ).date()
+
+        today = datetime.now().date()
+
+        age = today.year - birth_date.year
+
+        if (
+            today.month,
+            today.day
+        ) < (
+            birth_date.month,
+            birth_date.day
+        ):
+            age -= 1
+
+        return age
+
+    except (TypeError, ValueError):
+        return None
+
 def format_datetime(value):
     if not value:
         return "-"
@@ -60,7 +89,7 @@ def init_db():
         password_hash TEXT NOT NULL,
 
         role TEXT NOT NULL
-            CHECK(role IN ('ADMIN', 'THERAPIST', 'PARENT')),
+            CHECK(role IN ('ADMIN', 'THERAPIST', 'PARENT', 'PATIENT')),
 
         must_change_password INTEGER NOT NULL DEFAULT 0,
         is_active INTEGER NOT NULL DEFAULT 1,
@@ -77,15 +106,201 @@ def init_db():
     )
     """)
 
+    # Check whether users table already supports PATIENT
+    users_sql = cur.execute("""
+        SELECT sql
+        FROM sqlite_master
+        WHERE type = 'table'
+        AND name = 'users'
+    """).fetchone()
+
+    if users_sql and "'PATIENT'" not in users_sql[0]:
+
+        cur.execute("""
+            CREATE TABLE users_new (
+                user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                full_name TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+
+                role TEXT NOT NULL
+                    CHECK(
+                        role IN (
+                            'ADMIN',
+                            'THERAPIST',
+                            'PARENT',
+                            'PATIENT'
+                        )
+                    ),
+
+                must_change_password INTEGER NOT NULL DEFAULT 0,
+                is_active INTEGER NOT NULL DEFAULT 1,
+
+                approval_status TEXT NOT NULL
+                    CHECK(
+                        approval_status IN (
+                            'APPROVED',
+                            'PENDING',
+                            'REJECTED'
+                        )
+                    )
+                    DEFAULT 'APPROVED'
+            )
+        """)
+
+        cur.execute("""
+            INSERT INTO users_new (
+                user_id,
+                full_name,
+                email,
+                password_hash,
+                role,
+                must_change_password,
+                is_active,
+                approval_status
+            )
+            SELECT
+                user_id,
+                full_name,
+                email,
+                password_hash,
+                role,
+                must_change_password,
+                is_active,
+                approval_status
+            FROM users
+        """)
+
+        cur.execute("""
+            DROP TABLE users
+        """)
+
+        cur.execute("""
+            ALTER TABLE users_new
+            RENAME TO users
+        """)
+
     cur.execute("""
     CREATE TABLE IF NOT EXISTS clients (
         client_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        parent_user_id INTEGER NOT NULL,
+        parent_user_id INTEGER,
+        patient_user_id INTEGER,
         full_name TEXT NOT NULL,
         date_of_birth TEXT,
-        FOREIGN KEY(parent_user_id) REFERENCES users(user_id)
+        gender TEXT,
+        diagnosis TEXT,
+        created_at TEXT,
+        FOREIGN KEY(parent_user_id) REFERENCES users(user_id),
+        FOREIGN KEY(patient_user_id) REFERENCES users(user_id)
     )
     """)
+
+    client_columns = {
+        row[1]
+        for row in cur.execute(
+            "PRAGMA table_info(clients)"
+        ).fetchall()
+    }
+
+    if "date_of_birth" not in client_columns:
+        cur.execute("""
+            ALTER TABLE clients
+            ADD COLUMN date_of_birth TEXT
+        """)
+
+    if "gender" not in client_columns:
+        cur.execute("""
+            ALTER TABLE clients
+            ADD COLUMN gender TEXT
+        """)
+
+    if "diagnosis" not in client_columns:
+        cur.execute("""
+            ALTER TABLE clients
+            ADD COLUMN diagnosis TEXT
+        """)
+
+    if "created_at" not in client_columns:
+        cur.execute("""
+            ALTER TABLE clients
+            ADD COLUMN created_at TEXT
+        """)
+
+    if "patient_user_id" not in client_columns:
+        cur.execute("""
+            ALTER TABLE clients
+            ADD COLUMN patient_user_id INTEGER
+        """)
+
+    # Check whether parent_user_id is still NOT NULL
+    client_info = cur.execute(
+        "PRAGMA table_info(clients)"
+    ).fetchall()
+
+    parent_column = next(
+        (
+            row
+            for row in client_info
+            if row[1] == "parent_user_id"
+        ),
+        None
+    )
+
+    if parent_column and parent_column[3] == 1:
+
+        cur.execute("""
+            CREATE TABLE clients_new (
+                client_id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                parent_user_id INTEGER,
+                patient_user_id INTEGER,
+
+                full_name TEXT NOT NULL,
+                date_of_birth TEXT,
+                gender TEXT,
+                diagnosis TEXT,
+                created_at TEXT,
+
+                FOREIGN KEY(parent_user_id)
+                    REFERENCES users(user_id),
+
+                FOREIGN KEY(patient_user_id)
+                    REFERENCES users(user_id)
+            )
+        """)
+
+        cur.execute("""
+            INSERT INTO clients_new (
+                client_id,
+                parent_user_id,
+                patient_user_id,
+                full_name,
+                date_of_birth,
+                gender,
+                diagnosis,
+                created_at
+            )
+            SELECT
+                client_id,
+                parent_user_id,
+                patient_user_id,
+                full_name,
+                date_of_birth,
+                gender,
+                diagnosis,
+                created_at
+            FROM clients
+        """)
+
+        cur.execute("""
+            DROP TABLE clients
+        """)
+
+        cur.execute("""
+            ALTER TABLE clients_new
+            RENAME TO clients
+        """)
 
     # UPDATED appointments table (no reschedule_requests; store status here)
     cur.execute("""
@@ -122,7 +337,26 @@ def init_db():
     )
     """)
 
-    # OPTIONAL: clean old table if it exists (safe)
+    # Ensure progress_notes has newer columns
+    progress_note_columns = {
+        row[1]
+        for row in cur.execute(
+            "PRAGMA table_info(progress_notes)"
+        ).fetchall()
+    }
+
+    if "diagnosis" not in progress_note_columns:
+        cur.execute("""
+            ALTER TABLE progress_notes
+            ADD COLUMN diagnosis TEXT
+        """)
+
+    if "updated_at" not in progress_note_columns:
+        cur.execute("""
+            ALTER TABLE progress_notes
+            ADD COLUMN updated_at TEXT
+        """)
+
     cur.execute("DROP TABLE IF EXISTS reschedule_requests")
 
     db.commit()
@@ -411,9 +645,9 @@ def admin_create_user():
         )
         role = request.form.get("role", "")
 
-        if role not in ("THERAPIST", "PARENT"):
+        if role not in ("THERAPIST", "PARENT", "PATIENT"):
             flash(
-                "Only therapist and parent accounts can be created.",
+                "Please select a valid account type.",
                 "error"
             )
 
@@ -483,7 +717,7 @@ def register():
         )
         role = request.form.get("role", "")
 
-        if role not in ("THERAPIST", "PARENT"):
+        if role not in ("THERAPIST", "PARENT", "PATIENT"):
             flash("Please select a valid account type.", "error")
 
         elif not full_name:
@@ -514,7 +748,7 @@ def register():
             db = get_db()
 
             try:
-                db.execute("""
+                cursor = db.execute("""
                     INSERT INTO users (
                         full_name,
                         email,
@@ -533,6 +767,20 @@ def register():
                     is_active,
                     approval_status
                 ))
+
+                new_user_id = cursor.lastrowid
+
+                if role == "PATIENT":
+                    db.execute("""
+                        INSERT INTO clients (
+                            patient_user_id,
+                            full_name
+                        )
+                        VALUES (?, ?)
+                    """, (
+                        new_user_id,
+                        full_name
+                    ))
 
                 db.commit()
 
@@ -590,6 +838,9 @@ def dashboard():
     if role == "PARENT":
         return redirect(url_for("parent_dashboard"))
 
+    elif role == "PATIENT":
+        return redirect(url_for("patient_dashboard"))
+
     session.clear()
     return redirect(url_for("home"))
 
@@ -605,8 +856,42 @@ def forbidden(_error):
 @app.get("/admin")
 @login_required(roles=["ADMIN"])
 def admin_dashboard():
-    return render_template("admin.html")
+    conn = get_db()
 
+    appointments_count = conn.execute(
+        "SELECT COUNT(*) FROM appointments"
+    ).fetchone()[0]
+
+    users_count = conn.execute(
+        """
+        SELECT COUNT(*)
+        FROM users
+        WHERE role IN ('THERAPIST', 'PARENT')
+        """
+    ).fetchone()[0]
+
+    clients_count = conn.execute(
+        "SELECT COUNT(*) FROM clients"
+    ).fetchone()[0]
+
+    progress_notes_count = conn.execute(
+    "SELECT COUNT(*) FROM progress_notes"
+    ).fetchone()[0]
+
+    progress_status_count = conn.execute("""
+        SELECT COUNT(*)
+        FROM progress_notes
+        WHERE progress_status IS NOT NULL
+    """).fetchone()[0]
+
+    return render_template(
+        "admin.html",
+        appointments_count=appointments_count,
+        users_count=users_count,
+        clients_count=clients_count,
+        progress_notes_count=progress_notes_count,
+        progress_status_count=progress_status_count
+    )
 
 @app.route("/admin/users", methods=["GET", "POST"])
 @login_required(roles=["ADMIN"])
@@ -622,8 +907,8 @@ def admin_users():
         )
         role = request.form.get("role", "")
 
-        if role not in ("THERAPIST", "PARENT"):
-            flash("Please select Therapist or Parent.", "error")
+        if role not in ("THERAPIST", "PARENT", "PATIENT"):
+            flash("Only therapist, parent and patient accounts can be created.", "error")
 
         elif not full_name:
             flash("Please enter the full name.", "error")
@@ -683,7 +968,7 @@ def admin_users():
             is_active,
             approval_status
         FROM users
-        WHERE role IN ('THERAPIST', 'PARENT')
+        WHERE role IN ('THERAPIST', 'PARENT', 'PATIENT')
         ORDER BY full_name
     """).fetchall()
 
@@ -697,47 +982,258 @@ def admin_users():
 @app.route("/admin/clients", methods=["GET", "POST"])
 @login_required(roles=["ADMIN"])
 def admin_clients():
+
     db = get_db()
 
+
+    # ==============================
+    # REGISTER NEW PATIENT
+    # ==============================
     if request.method == "POST":
-        client_name = " ".join(request.form.get("client_name", "").split()).title()
-        parent_user_id = request.form.get("parent_user_id")
 
+        client_name = " ".join(
+            request.form.get(
+                "client_name",
+                ""
+            ).split()
+        ).title()
+
+        date_of_birth = request.form.get(
+            "date_of_birth",
+            ""
+        ).strip()
+
+        gender = request.form.get(
+            "gender",
+            ""
+        ).strip().upper()
+
+        diagnosis = request.form.get(
+            "diagnosis",
+            ""
+        ).strip()
+
+        link_type = request.form.get(
+            "link_type",
+            ""
+        ).strip().upper()
+
+        parent_user_id = request.form.get(
+            "parent_user_id"
+        )
+
+        patient_user_id = request.form.get(
+            "patient_user_id"
+        )
+
+
+        # ------------------------------
+        # BASIC VALIDATION
+        # ------------------------------
         if not client_name:
-            flash("Please enter the client's full name.", "error")
 
-        elif not parent_user_id:
-            flash("Please select a parent.", "error")
+            flash(
+                "Please enter the patient's full name.",
+                "error"
+            )
 
-        else:
-            parent = db.execute("""
-                SELECT user_id
-                FROM users
-                WHERE user_id = ?
-                  AND role = 'PARENT'
-                  AND is_active = 1
-            """, (parent_user_id,)).fetchone()
 
-            if not parent:
-                flash("The selected parent account is invalid.", "error")
+        elif not date_of_birth:
+
+            flash(
+                "Please enter the patient's date of birth.",
+                "error"
+            )
+
+
+        elif gender not in {
+            "MALE",
+            "FEMALE"
+        }:
+
+            flash(
+                "Please select the patient's gender.",
+                "error"
+            )
+
+
+        elif link_type not in {
+            "PARENT",
+            "PATIENT"
+        }:
+
+            flash(
+                "Please select how this patient should be linked.",
+                "error"
+            )
+
+
+        # ==============================
+        # LINK TO PARENT
+        # ==============================
+        elif link_type == "PARENT":
+
+            if not parent_user_id:
+
+                flash(
+                    "Please select a parent account.",
+                    "error"
+                )
 
             else:
-                db.execute("""
-                    INSERT INTO clients (
-                        full_name,
-                        parent_user_id
-                    )
-                    VALUES (?, ?)
+
+                parent = db.execute("""
+                    SELECT
+                        user_id
+                    FROM users
+                    WHERE user_id = ?
+                      AND role = 'PARENT'
+                      AND is_active = 1
+                      AND approval_status = 'APPROVED'
                 """, (
-                    client_name,
-                    parent_user_id
-                ))
+                    parent_user_id,
+                )).fetchone()
 
-                db.commit()
 
-                flash("Client registered successfully.", "ok")
-                return redirect(url_for("admin_clients"))
+                if not parent:
 
+                    flash(
+                        "The selected parent account is invalid.",
+                        "error"
+                    )
+
+                else:
+
+                    created_at = now_str()
+
+                    db.execute("""
+                        INSERT INTO clients (
+                            full_name,
+                            date_of_birth,
+                            gender,
+                            diagnosis,
+                            parent_user_id,
+                            patient_user_id,
+                            created_at
+                        )
+                        VALUES (?, ?, ?, ?, ?, NULL, ?)
+                    """, (
+                        client_name,
+                        date_of_birth,
+                        gender,
+                        diagnosis,
+                        parent_user_id,
+                        created_at
+                    ))
+
+                    db.commit()
+
+                    flash(
+                        "Patient registered successfully.",
+                        "ok"
+                    )
+
+                    return redirect(
+                        url_for("admin_clients")
+                    )
+
+
+        # ==============================
+        # LINK TO PATIENT ACCOUNT
+        # ==============================
+        elif link_type == "PATIENT":
+
+            if not patient_user_id:
+
+                flash(
+                    "Please select a patient account.",
+                    "error"
+                )
+
+            else:
+
+                patient = db.execute("""
+                    SELECT
+                        user_id,
+                        full_name
+                    FROM users
+                    WHERE user_id = ?
+                      AND role = 'PATIENT'
+                      AND is_active = 1
+                      AND approval_status = 'APPROVED'
+                """, (
+                    patient_user_id,
+                )).fetchone()
+
+
+                if not patient:
+
+                    flash(
+                        "The selected patient account is invalid.",
+                        "error"
+                    )
+
+                else:
+
+                    # Prevent one Patient account
+                    # from being linked more than once
+                    existing_patient = db.execute("""
+                        SELECT
+                            client_id
+                        FROM clients
+                        WHERE patient_user_id = ?
+                        LIMIT 1
+                    """, (
+                        patient_user_id,
+                    )).fetchone()
+
+
+                    if existing_patient:
+
+                        flash(
+                            "This patient account is already linked to a patient record.",
+                            "error"
+                        )
+
+                    else:
+
+                        created_at = now_str()
+
+                        db.execute("""
+                            INSERT INTO clients (
+                                full_name,
+                                date_of_birth,
+                                gender,
+                                diagnosis,
+                                parent_user_id,
+                                patient_user_id,
+                                created_at
+                            )
+                            VALUES (?, ?, ?, ?, NULL, ?, ?)
+                        """, (
+                            client_name,
+                            date_of_birth,
+                            gender,
+                            diagnosis,
+                            patient_user_id,
+                            created_at
+                        ))
+
+                        db.commit()
+
+                        flash(
+                            "Patient registered successfully.",
+                            "ok"
+                        )
+
+                        return redirect(
+                            url_for("admin_clients")
+                        )
+
+
+    # ==============================
+    # AVAILABLE PARENT ACCOUNTS
+    # ==============================
     parents = db.execute("""
         SELECT
             user_id,
@@ -750,22 +1246,352 @@ def admin_clients():
         ORDER BY full_name
     """).fetchall()
 
-    clients = db.execute("""
+
+    # ==============================
+    # AVAILABLE PATIENT ACCOUNTS
+    # ==============================
+    patient_accounts = db.execute("""
+        SELECT
+            u.user_id,
+            u.full_name,
+            u.email
+        FROM users u
+
+        LEFT JOIN clients c
+            ON c.patient_user_id = u.user_id
+
+        WHERE u.role = 'PATIENT'
+          AND u.is_active = 1
+          AND u.approval_status = 'APPROVED'
+          AND c.client_id IS NULL
+
+        ORDER BY u.full_name
+    """).fetchall()
+
+    edit_patient_accounts = db.execute("""
+    SELECT
+        user_id,
+        full_name,
+        email
+
+    FROM users
+
+    WHERE role = 'PATIENT'
+      AND is_active = 1
+      AND approval_status = 'APPROVED'
+
+    ORDER BY full_name
+""").fetchall()
+
+
+    # ==============================
+    # REGISTERED PATIENTS
+    # ==============================
+    client_rows = db.execute("""
         SELECT
             c.client_id,
             c.full_name AS client_name,
-            u.full_name AS parent_name,
-            u.email AS parent_email
+            c.date_of_birth,
+            c.gender,
+            c.diagnosis,
+            c.created_at,
+
+            c.parent_user_id,
+            c.patient_user_id,
+
+            parent.full_name AS parent_name,
+            parent.email AS parent_email,
+
+            patient.full_name AS patient_account_name,
+            patient.email AS patient_account_email
+
         FROM clients c
-        JOIN users u
-            ON u.user_id = c.parent_user_id
+
+        LEFT JOIN users parent
+            ON parent.user_id = c.parent_user_id
+
+        LEFT JOIN users patient
+            ON patient.user_id = c.patient_user_id
+
         ORDER BY c.full_name
     """).fetchall()
+
+
+    clients = []
+
+
+    for row in client_rows:
+
+        client = dict(row)
+
+        client["age"] = calculate_age(
+            client["date_of_birth"]
+        )
+
+        clients.append(
+            client
+        )
+
 
     return render_template(
         "admin_clients.html",
         parents=parents,
+        patient_accounts=patient_accounts,
+        edit_patient_accounts=edit_patient_accounts,
         clients=clients
+    )
+
+@app.post("/admin/clients/<int:client_id>/update")
+@login_required(roles=["ADMIN"])
+def admin_update_client(client_id):
+
+    db = get_db()
+
+    client_name = " ".join(
+        request.form.get("client_name", "").split()
+    ).title()
+
+    date_of_birth = request.form.get(
+        "date_of_birth",
+        ""
+    ).strip()
+
+    gender = request.form.get(
+        "gender",
+        ""
+    ).strip().upper()
+
+    diagnosis = request.form.get(
+        "diagnosis",
+        ""
+    ).strip()
+
+    link_type = request.form.get(
+        "link_type",
+        ""
+    ).strip().upper()
+
+    parent_user_id = request.form.get(
+        "parent_user_id"
+    )
+
+    patient_user_id = request.form.get(
+        "patient_user_id"
+    )
+
+
+    # ------------------------------
+    # BASIC VALIDATION
+    # ------------------------------
+    if not client_name:
+
+        flash(
+            "Please enter the patient's full name.",
+            "error"
+        )
+
+        return redirect(
+            url_for("admin_clients")
+        )
+
+
+    if not date_of_birth:
+
+        flash(
+            "Please enter the patient's date of birth.",
+            "error"
+        )
+
+        return redirect(
+            url_for("admin_clients")
+        )
+
+
+    if gender not in (
+        "MALE",
+        "FEMALE"
+    ):
+
+        flash(
+            "Please select the patient's gender.",
+            "error"
+        )
+
+        return redirect(
+            url_for("admin_clients")
+        )
+
+
+    if link_type not in (
+        "PARENT",
+        "PATIENT"
+    ):
+
+        flash(
+            "Please select how this patient should be linked.",
+            "error"
+        )
+
+        return redirect(
+            url_for("admin_clients")
+        )
+
+
+    # ==============================
+    # PARENT / GUARDIAN
+    # ==============================
+    if link_type == "PARENT":
+
+        if not parent_user_id:
+
+            flash(
+                "Please select a parent account.",
+                "error"
+            )
+
+            return redirect(
+                url_for("admin_clients")
+            )
+
+
+        parent = db.execute("""
+            SELECT user_id
+            FROM users
+            WHERE user_id = ?
+              AND role = 'PARENT'
+              AND is_active = 1
+              AND approval_status = 'APPROVED'
+        """, (
+            parent_user_id,
+        )).fetchone()
+
+
+        if not parent:
+
+            flash(
+                "The selected parent account is invalid.",
+                "error"
+            )
+
+            return redirect(
+                url_for("admin_clients")
+            )
+
+
+        db.execute("""
+            UPDATE clients
+            SET
+                full_name = ?,
+                date_of_birth = ?,
+                gender = ?,
+                diagnosis = ?,
+                parent_user_id = ?,
+                patient_user_id = NULL
+            WHERE client_id = ?
+        """, (
+            client_name,
+            date_of_birth,
+            gender,
+            diagnosis,
+            parent_user_id,
+            client_id
+        ))
+
+
+    # ==============================
+    # PATIENT ACCOUNT
+    # ==============================
+    elif link_type == "PATIENT":
+
+        if not patient_user_id:
+
+            flash(
+                "Please select a patient account.",
+                "error"
+            )
+
+            return redirect(
+                url_for("admin_clients")
+            )
+
+
+        patient = db.execute("""
+            SELECT user_id
+            FROM users
+            WHERE user_id = ?
+              AND role = 'PATIENT'
+              AND is_active = 1
+              AND approval_status = 'APPROVED'
+        """, (
+            patient_user_id,
+        )).fetchone()
+
+
+        if not patient:
+
+            flash(
+                "The selected patient account is invalid.",
+                "error"
+            )
+
+            return redirect(
+                url_for("admin_clients")
+            )
+
+
+        existing_patient = db.execute("""
+            SELECT client_id
+            FROM clients
+            WHERE patient_user_id = ?
+              AND client_id != ?
+            LIMIT 1
+        """, (
+            patient_user_id,
+            client_id
+        )).fetchone()
+
+
+        if existing_patient:
+
+            flash(
+                "This patient account is already linked to another patient record.",
+                "error"
+            )
+
+            return redirect(
+                url_for("admin_clients")
+            )
+
+
+        db.execute("""
+            UPDATE clients
+            SET
+                full_name = ?,
+                date_of_birth = ?,
+                gender = ?,
+                diagnosis = ?,
+                parent_user_id = NULL,
+                patient_user_id = ?
+            WHERE client_id = ?
+        """, (
+            client_name,
+            date_of_birth,
+            gender,
+            diagnosis,
+            patient_user_id,
+            client_id
+        ))
+
+
+    db.commit()
+
+    flash(
+        "Patient information updated successfully.",
+        "ok"
+    )
+
+    return redirect(
+        url_for("admin_clients")
     )
 
 @app.post("/admin/user/<int:user_id>/approve")
@@ -817,7 +1643,7 @@ def admin_user_action(user_id, action):
             is_active
         FROM users
         WHERE user_id = ?
-          AND role IN ('PARENT', 'THERAPIST')
+          AND role IN ('PARENT', 'THERAPIST', 'PATIENT')
     """, (user_id,)).fetchone()
 
     if not user:
@@ -903,10 +1729,16 @@ def admin_appointments():
         SELECT
             c.client_id,
             c.full_name AS client_name,
-            u.full_name AS parent_name
+
+            p.full_name AS parent_name,
+            pa.full_name AS patient_account_name
+
         FROM clients c
-        JOIN users u
-            ON u.user_id = c.parent_user_id
+        LEFT JOIN users p
+            ON p.user_id = c.parent_user_id
+        LEFT JOIN users pa
+            ON pa.user_id = c.patient_user_id
+
         ORDER BY c.full_name
     """).fetchall()
 
@@ -984,7 +1816,7 @@ def admin_schedule():
     """, (
         client_id, therapist_id, appointment_type, dt,
         location, notes,
-        "Created. Waiting parent confirmation (WhatsApp).", now
+        "Created. Waiting for confirmation (WhatsApp).", now
     ))
     db.commit()
 
@@ -999,9 +1831,19 @@ def admin_update_appointment(appointment_id: int):
     date_time = request.form.get("date_time")
     location = request.form.get("location", "").strip()
     update_note = request.form.get("update_note", "").strip()
+    status = request.form.get("status", "Scheduled").strip()
 
     if not (therapist_id and date_time):
         flash("Therapist and date/time are required.", "error")
+        return redirect(url_for("admin_appointments"))
+
+    if status not in (
+        "Scheduled",
+        "Completed",
+        "Cancelled",
+        "No Show"
+    ):
+        flash("Invalid appointment status.", "error")
         return redirect(url_for("admin_appointments"))
 
     dt = date_time.replace("T", " ")
@@ -1025,18 +1867,18 @@ def admin_update_appointment(appointment_id: int):
         SET therapist_user_id=?,
             date_time=?,
             location=?,
-            confirmation_status='Rescheduled',
+            status=?,
             update_note=?,
             last_updated_at=?
         WHERE appointment_id=?
     """, (
-        therapist_id, dt, location,
-        update_note or "Rescheduled after WhatsApp discussion.",
-        now, appointment_id
+        therapist_id, dt, location, status,
+        update_note, now, 
+        appointment_id
     ))
     db.commit()
 
-    flash("Appointment updated (Rescheduled).", "ok")
+    flash("Appointment updated successfully.", "ok")
     return redirect(url_for("admin_appointments"))
 
 
@@ -1077,7 +1919,12 @@ def admin_progress_notes():
             pn.note_id,
             pn.content,
             pn.created_at,
+            pn.updated_at,
             c.full_name AS client_name,
+            c.date_of_birth,
+            c.gender,
+            c.diagnosis,
+
             u.full_name AS therapist_name,
             a.appointment_type,
             a.date_time
@@ -1088,12 +1935,23 @@ def admin_progress_notes():
             ON c.client_id = a.client_id
         JOIN users u
             ON u.user_id = pn.therapist_user_id
-        ORDER BY pn.created_at DESC
+        ORDER BY COALESCE(pn.updated_at, pn.created_at) DESC
     """).fetchall()
+
+    progress_notes = []
+
+    for row in notes:
+        note = dict(row)
+
+        note["age"] = calculate_age(
+            note["date_of_birth"]
+        )
+
+        progress_notes.append(note)
 
     return render_template(
         "admin_progress_notes.html",
-        notes=notes
+        notes=progress_notes
     )
 
 @app.get("/admin/progress-status")
@@ -1110,10 +1968,16 @@ def admin_progress_status():
             pn.progress_status,
             pn.ai_recommendation,
             pn.created_at,
+
+            c.client_id,
             c.full_name AS client_name,
+            c.date_of_birth,
+
             u.full_name AS therapist_name,
+
             a.appointment_type,
             a.date_time
+
         FROM progress_notes pn
         JOIN appointments a
             ON a.appointment_id = pn.appointment_id
@@ -1121,12 +1985,219 @@ def admin_progress_status():
             ON c.client_id = a.client_id
         JOIN users u
             ON u.user_id = pn.therapist_user_id
-        ORDER BY pn.created_at DESC
+
+        ORDER BY a.date_time ASC
     """).fetchall()
+
+    # attendance_labels = []
+    # attendance_values = []
+
+    goal_history = {}
+
+    attendance_history = {}
+
+    patients = {}
+
+    for status in statuses:
+
+        client_id = str(status["client_id"])
+        client_name = status["client_name"]
+
+
+        # ==============================
+        # UNIQUE PATIENTS
+        # ==============================
+
+        if client_id not in patients:
+
+            # Format DOB for duplicate-name display
+            if status["date_of_birth"]:
+
+                dob_obj = datetime.strptime(
+                    status["date_of_birth"],
+                    "%Y-%m-%d"
+                )
+
+                formatted_dob = dob_obj.strftime(
+                    "%d %b %Y"
+                )
+
+            else:
+
+                formatted_dob = None
+
+            patients[client_id] = {
+                "client_id": client_id,
+                "client_name": client_name,
+                "date_of_birth": formatted_dob
+            }
+
+
+        # ==============================
+        # FORMAT SESSION DATE
+        # ==============================
+
+        date_obj = datetime.strptime(
+            status["date_time"],
+            "%Y-%m-%d %H:%M"
+        )
+
+        formatted_date = date_obj.strftime(
+            "%d %b %Y"
+        )
+
+
+        # ==============================
+        # GOAL PROGRESS
+        # ==============================
+
+        if client_id not in goal_history:
+
+            goal_history[client_id] = {
+                "dates": [],
+                "scores": []
+            }
+
+
+        goal_history[client_id]["dates"].append(
+            formatted_date
+        )
+
+        goal_history[client_id]["scores"].append(
+            status["goal_score"]
+        )
+
+
+        # ==============================
+        # ATTENDANCE PROGRESS
+        # ==============================
+
+        if client_id not in attendance_history:
+
+            attendance_history[client_id] = {
+                "dates": [],
+                "rates": []
+            }
+
+
+        attendance_history[client_id]["dates"].append(
+            formatted_date
+        )
+
+        attendance_history[client_id]["rates"].append(
+            status["attendance_rate"]
+        )
+
+
+    # ==============================
+    # PATIENT LIST
+    # ==============================
+
+    patient_list = list(
+        patients.values()
+    )
+
+    patient_list.sort(
+        key=lambda patient:
+        patient["client_name"].lower()
+    )
+
+
+    # Detect duplicate patient names
+    name_counts = Counter(
+        patient["client_name"].lower()
+        for patient in patient_list
+    )
+
+
+    for patient in patient_list:
+
+        patient["is_duplicate"] = (
+            name_counts[
+                patient["client_name"].lower()
+            ] > 1
+        )
+
 
     return render_template(
         "admin_progress_status.html",
-        statuses=statuses
+
+        statuses=statuses,
+
+        goal_history=goal_history,
+
+        attendance_history=attendance_history,
+
+        patient_list=patient_list
+    )
+
+# ----------------------------
+# admin reports
+# ----------------------------
+
+@app.get("/admin/reports")
+@login_required(roles=["ADMIN"])
+def admin_reports():
+    db = get_db()
+
+    selected_year = request.args.get(
+        "year",
+        str(datetime.now().year)
+    )
+
+    report_data = db.execute("""
+        SELECT
+            strftime('%m', created_at) AS month,
+            COUNT(*) AS total
+        FROM clients
+        WHERE strftime('%Y', created_at) = ?
+        GROUP BY strftime('%m', created_at)
+        ORDER BY month
+    """, (selected_year,)).fetchall()
+
+    month_names = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+    ]
+
+    monthly_counts = {
+        row["month"]: row["total"]
+        for row in report_data
+    }
+
+    report_rows = []
+
+    for month_number, month_name in enumerate(
+        month_names,
+        start=1
+    ):
+        month_key = f"{month_number:02d}"
+
+        report_rows.append({
+            "month_name": month_name,
+            "total": monthly_counts.get(month_key, 0)
+        })
+
+    total_patients = sum(
+        row["total"]
+        for row in report_rows
+    )
+
+    return render_template(
+        "admin_reports.html",
+        report_rows=report_rows,
+        selected_year=selected_year,
+        total_patients=total_patients
     )
 
 # ----------------------------
@@ -1218,8 +2289,11 @@ def therapist_progress_notes():
         SELECT
             a.appointment_id,
             a.date_time,
+            a.appointment_type,
+
             a.confirmation_status,
             c.full_name AS client_name
+
         FROM appointments a
         JOIN clients c
             ON c.client_id = a.client_id
@@ -1231,22 +2305,33 @@ def therapist_progress_notes():
         SELECT
             pn.note_id,
             pn.created_at,
+            pn.updated_at,
             pn.content,
+
             pn.goal_score,
             pn.attendance_rate,
             pn.therapist_rating,
             pn.progress_status,
             pn.ai_recommendation,
+
             a.appointment_id,
-            c.full_name AS client_name
+            a.appointment_type,
+            a.date_time,
+
+            c.client_id,
+            c.full_name AS client_name,
+            c.date_of_birth,
+            c.gender,
+            c.diagnosis
+
         FROM progress_notes pn
         JOIN appointments a
             ON a.appointment_id = pn.appointment_id
         JOIN clients c
             ON c.client_id = a.client_id
         WHERE pn.therapist_user_id = ?
-        ORDER BY pn.note_id DESC
-        LIMIT 10
+
+        ORDER BY COALESCE(pn.updated_at, pn.created_at) DESC
     """, (therapist_id,)).fetchall()
 
     return render_template(
@@ -1314,6 +2399,7 @@ def therapist_add_note():
             appointment_id,
             therapist_user_id,
             created_at,
+            updated_at,
             content,
             goal_score,
             attendance_rate,
@@ -1321,11 +2407,12 @@ def therapist_add_note():
             progress_status,
             ai_recommendation
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         appointment_id,
         therapist_id,
         now_str(),
+        None,
         content,
         goal_score,
         attendance_rate,
@@ -1350,6 +2437,69 @@ def therapist_add_note():
     flash("Progress note and progress evaluation saved.", "ok")
     return redirect(url_for("therapist_progress_notes"))
 
+# ----------------------------
+# THERAPIST: edit progress note
+# ----------------------------
+@app.post("/therapist/progress-notes/<int:note_id>/edit")
+@login_required(roles=["THERAPIST"])
+def therapist_edit_progress_note(note_id):
+    therapist_id = session["user"]["user_id"]
+    db = get_db()
+
+    content = request.form.get("content","").strip()
+
+    if not content:
+        flash(
+            "Progress report are required.",
+            "error"
+        )
+        return redirect(
+            url_for("therapist_progress_notes")
+        )
+
+    note = db.execute("""
+        SELECT note_id
+        FROM progress_notes
+        WHERE note_id = ?
+          AND therapist_user_id = ?
+    """, (
+        note_id,
+        therapist_id
+    )).fetchone()
+
+    if not note:
+        flash(
+            "Progress note not found.",
+            "error"
+        )
+        return redirect(
+            url_for("therapist_progress_notes")
+        )
+
+    db.execute("""
+        UPDATE progress_notes
+        SET
+            content = ?,
+            updated_at = ?
+        WHERE note_id = ?
+          AND therapist_user_id = ?
+    """, (
+        content,
+        now_str(),
+        note_id,
+        therapist_id
+    ))
+
+    db.commit()
+
+    flash(
+        "Progress note updated successfully.",
+        "ok"
+    )
+
+    return redirect(
+        url_for("therapist_progress_notes")
+    )
 
 # ----------------------------
 # THERAPIST: AI progress status
@@ -1369,20 +2519,382 @@ def therapist_progress_status():
             pn.therapist_rating,
             pn.progress_status,
             pn.ai_recommendation,
+
             a.appointment_id,
-            c.full_name AS client_name
+            a.appointment_type,
+            a.date_time,
+
+            c.client_id,
+            c.full_name AS client_name,
+            c.date_of_birth
+
         FROM progress_notes pn
         JOIN appointments a
             ON a.appointment_id = pn.appointment_id
         JOIN clients c
             ON c.client_id = a.client_id
         WHERE pn.therapist_user_id = ?
-        ORDER BY pn.note_id DESC
+        ORDER BY a.date_time ASC
     """, (therapist_id,)).fetchall()
+
+    goal_history = {}
+    attendance_history = {}
+    patients = {}
+
+    for result in results:
+
+        client_id = str(result["client_id"])
+        client_name = result["client_name"]
+
+
+        # ------------------------------
+        # Unique therapist patients
+        # ------------------------------
+
+        if client_id not in patients:
+
+            if result["date_of_birth"]:
+
+                dob_obj = datetime.strptime(
+                    result["date_of_birth"],
+                    "%Y-%m-%d"
+                )
+
+                formatted_dob = dob_obj.strftime(
+                    "%d %b %Y"
+                )
+
+            else:
+
+                formatted_dob = None
+
+
+            patients[client_id] = {
+                "client_id": client_id,
+                "client_name": client_name,
+                "date_of_birth": formatted_dob
+            }
+
+
+        # ------------------------------
+        # Format session date
+        # ------------------------------
+
+        date_obj = datetime.strptime(
+            result["date_time"],
+            "%Y-%m-%d %H:%M"
+        )
+
+        formatted_date = date_obj.strftime(
+            "%d %b %Y"
+        )
+
+
+        # ------------------------------
+        # Goal progress
+        # ------------------------------
+
+        if client_id not in goal_history:
+
+            goal_history[client_id] = {
+                "dates": [],
+                "scores": []
+            }
+
+
+        goal_history[client_id]["dates"].append(
+            formatted_date
+        )
+
+        goal_history[client_id]["scores"].append(
+            result["goal_score"]
+        )
+
+
+        # ------------------------------
+        # Attendance progress
+        # ------------------------------
+
+        if client_id not in attendance_history:
+
+            attendance_history[client_id] = {
+                "dates": [],
+                "rates": []
+            }
+
+
+        attendance_history[client_id]["dates"].append(
+            formatted_date
+        )
+
+        attendance_history[client_id]["rates"].append(
+            result["attendance_rate"]
+        )
+
+
+    # ------------------------------
+    # Patient selector list
+    # ------------------------------
+
+    patient_list = list(
+        patients.values()
+    )
+
+    patient_list.sort(
+        key=lambda patient:
+        patient["client_name"].lower()
+    )
+
+
+    name_counts = Counter(
+        patient["client_name"].lower()
+        for patient in patient_list
+    )
+
+
+    for patient in patient_list:
+
+        patient["is_duplicate"] = (
+            name_counts[
+                patient["client_name"].lower()
+            ] > 1
+        )
+
 
     return render_template(
         "therapist_progress_status.html",
-        results=results
+
+        results=results,
+
+        goal_history=goal_history,
+
+        attendance_history=attendance_history,
+
+        patient_list=patient_list
+    )
+
+# ------------------------------
+# PATIENT: view own appointments and progress
+# ------------------------------
+@app.get("/patient")
+@login_required(roles=["PATIENT"])
+def patient_dashboard():
+
+    patient_id = session["user"]["user_id"]
+
+    db = get_db()
+
+
+    # Get the client record linked to this patient account
+    client = db.execute("""
+        SELECT
+            client_id,
+            full_name,
+            date_of_birth,
+            gender,
+            diagnosis
+        FROM clients
+        WHERE patient_user_id = ?
+        LIMIT 1
+    """, (patient_id,)).fetchone()
+
+
+    # If patient has not completed their patient profile yet
+    if not client:
+
+        return render_template(
+            "patient.html",
+            client=None,
+            appointments=[],
+            upcoming_count=0,
+            previous_count=0,
+            progress_results=[],
+            parent_progress_data={},
+            patient_not_linked=True
+        )
+
+
+    client_id = client["client_id"]
+
+
+    # ------------------------------
+    # APPOINTMENTS
+    # ------------------------------
+    appointment_rows = db.execute("""
+        SELECT
+            a.appointment_id,
+            a.date_time,
+            a.status,
+            a.location,
+            a.appointment_type,
+            a.confirmation_status,
+            a.update_note,
+
+            t.full_name AS therapist_name
+
+        FROM appointments a
+
+        JOIN users t
+            ON t.user_id = a.therapist_user_id
+
+        WHERE a.client_id = ?
+
+        ORDER BY a.date_time DESC
+    """, (client_id,)).fetchall()
+
+
+    current_time = datetime.now()
+
+    appointments = []
+
+    upcoming_count = 0
+    previous_count = 0
+
+
+    for row in appointment_rows:
+
+        appointment = dict(row)
+
+        appointment_date = datetime.strptime(
+            row["date_time"],
+            "%Y-%m-%d %H:%M"
+        )
+
+        status = (
+            row["status"] or ""
+        ).strip().lower()
+
+
+        # Previous if:
+        # - completed
+        # - cancelled
+        # - appointment date already passed
+        if (
+            status in ["completed", "cancelled"]
+            or appointment_date < current_time
+        ):
+
+            appointment["appointment_group"] = "previous"
+
+            previous_count += 1
+
+        else:
+
+            appointment["appointment_group"] = "upcoming"
+
+            upcoming_count += 1
+
+
+        appointments.append(
+            appointment
+        )
+
+
+    # ------------------------------
+    # PROGRESS
+    # ------------------------------
+    progress_results = db.execute("""
+        SELECT
+            pn.goal_score,
+            pn.progress_status,
+            pn.ai_recommendation,
+
+            a.appointment_type,
+            a.date_time,
+
+            c.client_id,
+            c.full_name AS client_name
+
+        FROM progress_notes pn
+
+        JOIN appointments a
+            ON a.appointment_id = pn.appointment_id
+
+        JOIN clients c
+            ON c.client_id = a.client_id
+
+        WHERE c.client_id = ?
+
+        ORDER BY a.date_time ASC
+    """, (client_id,)).fetchall()
+
+
+    # Keep same variable name used by patient.html
+    parent_progress_data = {}
+
+
+    for result in progress_results:
+
+        progress_client_id = str(
+            result["client_id"]
+        )
+
+
+        if progress_client_id not in parent_progress_data:
+
+            parent_progress_data[progress_client_id] = {
+                "dates": [],
+                "scores": [],
+                "statuses": [],
+                "types": [],
+                "recommendations": []
+            }
+
+
+        date_obj = datetime.strptime(
+            result["date_time"],
+            "%Y-%m-%d %H:%M"
+        )
+
+
+        formatted_date = date_obj.strftime(
+            "%d %b %Y"
+        )
+
+
+        parent_progress_data[
+            progress_client_id
+        ]["dates"].append(
+            formatted_date
+        )
+
+
+        parent_progress_data[
+            progress_client_id
+        ]["scores"].append(
+            result["goal_score"]
+        )
+
+
+        parent_progress_data[
+            progress_client_id
+        ]["statuses"].append(
+            result["progress_status"]
+        )
+
+
+        parent_progress_data[
+            progress_client_id
+        ]["types"].append(
+            result["appointment_type"]
+        )
+
+
+        parent_progress_data[
+            progress_client_id
+        ]["recommendations"].append(
+            result["ai_recommendation"]
+        )
+
+
+    return render_template(
+        "patient.html",
+        client=client,
+        appointments=appointments,
+        upcoming_count=upcoming_count,
+        previous_count=previous_count,
+        progress_results=progress_results,
+        parent_progress_data=parent_progress_data
     )
 
 # ----------------------------
@@ -1395,26 +2907,165 @@ def parent_dashboard():
     db = get_db()
 
     clients = db.execute("""
-        SELECT client_id, full_name FROM clients
+        SELECT  client_id, 
+                full_name 
+        FROM clients
         WHERE parent_user_id=?
         ORDER BY full_name
     """, (parent_id,)).fetchall()
 
-    appointments = db.execute("""
-        SELECT a.appointment_id, a.date_time, a.status, a.location,
-               a.appointment_type, a.confirmation_status, a.update_note,
-               c.full_name AS client_name, t.full_name AS therapist_name
+    appointment_rows = db.execute("""
+        SELECT  a.appointment_id, 
+                a.date_time, 
+                a.status, 
+                a.location,
+                a.appointment_type, 
+                a.confirmation_status, 
+                a.update_note,
+
+               c.full_name AS client_name, 
+               
+               t.full_name AS therapist_name
+
         FROM appointments a
         JOIN clients c ON c.client_id = a.client_id
         JOIN users t ON t.user_id = a.therapist_user_id
         WHERE c.parent_user_id=?
         ORDER BY a.date_time DESC
-        LIMIT 20
     """, (parent_id,)).fetchall()
 
-    return render_template("parent.html", clients=clients, appointments=appointments)
+    # Current date/time
+    current_time = datetime.now()
+
+    appointments = []
+
+    upcoming_count = 0
+    previous_count = 0
 
 
+    for row in appointment_rows:
+
+        appointment = dict(row)
+
+        appointment_date = datetime.strptime(
+            row["date_time"],
+            "%Y-%m-%d %H:%M"
+        )
+
+        status = (
+            row["status"] or ""
+        ).strip().lower()
+
+        # Previous if:
+        # - completed
+        # - cancelled
+        # - appointment date already passed
+
+        if (
+            status in ["completed", "cancelled"]
+            or appointment_date < current_time
+        ):
+            appointment["appointment_group"] = "previous"
+
+            previous_count += 1
+
+        else:
+
+            appointment["appointment_group"] = "upcoming"
+            upcoming_count += 1
+
+        appointments.append(
+            appointment
+        )
+
+    progress_results = db.execute("""
+        SELECT
+            pn.goal_score,
+            pn.progress_status,
+            pn.ai_recommendation,
+
+            a.appointment_type,
+            a.date_time,
+
+            c.client_id,
+            c.full_name AS client_name
+
+        FROM progress_notes pn
+
+        JOIN appointments a
+            ON a.appointment_id = pn.appointment_id
+
+        JOIN clients c
+            ON c.client_id = a.client_id
+
+        WHERE c.parent_user_id = ?
+
+        ORDER BY a.date_time ASC
+    """, (parent_id,)).fetchall()   
+    
+
+    parent_progress_data = {}
+
+
+    for result in progress_results:
+
+        client_id = str(
+            result["client_id"]
+        )
+
+
+        if client_id not in parent_progress_data:
+
+            parent_progress_data[client_id] = {
+                "dates": [],
+                "scores": [],
+                "statuses": [],
+                "types": [],
+                "recommendations": []
+            }
+
+
+        date_obj = datetime.strptime(
+            result["date_time"],
+            "%Y-%m-%d %H:%M"
+        )
+
+
+        formatted_date = date_obj.strftime(
+            "%d %b %Y"
+        )
+
+
+        parent_progress_data[client_id]["dates"].append(
+            formatted_date
+        )
+
+        parent_progress_data[client_id]["scores"].append(
+            result["goal_score"]
+        )
+
+        parent_progress_data[client_id]["statuses"].append(
+            result["progress_status"]
+        )
+
+        parent_progress_data[client_id]["types"].append(
+            result["appointment_type"]
+        )
+
+        parent_progress_data[client_id]["recommendations"].append(
+            result["ai_recommendation"]
+        ) 
+
+    return render_template(
+        "parent.html",
+        clients=clients,
+        appointments=appointments,
+        upcoming_count=upcoming_count,
+        previous_count=previous_count,
+        progress_results=progress_results,
+        parent_progress_data=parent_progress_data
+    )
+   
 # ----------------------------
 # Main
 # ----------------------------

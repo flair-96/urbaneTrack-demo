@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Reports | UrbaneTrack{% endblock %}
+
+{% block content %}
+
+<section class="page-header-modern">
+
+  <div>
+    <span class="page-eyebrow">
+      Admin Reports
+    </span>
+
+    <h1>
+      Patient Registration Report
+    </h1>
+
+    <p>
+      View the number of registered patients by month.
+    </p>
+  </div>
+
+</section>
+
+
+<section class="report-content-card">
+
+  <div class="report-content-header">
+
+    <div class="report-content-header-icon">
+      <i class="bi bi-bar-chart-line"></i>
+    </div>
+
+    <div>
+      <h2>Generate Report</h2>
+
+      <p>
+        Select a year to view monthly patient registrations.
+      </p>
+    </div>
+
+  </div>
+
+  <form
+    method="GET"
+    action="{{ url_for('admin_reports') }}"
+    class="report-filter-form"
+  >
+
+    <div class="form-field-group">
+
+      <label for="year">
+        Report Year
+      </label>
+
+      <select
+        id="year"
+        name="year"
+        required
+      >
+        <option
+          value="2026"
+          {% if selected_year == "2026" %}selected{% endif %}
+        >
+          2026
+        </option>
+
+        <option
+          value="2027"
+          {% if selected_year == "2027" %}selected{% endif %}
+        >
+          2027
+        </option>
+      </select>
+
+    </div>
+
+    <button
+      type="submit"
+      class="btn primary report-generate-btn"
+    >
+      <i class="bi bi-file-earmark-bar-graph"></i>
+      Generate Report
+    </button>
+
+  </form>
+
+</section>
+
+
+{% if report_rows %}
+
+<section class="table-card report-results-card">
+
+  <div class="table-card-header">
+
+    <div>
+      <h2>
+        Monthly Registration Summary
+      </h2>
+
+      <p>
+        New patients registered in {{ selected_year }}.
+      </p>
+    </div>
+
+    <span class="table-count">
+      {{ total_patients }}
+      patient{% if total_patients != 1 %}s{% endif %}
+    </span>
+
+  </div>
+
+
+  <div class="table-responsive">
+
+    <table
+      class="table table-hover align-middle modern-data-table"
+      style="width: 100%;"
+    >
+
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>New Patients</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        {% for row in report_rows %}
+          <tr>
+
+            <td>
+              {{ row.month_name }}
+            </td>
+
+            <td>
+              <strong>
+                {{ row.total }}
+              </strong>
+            </td>
+
+          </tr>
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+{% endif %}
+
+{% endblock %}

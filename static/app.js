@@ -54,39 +54,39 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-document.addEventListener("DOMContentLoaded", function () {
-  const sessionsTable = document.querySelector("#sessionsTable");
+// document.addEventListener("DOMContentLoaded", function () {
+//   const sessionsTable = document.querySelector("#sessionsTable");
 
-  if (sessionsTable && typeof DataTable !== "undefined") {
-    new DataTable(sessionsTable, {
-      responsive: true,
-      pageLength: 10,
-      lengthMenu: [5, 10, 25, 50],
-      order: [[1, "desc"]],
+//   if (sessionsTable && typeof DataTable !== "undefined") {
+//     new DataTable(sessionsTable, {
+//       responsive: true,
+//       pageLength: 10,
+//       lengthMenu: [5, 10, 25, 50],
+//       order: [[1, "desc"]],
 
-      language: {
-        search: "",
-        searchPlaceholder: "Search sessions...",
-        lengthMenu: "Show _MENU_ records",
-        info: "Showing _START_ to _END_ of _TOTAL_ sessions",
-        infoEmpty: "No sessions available",
-        zeroRecords: "No matching sessions found"
-      },
+//       language: {
+//         search: "",
+//         searchPlaceholder: "Search sessions...",
+//         lengthMenu: "Show _MENU_ records",
+//         info: "Showing _START_ to _END_ of _TOTAL_ sessions",
+//         infoEmpty: "No sessions available",
+//         zeroRecords: "No matching sessions found"
+//       },
 
-      layout: {
-        topStart: "pageLength",
-        topEnd: "search",
-        bottomStart: "info",
-        bottomEnd: "paging"
-      },
+//       layout: {
+//         topStart: "pageLength",
+//         topEnd: "search",
+//         bottomStart: "info",
+//         bottomEnd: "paging"
+//       },
 
-      columnDefs: [
-        {
-          targets: -1,
-          orderable: false,
-          searchable: false
-        }
-      ]
-    });
-  }
-});
+//       columnDefs: [
+//         {
+//           targets: -1,
+//           orderable: false,
+//           searchable: false
+//         }
+//       ]
+//     });
+//   }
+// });

@@ -10,17 +10,92 @@
     </p>
   </div>
 
-  <section class="notes-layout">
+  <div class="progress-note-section-selectors">
 
-    <div class="card">
-      <h2>Write Progress Note</h2>
+  <button
+    type="button"
+    class="progress-note-section-card"
+    data-progress-tab="write"
+    aria-selected="false"
+  >
+    <span class="progress-note-section-icon write-icon">
+      <i class="bi bi-pencil-square"></i>
+    </span>
+
+    <span class="progress-note-section-content">
+      <strong>Write Progress Note</strong>
+
+      <small>
+        Record session details and therapist observations.
+      </small>
+
+      <span class="progress-note-section-link">
+        Write note
+        <i class="bi bi-arrow-right"></i>
+      </span>
+    </span>
+  </button>
+
+  <button
+    type="button"
+    class="progress-note-section-card active"
+    data-progress-tab="recent"
+    aria-selected="true"
+  >
+    <span class="progress-note-section-icon recent-note-icon">
+      <i class="bi bi-journal-check"></i>
+    </span>
+
+    <span class="progress-note-section-content">
+      <strong>Recent Notes</strong>
+
+      <small>
+        Review progress notes recorded for recent sessions.
+      </small>
+
+      <span class="progress-note-section-link">
+        {{ notes | length }} notes
+        <i class="bi bi-arrow-right"></i>
+      </span>
+    </span>
+  </button>
+
+</div>
+
+    <section
+      id="writeProgressNotePanel"
+      class="progress-note-tab-panel"
+      data-progress-panel="write"
+      hidden
+    >
+    
+    <section class="appointment-content-card therapist-note-form-card">
+
+      <div class="appointment-content-header">
+
+        <div class="appointment-content-header-icon">
+          <i class="bi bi-journal-plus"></i>
+        </div>
+
+        <div>
+          <h2>Write Progress Note</h2>
+
+          <p>
+            Record the patient's session progress and evaluation details.
+          </p>
+        </div>
+
+      </div>
+
 
       <form
         method="POST"
         action="{{ url_for('therapist_add_note') }}"
-        class="form"
+        class="form therapist-note-register-form"
       >
-        <label for="appointment_id">Session</label>
+        
+      <div class="therapist-note-field">
+      <label for="appointment_id">Session & Patient Name</label>
 
         <select
           id="appointment_id"
@@ -28,7 +103,7 @@
           required
         >
           <option value="">
-            -- select session --
+            -- select session & patient name --
           </option>
 
           {% for s in sessions %}
@@ -40,7 +115,9 @@
             </option>
           {% endfor %}
         </select>
+      </div>
 
+      <div class="therapist-note-field">
         <label for="content">Progress Note</label>
 
         <textarea
@@ -50,7 +127,10 @@
           placeholder="Write session progress..."
           required
         ></textarea>
+      
+      </div>
 
+      <div class="therapist-note-field">
         <label for="goal_score">
           Goal Achievement (%)
         </label>
@@ -65,6 +145,9 @@
           required
         >
 
+      </div>
+
+      <div class="therapist-note-field">
         <label for="attendance_rate">
           Attendance Rate (%)
         </label>
@@ -79,6 +162,9 @@
           required
         >
 
+      </div>
+
+      <div class="therapist-note-field">
         <label for="therapist_rating">
           Therapist Rating
         </label>
@@ -97,6 +183,7 @@
           <option value="4">4 - Good</option>
           <option value="5">5 - Excellent</option>
         </select>
+      </div>
 
         <button
           class="btn primary"
@@ -105,7 +192,14 @@
           Save Note
         </button>
       </form>
-    </div>
+      </section>
+    </section>
+
+    <section
+      id="recentProgressNotesPanel"
+      class="progress-note-tab-panel active"
+      data-progress-panel="recent"
+    >
 
   <section class="table-card therapist-notes-card">
 
@@ -137,12 +231,12 @@
 
         <thead>
           <tr>
-            <th>Note</th>
-            <th>Client</th>
-            <th>Session</th>
-            <th>Note Created</th>
+            <th>Note No.</th>
+            <th>Patient</th>
+            <th>Type</th>
+            <th>Session Date</th>
             <th>Progress</th>
-            <th>Action</th>
+            <th>Notes</th>
           </tr>
         </thead>
 
@@ -173,30 +267,40 @@
                     </strong>
 
                     <small>
-                      Client
+                      Patient
                     </small>
                   </div>
 
                 </div>
               </td>
 
-              <!-- Session -->
+              <!-- Type -->
               <td>
-                <div class="recent-note-session">
 
-                  <strong>
-                    #{{ n.appointment_id }}
-                  </strong>
+                {% if n.appointment_type == "Assessment" %}
 
-                </div>
+                  <span class="session-type-badge type-assessment">
+                    <i class="bi bi-clipboard-pulse"></i>
+                    Assessment
+                  </span>
+
+                {% else %}
+
+                  <span class="session-type-badge type-therapy">
+                    <i class="bi bi-heart-pulse"></i>
+                    Therapy
+                  </span>
+
+                {% endif %}
+
               </td>
 
-              <!-- Created date -->
+              <!-- Session date -->
               <td>
                 <div class="recent-note-date">
 
                   <strong>
-                    {{ n.created_at | datetime }}
+                    {{ n.date_time | datetime }}
                   </strong>
 
                 </div>
@@ -237,19 +341,28 @@
 
               </td>
 
-              <!-- View action -->
+              <!-- Notes -->
               <td>
 
                 <button
                   type="button"
                   class="progress-note-view-btn view-note-btn"
 
+                  data-note-id="{{ n.note_id }}"
                   data-client="{{ n.client_name | title | e }}"
-                  data-date="{{ n.created_at | datetime | e }}"
+                  data-type="{{ n.appointment_type | title | e }}"
+                  data-session-date="{{ n.date_time | datetime | e }}"
+                  data-created="{{ n.created_at | datetime | e }}"
+                  data-updated="{% if n.updated_at %}{{ n.updated_at | datetime | e }}{% endif %}"
+                  data-dob="{{ n.date_of_birth or '' }}"
+                  data-gender="{{ n.gender | title if n.gender else 'Not Available' }}"
+                  data-diagnosis="{{ (n.diagnosis or '') | e }}"
                   data-content="{{ n.content | e }}"
                 >
+
                   <i class="bi bi-eye"></i>
                   View
+
                 </button>
 
               </td>
@@ -280,12 +393,14 @@
 
   {% endif %}
 
+    </section>
   </section>
-
-</section>
 </div>
 
-<!-- View Note Modal -->
+<!-- ==============================
+     VIEW / EDIT PROGRESS NOTE MODAL
+============================== -->
+
 <div
   id="noteModal"
   class="note-modal-overlay hidden"
@@ -293,27 +408,46 @@
   aria-modal="true"
   aria-labelledby="modalClient"
 >
-  <div class="modern-note-modal">
 
+  <div class="modern-note-modal therapist-progress-note-modal">
+
+    <!-- Header -->
     <div class="modern-note-modal-header">
 
       <div>
+
         <span class="page-eyebrow">
           Progress Note
         </span>
 
-        <h3 id="modalClient"></h3>
+        <h3 id="modalClient">
+          Patient
+        </h3>
+
+        <p class="modern-note-modal-date">
+
+          <span id="modalSessionType">
+            Session
+          </span>
+
+          <span>•</span>
+
+          <span id="modalSessionDate"></span>
+
+        </p>
 
         <p
-          class="modern-note-modal-date"
-          id="modalDate"
+          id="modalTimestamp"
+          class="progress-note-timestamp"
         ></p>
+
       </div>
+
 
       <button
         type="button"
-        class="note-modal-close-icon"
         id="closeNoteButton"
+        class="note-modal-close-icon"
         aria-label="Close progress note"
       >
         <i class="bi bi-x-lg"></i>
@@ -321,76 +455,573 @@
 
     </div>
 
+
+    <!-- Body -->
     <div class="modern-note-modal-body">
 
-      <div class="therapist-note-content-box">
 
-        <div
-          class="therapist-note-content"
-          id="modalContent"
-        ></div>
+      <!-- Child Information -->
+      <section class="note-detail-section">
 
-      </div>
+        <div class="note-detail-heading">
+
+          <i class="bi bi-person"></i>
+
+          <h4>
+            Child Information
+          </h4>
+
+        </div>
+
+
+        <div class="note-detail-grid">
+
+          <div class="note-detail-item">
+
+            <span>
+              Age
+            </span>
+
+            <strong id="modalAge">
+              Not Available
+            </strong>
+
+          </div>
+
+
+          <div class="note-detail-item">
+
+            <span>
+              Gender
+            </span>
+
+            <strong id="modalGender">
+              Not Available
+            </strong>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- Editable note form -->
+      <form
+        id="editProgressNoteForm"
+        method="POST"
+      >
+
+
+        <!-- Diagnosis -->
+        <section class="note-detail-section">
+
+          <div class="note-detail-heading">
+
+            <i class="bi bi-clipboard2-pulse"></i>
+
+            <h4>
+              Diagnosis
+            </h4>
+
+          </div>
+
+
+          <div
+            id="modalDiagnosisDisplay"
+            class="note-text-box"
+          >
+            Not Available
+          </div>
+
+        </section>
+
+
+        <!-- Progress Report -->
+        <section class="note-detail-section">
+
+          <div class="note-detail-heading">
+
+            <i class="bi bi-journal-text"></i>
+
+            <h4>
+              Progress Report
+            </h4>
+
+          </div>
+
+
+          <div
+            id="modalContent"
+            class="note-text-box note-view-field"
+          >
+            No progress report available.
+          </div>
+
+
+          <textarea
+            id="modalContentEdit"
+            name="content"
+            class="note-edit-field"
+            rows="7"
+            hidden
+            required
+          ></textarea>
+
+        </section>
+
+
+        <!-- Actions -->
+        <div class="note-modal-actions">
+
+          <button
+            type="button"
+            id="editNoteButton"
+            class="btn secondary"
+          >
+            <i class="bi bi-pencil"></i>
+            Edit Note
+          </button>
+
+
+          <button
+            type="button"
+            id="cancelEditButton"
+            class="btn secondary"
+            hidden
+          >
+            Cancel
+          </button>
+
+
+          <button
+            type="submit"
+            id="saveNoteButton"
+            class="btn primary"
+            hidden
+          >
+            <i class="bi bi-check-lg"></i>
+            Save Changes
+          </button>
+
+        </div>
+
+      </form>
 
     </div>
 
   </div>
+
 </div>
 
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  const modal = document.getElementById("noteModal");
-  const closeButton = document.getElementById("closeNoteButton");
-  const viewButtons = document.querySelectorAll(".view-note-btn");
+  const progressTabButtons =
+  document.querySelectorAll("[data-progress-tab]");
 
-  if (!modal || !closeButton) {
-    console.error("Progress note modal elements were not found.");
+  const progressTabPanels =
+    document.querySelectorAll("[data-progress-panel]");
+
+  function showProgressTab(tabName) {
+    progressTabButtons.forEach(function (button) {
+      const isActive =
+        button.dataset.progressTab === tabName;
+
+      button.classList.toggle("active", isActive);
+
+      button.setAttribute(
+        "aria-selected",
+        isActive ? "true" : "false"
+      );
+    });
+
+    progressTabPanels.forEach(function (panel) {
+      const isActive =
+        panel.dataset.progressPanel === tabName;
+
+      panel.classList.toggle("active", isActive);
+      panel.hidden = !isActive;
+    });
+  }
+
+  progressTabButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      showProgressTab(
+        button.dataset.progressTab
+      );
+    });
+  });
+
+  /* Recent Notes opens by default */
+  showProgressTab("recent");
+
+  /* Recent Notes DataTable */
+  const recentNotesTable =
+  document.getElementById("therapistRecentNotesTable");
+
+  if (
+    recentNotesTable &&
+    typeof DataTable !== "undefined"
+  ) {
+    new DataTable(recentNotesTable, {
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50],
+
+      pagingType: "full_numbers",
+
+      order: [[3, "desc"]],
+
+      language: {
+        search: "",
+        searchPlaceholder: "Search...",
+        lengthMenu: "Show _MENU_ records",
+        info: "Showing _START_ to _END_ of _TOTAL_ notes",
+        infoEmpty: "No notes available",
+        zeroRecords: "No matching notes found"
+      },
+
+      layout: {
+        topStart: "pageLength",
+        topEnd: "search",
+        bottomStart: "info",
+        bottomEnd: "paging"
+      },
+
+      columnDefs: [
+        {
+          targets: [2, 5],
+          orderable: false
+        },
+        {
+          targets: [5],
+          searchable: false
+        }
+      ]
+    });
+  }
+
+  /* ==============================
+     VIEW / EDIT NOTE MODAL
+  ============================== */
+
+  const modal =
+    document.getElementById("noteModal");
+
+  const closeButton =
+    document.getElementById("closeNoteButton");
+
+  const viewButtons =
+    document.querySelectorAll(".view-note-btn");
+
+  const editForm =
+    document.getElementById("editProgressNoteForm");
+
+  const editButton =
+    document.getElementById("editNoteButton");
+
+  const cancelEditButton =
+    document.getElementById("cancelEditButton");
+
+  const saveNoteButton =
+    document.getElementById("saveNoteButton");
+
+
+  if (
+    !modal ||
+    !closeButton ||
+    !editForm ||
+    !editButton ||
+    !cancelEditButton ||
+    !saveNoteButton
+  ) {
+    console.error(
+      "Progress note modal elements were not found."
+    );
     return;
   }
 
-  viewButtons.forEach(function (button) {
 
-    button.addEventListener("click", function () {
+  /* ==============================
+     CALCULATE AGE
+  ============================== */
 
-      document.getElementById("modalClient").textContent =
-        button.dataset.client || "Client";
+  function calculateAge(dateOfBirth) {
 
-      document.getElementById("modalDate").textContent =
-        button.dataset.date || "";
+    if (!dateOfBirth) {
+      return "Not Available";
+    }
 
-      document.getElementById("modalContent").textContent =
-        button.dataset.content || "No progress note available.";
+    const birthDate =
+      new Date(dateOfBirth);
 
-      modal.classList.remove("hidden");
-      document.body.classList.add("modal-open");
+    const today =
+      new Date();
 
-    });
+    let age =
+      today.getFullYear() -
+      birthDate.getFullYear();
 
-  });
+    const monthDifference =
+      today.getMonth() -
+      birthDate.getMonth();
 
-  function closeNoteModal() {
-    modal.classList.add("hidden");
-    document.body.classList.remove("modal-open");
+    if (
+      monthDifference < 0 ||
+      (
+        monthDifference === 0 &&
+        today.getDate() <
+        birthDate.getDate()
+      )
+    ) {
+      age--;
+    }
+
+    return age + " years";
   }
 
-  closeButton.addEventListener("click", closeNoteModal);
 
-  modal.addEventListener("click", function (event) {
-    if (event.target === modal) {
-      closeNoteModal();
-    }
+/* ==============================
+   VIEW / EDIT MODE
+============================== */
+
+function setNoteEditMode(editing) {
+
+  const contentDisplay =
+    document.getElementById("modalContent");
+
+  const contentEdit =
+    document.getElementById("modalContentEdit");
+
+
+  contentDisplay.hidden =
+    editing;
+
+  contentEdit.hidden =
+    !editing;
+
+
+  editButton.hidden =
+    editing;
+
+  cancelEditButton.hidden =
+    !editing;
+
+  saveNoteButton.hidden =
+    !editing;
+}
+
+  /* ==============================
+     OPEN NOTE
+  ============================== */
+
+  viewButtons.forEach(function (button) {
+
+    button.addEventListener(
+      "click",
+      function () {
+
+        const noteId =
+          button.dataset.noteId;
+
+        editForm.action =
+          "/therapist/progress-notes/" +
+          noteId +
+          "/edit";
+
+
+        /* Patient */
+
+        document
+          .getElementById("modalClient")
+          .textContent =
+            button.dataset.client ||
+            "Patient";
+
+
+        /* Session */
+
+        document
+          .getElementById("modalSessionType")
+          .textContent =
+            button.dataset.type ||
+            "Session";
+
+        document
+          .getElementById("modalSessionDate")
+          .textContent =
+            button.dataset.sessionDate ||
+            "";
+
+
+        /* Note recorded / updated */
+
+        const timestamp =
+          document.getElementById(
+            "modalTimestamp"
+          );
+
+        if (button.dataset.updated) {
+
+          timestamp.textContent =
+            "Last updated: " +
+            button.dataset.updated;
+
+        } else {
+
+          timestamp.textContent =
+            "Note recorded: " +
+            button.dataset.created;
+
+        }
+
+
+        /* Child information */
+
+        document
+          .getElementById("modalAge")
+          .textContent =
+            calculateAge(
+              button.dataset.dob
+            );
+
+        document
+          .getElementById("modalGender")
+          .textContent =
+            button.dataset.gender ||
+            "Not Available";
+
+
+        /* Diagnosis */
+
+        document
+          .getElementById(
+            "modalDiagnosisDisplay"
+          )
+          .textContent =
+            button.dataset.diagnosis ||
+            "Not Available";
+
+        document
+          .getElementById(
+            "modalDiagnosisDisplay"
+          )
+          .textContent =
+            button.dataset.diagnosis ||
+            "Not Available";
+
+        /* Progress report */
+
+        document
+          .getElementById("modalContent")
+          .textContent =
+            button.dataset.content ||
+            "No progress report available.";
+
+        document
+          .getElementById(
+            "modalContentEdit"
+          )
+          .value =
+            button.dataset.content ||
+            "";
+
+
+        setNoteEditMode(false);
+
+        modal.classList.remove(
+          "hidden"
+        );
+
+        document.body.classList.add(
+          "modal-open"
+        );
+
+      }
+    );
+
   });
 
-  document.addEventListener("keydown", function (event) {
-    if (
-      event.key === "Escape" &&
-      !modal.classList.contains("hidden")
-    ) {
-      closeNoteModal();
+
+  /* ==============================
+     EDIT
+  ============================== */
+
+  editButton.addEventListener(
+    "click",
+    function () {
+
+      setNoteEditMode(true);
+
     }
-  });
+  );
+
+
+  /* ==============================
+     CANCEL EDIT
+  ============================== */
+
+  cancelEditButton.addEventListener(
+    "click",
+    function () {
+
+      setNoteEditMode(false);
+
+    }
+  );
+
+
+  /* ==============================
+     CLOSE MODAL
+  ============================== */
+
+  function closeNoteModal() {
+
+    modal.classList.add(
+      "hidden"
+    );
+
+    document.body.classList.remove(
+      "modal-open"
+    );
+
+    setNoteEditMode(false);
+  }
+
+
+  closeButton.addEventListener(
+    "click",
+    closeNoteModal
+  );
+
+
+  modal.addEventListener(
+    "click",
+    function (event) {
+
+      if (event.target === modal) {
+        closeNoteModal();
+      }
+
+    }
+  );
+
+
+  document.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (
+        event.key === "Escape" &&
+        !modal.classList.contains("hidden")
+      ) {
+        closeNoteModal();
+      }
+
+    }
+  );
 
 });
 </script>

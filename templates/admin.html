@@ -1,63 +1,299 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Admin Dashboard</h1>
+<section class="dashboard-welcome">
 
-<p class="muted">
-  Welcome, {{ session["user"]["full_name"] | title }}.
-  Select a section to manage UrbaneTrack.
-</p>
+  <div>
+    <span class="dashboard-eyebrow">
+      Administrator dashboard
+    </span>
 
-<section class="grid">
+    <h1>
+      Welcome back, {{ session["user"]["full_name"] | title }}
+    </h1>
 
-  <div class="card dashboard-card">
-    <h2>Appointments</h2>
+    <p>
+      Manage appointments, user accounts, patients and therapy records.
+    </p>
+  </div>
+
+  <div class="dashboard-date">
+    <i class="bi bi-calendar3"></i>
+
+    <span id="currentDate"></span>
+  </div>
+
+</section>
+
+<section class="modern-stat-grid">
+
+  <!-- Appointments -->
+  <article class="modern-stat-card stat-primary">
+
+    <div class="stat-card-top">
+
+      <div class="stat-icon">
+        <i class="bi bi-calendar-check"></i>
+      </div>
+
+      <span class="stat-badge">
+        Schedule
+      </span>
+
+    </div>
+
+    <div class="stat-content">
+
+      <span class="stat-label">
+        Appointments
+      </span>
+
+      <strong class="stat-number">
+        {{ appointments_count }}
+      </strong>
+
+      <p>
+        Therapy and assessment appointments in the system.
+      </p>
+
+    </div>
 
     <a
       href="{{ url_for('admin_appointments') }}"
-      class="btn primary"
+      class="stat-link"
     >
-      Manage Appointments
+      Manage appointments
+      <i class="bi bi-arrow-right"></i>
     </a>
-  </div>
 
-  <div class="card dashboard-card">
-    <h2>User Accounts</h2>
+  </article>
+
+
+  <!-- User Accounts -->
+  <article class="modern-stat-card stat-success">
+
+    <div class="stat-card-top">
+
+      <div class="stat-icon">
+        <i class="bi bi-people"></i>
+      </div>
+
+      <span class="stat-badge">
+        Accounts
+      </span>
+
+    </div>
+
+    <div class="stat-content">
+
+      <span class="stat-label">
+        User Accounts
+      </span>
+
+      <strong class="stat-number">
+        {{ users_count }}
+      </strong>
+
+      <p>
+        Therapist and parent accounts registered in UrbaneTrack.
+      </p>
+
+    </div>
 
     <a
       href="{{ url_for('admin_users') }}"
-      class="btn primary"
+      class="stat-link"
     >
-      Manage User Accounts
+      Manage users
+      <i class="bi bi-arrow-right"></i>
     </a>
+
+  </article>
+
+
+  <!-- Clients -->
+  <article class="modern-stat-card stat-warning">
+
+    <div class="stat-card-top">
+
+      <div class="stat-icon">
+        <i class="bi bi-person-heart"></i>
+      </div>
+
+      <span class="stat-badge">
+        Patients
+      </span>
+
+    </div>
+
+    <div class="stat-content">
+
+      <span class="stat-label">
+        Registered Patients
+      </span>
+
+      <strong class="stat-number">
+        {{ clients_count }}
+      </strong>
+
+      <p>
+        Patients profiles registered and linked accounts.
+      </p>
+
+    </div>
 
     <a
       href="{{ url_for('admin_clients') }}"
-      class="btn primary"
+      class="stat-link"
     >
-      Register Client
+      Manage patients
+      <i class="bi bi-arrow-right"></i>
     </a>
+
+  </article>
+
+  <!-- Progress Notes -->
+<article class="modern-stat-card stat-success">
+
+  <div class="stat-card-top">
+
+    <div class="stat-icon">
+      <i class="bi bi-journal-medical"></i>
+    </div>
+
+    <span class="stat-badge">
+      Notes
+    </span>
+
   </div>
 
-  <div class="card dashboard-card">
-    <h2>Sessions</h2>
+  <div class="stat-content">
 
-    <a
-      href="{{ url_for('admin_progress_notes') }}"
-      class="btn primary"
-    >
+    <span class="stat-label">
       Progress Notes
-    </a>
+    </span>
 
-     <a
-      href="{{ url_for('admin_progress_status') }}"
-      class="btn primary"
-    >
-      Progress Status
-    </a>
+    <strong class="stat-number">
+      {{ progress_notes_count }}
+    </strong>
+
+    <p>
+      Progress notes recorded by therapists.
+    </p>
+
   </div>
 
-  
+  <a
+    href="{{ url_for('admin_progress_notes') }}"
+    class="stat-link"
+  >
+    Review notes
+    <i class="bi bi-arrow-right"></i>
+  </a>
+
+</article>
+
+
+<!-- Progress Status -->
+<article class="modern-stat-card stat-warning">
+
+  <div class="stat-card-top">
+
+    <div class="stat-icon">
+      <i class="bi bi-graph-up-arrow"></i>
+    </div>
+
+    <span class="stat-badge">
+      Tracking
+    </span>
+
+  </div>
+
+  <div class="stat-content">
+
+    <span class="stat-label">
+      Progress Status
+    </span>
+
+    <strong class="stat-number">
+      {{ progress_status_count }}
+    </strong>
+
+    <p>
+      Patient progress records currently under monitoring.
+    </p>
+
+  </div>
+
+  <a
+    href="{{ url_for('admin_progress_status') }}"
+    class="stat-link"
+  >
+    View progress
+    <i class="bi bi-arrow-right"></i>
+  </a>
+
+</article>
 
 </section>
+
+<!-- Quick Actions -->
+<section class="dashboard-section">
+
+  <div class="section-heading">
+
+    <div>
+      <h2>Quick Actions</h2>
+
+      <p>
+        Common tools available for your administrator account.
+      </p>
+    </div>
+
+  </div>
+
+
+  <div class="quick-action-grid">
+
+    <a
+      href="{{ url_for('admin_reports') }}"
+      class="quick-action-card"
+    >
+
+      <span class="quick-action-icon">
+        <i class="bi bi-bar-chart-line"></i>
+      </span>
+
+      <span>
+        <strong>Patient Reports</strong>
+
+        <small>
+          View monthly patient registration reports
+        </small>
+      </span>
+
+      <i class="bi bi-chevron-right"></i>
+
+    </a>
+
+  </div>
+
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const dateElement =
+      document.getElementById("currentDate");
+
+    if (dateElement) {
+      dateElement.textContent =
+        new Intl.DateTimeFormat("en-MY", {
+          day: "numeric",
+          month: "long",
+          year: "numeric"
+        }).format(new Date());
+    }
+  });
+</script>
+
 {% endblock %}

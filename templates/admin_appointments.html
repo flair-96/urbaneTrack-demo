@@ -9,67 +9,253 @@
   </a>
 </p>
 
-<section class="grid">
-  <!-- Schedule appointment -->
-  <div class="card">
-    <h2>Schedule Appointment</h2>
-    <form method="POST" action="{{ url_for('admin_schedule') }}" class="form">
-      <label>Client</label>
-      <select name="client_id" required>
-        <option value="">-- select client --</option>
-        {% for c in clients %}
-          <option value="{{ c.client_id }}">{{ c.client_name | title }} (Parent: {{ c.parent_name  | title}})</option>
-        {% endfor %}
-      </select>
+<div class="appointment-section-selectors">
 
-      <label>Therapist</label>
-      <select name="therapist_id" required>
-        <option value="">-- select therapist --</option>
-        {% for t in therapists %}
-          <option value="{{ t.user_id }}">{{ t.full_name | title }}</option>
-        {% endfor %}
-      </select>
+  <!-- Schedule Appointment -->
+  <button
+    type="button"
+    class="appointment-section-card"
+    data-tab="schedule"
+  >
 
-      <label>Appointment Type</label>
-      <select name="appointment_type" required>
-        <option value="THERAPY" selected>THERAPY</option>
-        <option value="ASSESSMENT">ASSESSMENT</option>
-      </select>
+    <span class="appointment-section-icon">
+      <i class="bi bi-calendar-plus"></i>
+    </span>
 
-      <label>Date & Time</label>
-      <input type="datetime-local" name="date_time" required>
+    <div class="appointment-section-content">
 
-      <label>Location</label>
-      <input type="text" name="location" placeholder="e.g., Therapy Room 1">
+      <strong>
+        Schedule Appointment
+      </strong>
 
-      <label>Notes</label>
-      <textarea name="notes" rows="3" placeholder="Optional notes"></textarea>
+      <small>
+        Create a therapy or assessment appointment.
+      </small>
 
-      <button class="btn primary" type="submit">Schedule</button>
+      <span class="appointment-section-link">
+        Schedule appointment
+        <i class="bi bi-arrow-right"></i>
+      </span>
 
-      <p class="muted" style="margin-top:10px;">
-        After scheduling, admin informs parent via WhatsApp (manual).
-        System records confirmation as <b>Pending</b>.
-      </p>
-    </form>
-  </div>
+    </div>
 
-  <!-- Recent appointments -->
-  <section class="table-card" style="grid-column: 1 / -1;">
+  </button>
 
-    <div class="table-card-header">
-      <div>
-        <h2>Recent Appointments</h2>
 
-        <p>
-          Review appointment details, update confirmations and edit schedules.
-        </p>
+  <!-- Recent Appointments -->
+  <button
+    type="button"
+    class="appointment-section-card active"
+    data-tab="recent"
+  >
+
+    <span class="appointment-section-icon success">
+      <i class="bi bi-calendar-check"></i>
+    </span>
+
+    <div class="appointment-section-content">
+
+      <strong>
+        Recent Appointments
+      </strong>
+
+      <small>
+        Review, update and manage scheduled appointments.
+      </small>
+
+      <span class="appointment-section-link">
+        {{ appointments|length }} appointments
+        <i class="bi bi-arrow-right"></i>
+      </span>
+
+    </div>
+
+  </button>
+
+</div>
+
+
+<!-- Schedule Appointment -->
+<section
+  id="schedulePanel"
+  class="appointment-tab-panel"
+  hidden
+>
+
+  <section class="appointment-content-card">
+
+    <div class="appointment-content-header">
+
+      <div class="appointment-content-header-icon">
+        <i class="bi bi-calendar-plus"></i>
       </div>
 
-      <span class="table-count">
-        {{ appointments | length }} appointments
-      </span>
+      <div>
+
+        <h2>
+          Schedule Appointment
+        </h2>
+
+        <p>
+          Select the patient, therapist and session details.
+        </p>
+
+      </div>
+
     </div>
+
+    <form
+      method="POST"
+      action="{{ url_for('admin_schedule') }}"
+      class="form appointment-register-form"
+    >
+
+      <div class="form-field-group">
+
+        <label for="appointment_client">
+          Patient
+        </label>
+
+        <select
+          id="appointment_client"
+          name="client_id"
+          required
+        >
+          <option value="">
+            -- select patient --
+          </option>
+
+          {% for c in clients %}
+            <option value="{{ c.client_id }}">
+              {{ c.client_name | title }}
+              {% if c.parent_name %}
+                (Parent: {{ c.parent_name | title }})
+              {% elif c.patient_account_name %}
+                (Patient Account)
+              {% endif %}
+            </option>
+          {% endfor %}
+        </select>
+
+      </div>
+
+
+      <div class="form-field-group">
+
+        <label for="appointment_therapist">
+          Therapist
+        </label>
+
+        <select
+          id="appointment_therapist"
+          name="therapist_id"
+          required
+        >
+          <option value="">
+            -- select therapist --
+          </option>
+
+          {% for t in therapists %}
+            <option value="{{ t.user_id }}">
+              {{ t.full_name | title }}
+            </option>
+          {% endfor %}
+        </select>
+
+      </div>
+
+
+      <div class="form-field-group">
+
+        <label for="appointment_type">
+          Appointment Type
+        </label>
+
+        <select
+          id="appointment_type"
+          name="appointment_type"
+          required
+        >
+          <option value="THERAPY">
+            Therapy
+          </option>
+
+          <option value="ASSESSMENT">
+            Assessment
+          </option>
+        </select>
+
+      </div>
+
+
+      <div class="form-field-group">
+
+        <label for="appointment_date_time">
+          Date &amp; Time
+        </label>
+
+        <input
+          type="datetime-local"
+          id="appointment_date_time"
+          name="date_time"
+          required
+        >
+
+      </div>
+
+
+      <div class="form-field-group">
+
+        <label for="appointment_location">
+          Location
+        </label>
+
+        <input
+          type="text"
+          id="appointment_location"
+          name="location"
+          placeholder="e.g. Therapy Room 1"
+        >
+
+      </div>
+
+
+      <div class="form-field-group">
+
+        <label for="appointment_notes">
+          Notes
+        </label>
+
+        <textarea
+          id="appointment_notes"
+          name="notes"
+          rows="3"
+          placeholder="Optional notes"
+        ></textarea>
+
+      </div>
+
+      <button
+        class="btn primary"
+        type="submit"
+      >
+        Schedule Appointment
+      </button>
+
+    </form>
+  </section>
+</section>
+
+<!-- Recent Appointments -->
+<section
+  id="recentPanel"
+  class="appointment-tab-panel active"
+>
+
+<section
+  class="table-card"
+  style="grid-column:1 / -1;"
+>
 
     {% if appointments %}
 
@@ -86,7 +272,7 @@
               <th>ID</th>
               <th>Date and Time</th>
               <th>Type</th>
-              <th>Client</th>
+              <th>Patient</th>
               <th>Therapist</th>
               <th>Status</th>
               <th>Confirmation</th>
@@ -147,7 +333,7 @@
                   {% endif %}
                 </td>
 
-                <!-- Client -->
+                <!-- Patient -->
                 <td>
                   <div class="table-person">
 
@@ -161,7 +347,7 @@
                       </strong>
 
                       <small>
-                        Client
+                        Patient
                       </small>
                     </div>
 
@@ -205,6 +391,13 @@
                       Cancelled
                     </span>
 
+                   {% elif a.status == "No Show" %}
+
+                    <span class="status-badge status-no-show">
+                      <i class="bi bi-person-x"></i>
+                      No Show
+                    </span>
+
                   {% else %}
 
                     <span class="status-badge status-scheduled">
@@ -220,7 +413,7 @@
                   {% if a.confirmation_status == "Accepted" %}
 
                     <span class="confirmation-badge confirmation-accepted">
-                      <i class="bi bi-check2-circle"></i>                      Accepted
+                      <i class="bi bi-check-circle"></i>                      Accepted
                     </span>
 
                   {% elif a.confirmation_status == "Declined" %}
@@ -346,6 +539,8 @@
 
   </section>
 
+  </section>
+
     {% for a in appointments %}
     <div
       class="modal fade"
@@ -421,6 +616,7 @@
                     type="datetime-local"
                     name="date_time"
                     class="form-control"
+                    value="{{ a.date_time[:16] | replace(' ', 'T') }}"
                     required
                   >
                 </div>
@@ -444,6 +640,50 @@
 
                 <div class="col-md-6">
                   <label
+                    for="modal-status-{{ a.appointment_id }}"
+                    class="form-label"
+                  >
+                    Appointment Status
+                  </label>
+
+                  <select
+                    id="modal-status-{{ a.appointment_id }}"
+                    name="status"
+                    class="form-select"
+                    required
+                  >
+                    <option
+                      value="Scheduled"
+                      {% if a.status == "Scheduled" %}selected{% endif %}
+                    >
+                      Scheduled
+                    </option>
+
+                    <option
+                      value="Completed"
+                      {% if a.status == "Completed" %}selected{% endif %}
+                    >
+                      Completed
+                    </option>
+
+                    <option
+                      value="Cancelled"
+                      {% if a.status == "Cancelled" %}selected{% endif %}
+                    >
+                      Cancelled
+                    </option>
+
+                    <option
+                      value="No Show"
+                      {% if a.status == "No Show" %}selected{% endif %}
+                    >
+                      No Show
+                    </option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label
                     for="modal-note-{{ a.appointment_id }}"
                     class="form-label"
                   >
@@ -461,10 +701,6 @@
 
               </div>
 
-              <p class="text-muted mt-3 mb-0">
-                This will set confirmation status to
-                <strong>Rescheduled</strong>.
-              </p>
             </div>
 
             <div class="modal-footer">
@@ -489,6 +725,94 @@
       </div>
     </div>
   {% endfor %}
-  </div>
-</section>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const appointmentButtons =
+    document.querySelectorAll(".appointment-section-card");
+
+  const appointmentPanels = {
+    schedule: document.getElementById("schedulePanel"),
+    recent: document.getElementById("recentPanel")
+  };
+
+  appointmentButtons.forEach(function (button) {
+
+    button.addEventListener("click", function () {
+
+      appointmentButtons.forEach(function (b) {
+        b.classList.remove("active");
+      });
+
+      this.classList.add("active");
+
+      Object.values(appointmentPanels).forEach(function (panel) {
+        panel.hidden = true;
+      });
+
+      appointmentPanels[
+        this.dataset.tab
+      ].hidden = false;
+
+    });
+
+  });
+
+  /* Default page */
+  appointmentPanels.schedule.hidden = true;
+  appointmentPanels.recent.hidden = false;
+
+    /* Recent Appointments DataTable */
+  const appointmentsTable =
+    document.getElementById("adminAppointmentsTable");
+
+  if (
+    appointmentsTable &&
+    typeof DataTable !== "undefined"
+  ) {
+
+    new DataTable(appointmentsTable, {
+      responsive: true,
+      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50],
+      order: [[0, "desc"]],
+
+      language: {
+        search: "",
+        searchPlaceholder: "Search...",
+        lengthMenu: "Show _MENU_ records",
+        info: "Showing _START_ to _END_ of _TOTAL_ appointments",
+        infoEmpty: "No appointments available",
+        zeroRecords: "No matching appointments found"
+      },
+
+      layout: {
+        topStart: "pageLength",
+        topEnd: "search",
+        bottomStart: "info",
+        bottomEnd: "paging"
+      },
+
+      columnDefs: [
+        {
+          targets: [2, 3, 4, 5, 6, 7],
+          orderable: false
+        },
+        {
+          targets: [7],
+          searchable: false
+        }
+      ]
+    });
+
+  }
+
+});
+</script>
+ 
 {% endblock %}

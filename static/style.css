@@ -1578,11 +1578,11 @@ button.btn {
   font-weight: 700;
 }
 
-.modern-data-table {
+/* .modern-data-table {
   margin: 0 !important;
-}
+} */
 
-.modern-data-table thead th {
+/* .modern-data-table thead th {
   padding: 13px 14px !important;
 
   color: #475569;
@@ -1593,7 +1593,7 @@ button.btn {
   font-weight: 750;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-}
+} */
 
 .modern-data-table tbody td {
   padding: 14px !important;
@@ -1650,9 +1650,11 @@ button.btn {
 }
 
 
-/* DataTables controls */
+/* =========================================================
+   DATATABLE CONTROLS
+   ========================================================= */
 
-div.dt-container .dt-search {
+/* div.dt-container .dt-search {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1672,7 +1674,76 @@ div.dt-container .dt-search input {
   background: #ffffff;
   border: 1px solid #cbd5e1;
   border-radius: 9px;
+} */
+
+div.dt-container .dt-layout-row {
+  margin: 14px 0;
 }
+
+/* Search */
+
+div.dt-container .dt-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+div.dt-container .dt-search label {
+  display: none;
+}
+
+div.dt-container .dt-search::before {
+  content: "\F52A";
+
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+
+  color: #94a3b8;
+
+  font-family: "bootstrap-icons";
+  font-size: 0.88rem;
+
+  pointer-events: none;
+}
+
+div.dt-container .dt-search input {
+  width: 250px;
+  min-width: 250px;
+  height: 40px;
+
+  margin: 0 !important;
+  padding: 8px 14px 8px 38px !important;
+
+  color: #334155;
+  background: #ffffff;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+
+  font-size: 0.82rem;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+div.dt-container .dt-search input::placeholder {
+  color: #94a3b8;
+}
+
+div.dt-container .dt-search input:focus {
+  outline: none;
+
+  border-color: #2563eb;
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Show records */
 
 div.dt-container .dt-length select {
   min-height: 38px;
@@ -1680,31 +1751,70 @@ div.dt-container .dt-length select {
   padding: 6px 31px 6px 9px;
 }
 
+/* Information */
+
 div.dt-container .dt-info {
   color: #64748b;
   font-size: 0.78rem;
 }
 
-div.dt-container .dt-paging .dt-paging-button {
-  min-width: 36px;
+/* Pagination */
+
+div.dt-container .dt-paging {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* div.dt-container .dt-paging .dt-paging-button {
+  min-width: 36px !important;
+  width: 36px;
   height: 36px;
-  margin: 0 2px !important;
-  padding: 6px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
 
   border: 1px solid #e2e8f0 !important;
   border-radius: 8px !important;
+
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+
+  color: #475569 !important;
+  background: #ffffff !important;
+
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+
+  box-sizing: border-box;
 }
 
 div.dt-container .dt-paging .dt-paging-button.current {
   color: #ffffff !important;
   background: #2563eb !important;
   border-color: #2563eb !important;
+} */
+
+div.dt-container .dt-paging .dt-paging-button:hover:not(.current) {
+  color: #2563eb !important;
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
 }
 
-div.dt-container .dt-layout-row {
-  margin: 14px 0;
+div.dt-container .dt-paging nav {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
+/* Responsive */
 
 @media (max-width: 700px) {
   .table-card {
@@ -1733,13 +1843,16 @@ div.dt-container .dt-layout-row {
    ========================================================= */
 
 .page-header-modern {
-  margin-bottom: 24px;
-  padding: 24px 26px;
+  /* margin-bottom: 24px;
+  padding: 24px 26px; */
+  margin-bottom: 18px;
+  padding: 18px 22px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  /* gap: 24px; */
+  gap: 18px;
 
   background:
     linear-gradient(
@@ -1765,21 +1878,26 @@ div.dt-container .dt-layout-row {
 }
 
 .page-header-modern h1 {
-  margin: 0 0 6px;
+  /* margin: 0 0 6px; */
+  margin: 0 0 3px;
 
   color: #0f172a;
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  /* font-size: clamp(1.5rem, 3vw, 2rem); */
+  font-size: clamp(1.35rem, 2.6vw, 1.8rem);
   letter-spacing: -0.03em;
 }
 
 .page-header-modern p {
   margin: 0;
   color: #64748b;
+  font-size: 0.88rem;
 }
 
 .page-header-summary {
-  min-width: 165px;
-  padding: 13px 16px;
+  /* min-width: 165px;
+  padding: 13px 16px; */
+  min-width: 150px;
+  padding: 10px 13px;
 
   display: flex;
   align-items: center;
@@ -1791,8 +1909,10 @@ div.dt-container .dt-layout-row {
 }
 
 .page-header-summary > i {
-  width: 42px;
-  height: 42px;
+  /* width: 42px;
+  height: 42px; */
+  width: 38px;
+  height: 38px;
 
   display: grid;
   place-items: center;
@@ -1811,7 +1931,8 @@ div.dt-container .dt-layout-row {
 
 .page-header-summary strong {
   color: #0f172a;
-  font-size: 1.25rem;
+  /* font-size: 1.25rem; */
+  font-size: 1.1rem;
   line-height: 1;
 }
 
@@ -1907,7 +2028,6 @@ div.dt-container .dt-layout-row {
   background: #f8fbff;
 }
 
-
 /* Table content */
 
 .appointment-id {
@@ -1916,7 +2036,7 @@ div.dt-container .dt-layout-row {
 }
 
 .session-date-cell {
-  min-width: 210px;
+  /* min-width: 170px; */
 
   display: flex;
   align-items: center;
@@ -2005,19 +2125,27 @@ div.dt-container .dt-layout-row {
   align-items: center;
   gap: 6px;
 
-  padding: 6px 10px;
+  /* padding: 6px 10px; */
+  padding: 7px 12px;
 
   border: 1px solid transparent;
   border-radius: 999px;
 
-  font-size: 0.72rem;
+  /* font-size: 0.72rem; */
+  font-size: 0.74rem;
   font-weight: 700;
   white-space: nowrap;
+  line-height: 1;
 }
 
 .confirmation-badge {
   justify-content: center;
-  min-width: 108px;
+  /* min-width: 108px; */
+  min-width: 118px;
+}
+
+.confirmation-badge i {
+  font-size: 0.82rem;
 }
 
 .session-type-badge {
@@ -2039,7 +2167,6 @@ div.dt-container .dt-layout-row {
 .location-cell i {
   color: #94a3b8;
 }
-
 
 /* Status */
 
@@ -2067,45 +2194,78 @@ div.dt-container .dt-layout-row {
   border-color: #cbd5e1;
 }
 
+/* Assigned Sessions - align ID column */
+#sessionsTable thead th:nth-child(1) {
+  text-align: left !important;
+  padding-right: 30px !important;
+}
+
+#sessionsTable thead th:nth-child(1) .dt-column-title {
+  text-align: left !important;
+}
+
+#sessionsTable thead th:nth-child(1) .dt-column-header {
+  position: relative;
+  justify-content: flex-start !important;
+}
+
+#sessionsTable tbody td:nth-child(1) {
+  text-align: left !important;
+}
+
+/* Assigned Sessions - compact ID column */
+#sessionsTable th:first-child,
+#sessionsTable td:first-child {
+  width: 90px !important;
+  max-width: 90px !important;
+}
+
+/* Assigned Sessions - aligned Date & Time*/
+#sessionsTable thead th:nth-child(2) {
+  text-align: left !important;
+  padding-right: 30px !important;
+}
+
+#sessionsTable thead th:nth-child(2) .dt-column-title {
+  text-align: left !important;
+}
+
+#sessionsTable thead th:nth-child(2) .dt-column-header {
+  position: relative;
+  justify-content: flex-start !important;
+}
+
+/* sorting arrows on the right */
+#sessionsTable thead th:nth-child(1) .dt-column-order,
+#sessionsTable thead th:nth-child(2) .dt-column-order {
+  position: absolute !important;
+
+  right: 8px !important;
+  left: auto !important;
+
+  top: 50% !important;
+  transform: translateY(-50%);
+
+  margin: 0 !important;
+}
 
 /* Confirmation */
 
-.confirmation-confirmed {
-  color: #047857;
-  background: #ecfdf5;
-  border-color: #a7f3d0;
-}
-
-.confirmation-pending {
-  color: #b45309;
-  background: #fffbeb;
-  border-color: #fde68a;
-}
-
-.confirmation-rejected {
-  color: #b91c1c;
-  background: #fef2f2;
-  border-color: #fecaca;
-}
-
+.confirmation-confirmed,
 .confirmation-accepted {
   color: #047857;
   background: #ecfdf5;
   border-color: #a7f3d0;
 }
 
+.confirmation-pending,
 .confirmation-rescheduled {
   color: #b45309;
   background: #fffbeb;
   border-color: #fde68a;
 }
 
-.confirmation-pending {
-  color: #475569;
-  background: #f8fafc;
-  border-color: #cbd5e1;
-}
-
+.confirmation-rejected,
 .confirmation-declined {
   color: #b91c1c;
   background: #fef2f2;
@@ -2175,7 +2335,7 @@ div.dt-container .dt-layout-row {
 
 /* DataTables controls */
 
-div.dt-container .dt-layout-row {
+/* div.dt-container .dt-layout-row {
   margin: 14px 0;
 }
 
@@ -2226,7 +2386,7 @@ div.dt-container .dt-paging .dt-paging-button.current {
   color: #ffffff !important;
   background: #2563eb !important;
   border-color: #2563eb !important;
-}
+} */
 
 
 /* Responsive */
@@ -2726,6 +2886,7 @@ div.dt-container .dt-paging .dt-paging-button.current {
   vertical-align: middle;
 }
 
+/* Actions column */
 #clientsTable td:last-child {
   min-width: 220px;
 }
@@ -2852,22 +3013,110 @@ div.dt-container .dt-paging .dt-paging-button.current {
   background: #f8fafc;
 }
 
-.progress-note-full {
-  min-height: 180px;
-  padding: 22px;
+.progress-note-content {
+  padding: 18px;
 
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-}
 
-.progress-note-content {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
   color: #334155;
-  font-size: 0.96rem;
+  font-size: 0.95rem;
   line-height: 1.8;
 
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+/* Progress note sections */
+.progress-note-section {
+  margin-bottom: 24px;
+}
+
+.progress-note-section:last-child {
+  margin-bottom: 0;
+}
+
+.progress-note-section h6 {
+  margin: 0 0 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #1e293b;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.progress-note-section h6 i {
+  color: #2563eb;
+}
+
+/* Information cards */
+.progress-note-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.progress-info-card {
+  padding: 14px 16px;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.progress-info-card small {
+  display: block;
+  margin-bottom: 5px;
+
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.progress-info-card strong {
+  display: block;
+
+  color: #1e293b;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+/* Full report */
+.progress-note-content {
+  padding: 18px;
+
+  color: #334155;
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
+  font-size: 0.94rem;
+  line-height: 1.75;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 750px) {
+  .progress-note-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.progress-note-child-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.progress-note-child-grid .diagnosis-card {
+  grid-column: 1 / -1;
 }
 
 /*Admin progress Status*/
@@ -3222,7 +3471,7 @@ div.dt-container .dt-paging .dt-paging-button.current {
 }
 
 .note-modal-overlay.hidden {
-  display: none;
+  display: none !important;
 }
 
 body.modal-open {
@@ -3265,28 +3514,36 @@ body.modal-open {
 }
 
 /* Parent appointment update note */
+
 .parent-update-note {
-  width: 190px;
-  max-width: 190px;
+  width: auto;
+  max-width: 230px;
+
   margin: 0;
 
   color: #475569;
-  font-size: 0.82rem;
-  line-height: 1.5;
+
+  font-size: 0.79rem;
+  line-height: 1.45;
 
   display: -webkit-box;
-  line-clamp: 2;
+
   -webkit-line-clamp: 2;
+  line-clamp: 2;
+
   -webkit-box-orient: vertical;
 
   overflow: hidden;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .no-update-note {
   color: #94a3b8;
-  font-size: 0.82rem;
+
+  font-size: 0.79rem;
   font-style: italic;
+
+  white-space: nowrap;
 }
 
 
@@ -3363,4 +3620,2397 @@ body.modal-open {
   .parent-help-card {
     padding: 18px;
   }
+}
+
+/* =========================================================
+   PARENT APPOINTMENTS TABLE
+   ========================================================= */
+
+.parent-appointments-table-wrap {
+  width: 100%;
+  overflow: visible;
+}
+
+
+/* Allow DataTable to use available card width */
+
+#parentAppointmentsTable {
+  width: 100% !important;
+
+  table-layout: fixed;
+}
+
+
+/* General cells */
+
+#parentAppointmentsTable th,
+#parentAppointmentsTable td {
+  vertical-align: middle;
+
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+
+/* ID */
+
+#parentAppointmentsTable th:nth-child(1),
+#parentAppointmentsTable td:nth-child(1) {
+  width: 5%;
+
+  text-align: center;
+
+  white-space: nowrap;
+}
+
+
+/* Date & Time */
+
+#parentAppointmentsTable th:nth-child(2),
+#parentAppointmentsTable td:nth-child(2) {
+  width: 20%;
+}
+
+
+/* Type */
+
+#parentAppointmentsTable th:nth-child(3),
+#parentAppointmentsTable td:nth-child(3) {
+  width: 12%;
+}
+
+
+/* Child */
+
+#parentAppointmentsTable th:nth-child(4),
+#parentAppointmentsTable td:nth-child(4) {
+  width: 14%;
+}
+
+
+/* Therapist */
+
+#parentAppointmentsTable th:nth-child(5),
+#parentAppointmentsTable td:nth-child(5) {
+  width: 14%;
+}
+
+
+/* Status */
+
+#parentAppointmentsTable th:nth-child(6),
+#parentAppointmentsTable td:nth-child(6) {
+  width: 11%;
+
+  text-align: center;
+}
+
+
+/* Confirmation */
+
+#parentAppointmentsTable th:nth-child(7),
+#parentAppointmentsTable td:nth-child(7) {
+  width: 12%;
+
+  text-align: center;
+}
+
+
+/* Update Note */
+
+#parentAppointmentsTable th:nth-child(8),
+#parentAppointmentsTable td:nth-child(8) {
+  width: 12%;
+
+  text-align: left;
+}
+
+#parentAppointmentsTable .status-badge,
+#parentAppointmentsTable .confirmation-badge,
+#parentAppointmentsTable .session-type-badge {
+  padding: 6px 9px;
+
+  font-size: 0.72rem;
+
+  white-space: nowrap;
+}
+
+#parentAppointmentsTable .table-person {
+  gap: 8px;
+}
+
+#parentAppointmentsTable .table-avatar {
+  width: 36px;
+  height: 36px;
+
+  flex: 0 0 36px;
+}
+
+#parentAppointmentsTable .table-person strong {
+  font-size: 0.82rem;
+}
+
+#parentAppointmentsTable .table-person small {
+  font-size: 0.72rem;
+}
+
+#parentAppointmentsTable .appointment-date-cell {
+  gap: 8px;
+}
+
+#parentAppointmentsTable .appointment-date-icon {
+  width: 36px;
+  height: 36px;
+
+  flex: 0 0 36px;
+}
+
+#parentAppointmentsTable .appointment-date-cell strong {
+  font-size: 0.79rem;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   PARENT APPOINTMENT FILTER
+   ========================================================= */
+
+.parent-appointment-filters {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 4px;
+
+  margin: 0 0 18px;
+
+  padding: 4px;
+
+  background: #f1f5f9;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.parent-appointment-filter {
+  min-height: 36px;
+
+  display: inline-flex;
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 0 13px;
+
+  background: transparent;
+
+  border: 0;
+  border-radius: 8px;
+
+  color: #64748b;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.parent-appointment-filter:hover {
+  color: #334155;
+}
+
+.parent-appointment-filter.active {
+  background: #ffffff;
+
+  color: #2563eb;
+
+  box-shadow:
+    0 1px 4px rgba(15, 23, 42, 0.08);
+}
+
+.parent-appointment-filter span {
+  min-width: 22px;
+  height: 22px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 6px;
+
+  background: #eaf2ff;
+
+  border-radius: 999px;
+
+  color: #2563eb;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   PARENT APPOINTMENTS RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+  .parent-appointments-table-wrap {
+    width: 100%;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #parentAppointmentsTable {
+    width: 100% !important;
+
+    min-width: 1050px;
+
+    table-layout: auto;
+  }
+
+  #parentAppointmentsTable th,
+  #parentAppointmentsTable td {
+    white-space: nowrap;
+
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* Give Update Note enough space */
+  #parentAppointmentsTable th:nth-child(8),
+  #parentAppointmentsTable td:nth-child(8) {
+    min-width: 170px;
+
+    white-space: normal;
+
+    padding-left: 18px;
+  }
+
+}
+
+/* =========================================================
+   PARENT SECTION SELECTORS
+   ========================================================= */
+
+.parent-section-selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 18px;
+
+  margin-bottom: 22px;
+}
+
+.parent-section-card {
+  width: 100%;
+  min-height: 118px;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 14px;
+
+  padding: 16px 18px;
+
+  color: #334155;
+  background: #ffffff;
+
+  text-align: left;
+
+  border: 1px solid #dbe3ee;
+  border-top: 4px solid #cbd5e1;
+
+  border-radius: 16px;
+
+  box-shadow:
+    0 7px 20px rgba(15, 23, 42, 0.045);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.16s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.parent-section-card:hover {
+  transform: translateY(-2px);
+
+  border-color: #93c5fd;
+
+  box-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.parent-section-card.active {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.07),
+      rgba(14, 165, 233, 0.015)
+    ),
+    #ffffff;
+
+  border-color: #93c5fd;
+  border-top-color: #2563eb;
+
+  box-shadow:
+    0 10px 28px rgba(37, 99, 235, 0.1);
+}
+
+
+/* Icons */
+
+.parent-section-icon {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 12px;
+
+  font-size: 1.05rem;
+}
+
+.parent-section-icon.appointment-icon {
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.parent-section-icon.progress-icon {
+  color: #047857;
+  background: #ecfdf5;
+}
+
+
+/* Text */
+
+.parent-section-content {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.parent-section-content > strong {
+  margin-bottom: 5px;
+
+  color: #0f172a;
+
+  font-size: 0.98rem;
+  font-weight: 750;
+}
+
+.parent-section-content > small {
+  min-height: 38px;
+
+  color: #64748b;
+
+  font-size: 0.77rem;
+  line-height: 1.5;
+}
+
+.parent-section-link {
+  margin-top: 11px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: #2563eb;
+
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   PARENT TAB PANELS
+   ========================================================= */
+
+.parent-tab-panel[hidden] {
+  display: none !important;
+}
+
+.parent-tab-panel {
+  animation: parentPanelFade 0.2s ease;
+}
+
+@keyframes parentPanelFade {
+
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+
+/* =========================================================
+   CHILD PROGRESS CARD
+   ========================================================= */
+
+.parent-progress-card {
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #e3eaf3;
+  border-radius: 16px;
+
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.parent-progress-header {
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 20px 24px;
+
+  border-bottom: 1px solid #e7edf5;
+}
+
+.parent-progress-header-icon {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  display: grid;
+  place-items: center;
+
+  color: #2563eb;
+  background: #eff6ff;
+
+  border-radius: 11px;
+}
+
+.parent-progress-header h2 {
+  margin: 0 0 3px;
+
+  color: #0f172a;
+
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.parent-progress-header p {
+  margin: 0;
+
+  color: #7b8ba5;
+
+  font-size: 13px;
+}
+
+.parent-progress-placeholder {
+  min-height: 280px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 24px;
+
+  text-align: center;
+}
+
+.parent-progress-placeholder-icon {
+  width: 48px;
+  height: 48px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 12px;
+
+  color: #2563eb;
+  background: #eff6ff;
+
+  border-radius: 14px;
+
+  font-size: 19px;
+}
+
+.parent-progress-placeholder h3 {
+  margin: 0 0 5px;
+
+  color: #1e293b;
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.parent-progress-placeholder p {
+  max-width: 420px;
+
+  margin: 0;
+
+  color: #7b8ba5;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+
+/* Responsive */
+
+@media (max-width: 750px) {
+
+  .parent-section-selectors {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* =========================================================
+   PARENT CHILD PROGRESS CONTENT
+   ========================================================= */
+
+.parent-progress-content {
+  padding: 22px 24px 26px;
+}
+
+
+/* Child selector */
+
+.parent-progress-filter {
+  width: 260px;
+
+  margin-bottom: 20px;
+}
+
+.parent-progress-filter label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #475569;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.parent-progress-select {
+  width: 100%;
+  min-height: 40px;
+
+  padding: 0 12px;
+
+  background: #ffffff;
+
+  border: 1px solid #d8e1ec;
+  border-radius: 9px;
+
+  color: #1e293b;
+
+  font-size: 13px;
+
+  outline: none;
+}
+
+.parent-progress-select:focus {
+  border-color: #3b82f6;
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+
+/* Summary */
+
+.parent-progress-summary-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 14px;
+
+  margin-bottom: 20px;
+}
+
+.parent-progress-summary-card {
+  padding: 16px 18px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e3eaf3;
+  border-radius: 12px;
+}
+
+.parent-progress-summary-card span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #7b8ba5;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.parent-progress-summary-card strong {
+  color: #1e293b;
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+
+/* Goal chart */
+
+.parent-progress-chart-card {
+  margin-bottom: 20px;
+
+  padding: 20px 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #e3eaf3;
+  border-radius: 14px;
+}
+
+.parent-progress-chart-header h3 {
+  margin: 0 0 4px;
+
+  color: #0f172a;
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.parent-progress-chart-header p {
+  margin: 0;
+
+  color: #7b8ba5;
+
+  font-size: 13px;
+}
+
+.parent-progress-chart-container {
+  position: relative;
+
+  height: 260px;
+
+  margin-top: 16px;
+}
+
+
+/* Progress history */
+
+.parent-progress-history-card {
+  padding: 20px 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #e3eaf3;
+  border-radius: 14px;
+}
+
+.parent-progress-history-header {
+  margin-bottom: 16px;
+}
+
+.parent-progress-history-header h3 {
+  margin: 0 0 4px;
+
+  color: #0f172a;
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.parent-progress-history-header p {
+  margin: 0;
+
+  color: #7b8ba5;
+
+  font-size: 13px;
+}
+
+
+/* Parent progress table */
+
+#parentProgressTable th,
+#parentProgressTable td {
+  vertical-align: middle;
+}
+
+#parentProgressTable th {
+  font-size: 12px;
+}
+
+#parentProgressTable td {
+  font-size: 13px;
+}
+
+#parentProgressTable th:nth-child(1),
+#parentProgressTable td:nth-child(1) {
+  white-space: nowrap;
+}
+
+#parentProgressTable th:nth-child(4),
+#parentProgressTable td:nth-child(4) {
+  text-align: center;
+  white-space: nowrap;
+}
+
+#parentProgressTable th:nth-child(5),
+#parentProgressTable td:nth-child(5) {
+  min-width: 210px;
+}
+
+@media (max-width: 750px) {
+
+  .parent-section-selectors {
+    grid-template-columns: 1fr;
+  }
+
+  .parent-progress-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .parent-progress-filter {
+    width: 100%;
+  }
+
+  .parent-progress-content {
+    padding: 18px 16px 22px;
+  }
+
+  .parent-progress-chart-card,
+  .parent-progress-history-card {
+    padding: 18px;
+  }
+
+}
+
+/*Client form - Register Client*/
+.client-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.client-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+@media (max-width: 750px) {
+  .client-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   CLIENT MANAGEMENT SECTION SELECTORS
+   ========================================================= */
+
+.client-section-selectors {
+  margin-bottom: 24px;
+
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.client-section-card {
+  width: 100%;
+  min-height: 118px;
+  padding: 18px 20px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  text-align: left;
+
+  color: #334155;
+  background: #ffffff;
+
+  border: 1px solid #dbe3ee;
+  border-top: 4px solid #cbd5e1;
+  border-radius: 16px;
+
+  box-shadow:
+    0 7px 20px rgba(15, 23, 42, 0.045);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.16s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.client-section-card:hover {
+  transform: translateY(-2px);
+
+  border-color: #93c5fd;
+
+  box-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.client-section-card.active {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.07),
+      rgba(14, 165, 233, 0.015)
+    ),
+    #ffffff;
+
+  border-color: #93c5fd;
+  border-top-color: #2563eb;
+
+  box-shadow:
+    0 10px 28px rgba(37, 99, 235, 0.1);
+}
+
+.client-section-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 13px;
+
+  font-size: 1.15rem;
+}
+
+.register-icon {
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.registered-icon {
+  color: #047857;
+  background: #ecfdf5;
+}
+
+.client-section-content {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.client-section-content > strong {
+  margin-bottom: 6px;
+
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.client-section-content > small {
+  min-height: 42px;
+
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.client-section-label {
+  margin-top: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.client-section-card.active
+.client-section-label {
+  color: #1d4ed8;
+}
+
+.client-section-label i {
+  transition: transform 0.16s ease;
+}
+
+.client-section-card:hover
+.client-section-label i {
+  transform: translateX(3px);
+}
+
+
+/* =========================================================
+   CLIENT TAB CONTENT
+   ========================================================= */
+
+.client-tab-panel {
+  animation: clientPanelFade 0.2s ease;
+}
+
+.client-tab-panel[hidden] {
+  display: none !important;
+}
+
+@keyframes clientPanelFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.client-content-card {
+  overflow: hidden;
+  padding: 0;
+
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 16px;
+
+  /* padding: 0 28px 28px; */
+
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.client-content-header {
+  width: 100%;
+  /* padding: 16px 20px; */
+  padding: 14px 18px;
+
+  display: flex;
+  /* align-items: flex-start; */
+  align-items: center;
+  /* gap: 13px; */
+  gap: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.08),
+      rgba(14, 165, 233, 0.02)
+    );
+
+  border-bottom: 1px solid #e2e8f0;
+  box-sizing: border-box;
+}
+
+.client-content-header-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+
+  display: grid;
+  place-items: center;
+
+  color: #2563eb;
+  background: #eff6ff;
+  border-radius: 11px;
+}
+
+.client-content-header h2 {
+  margin: 0 0 4px;
+
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.client-content-header p {
+  margin: 0;
+
+  color: #64748b;
+  font-size: 0.77rem;
+  line-height: 1.5;
+}
+
+/* .client-register-form {
+  width: 100%;
+  max-width: none;
+  padding: 18px 24px 22px;
+  gap: 14px;
+  box-sizing: border-box;
+} */
+
+
+/* Responsive */
+
+@media (max-width: 750px) {
+  .client-section-selectors {
+    grid-template-columns: 1fr;
+  }
+
+  .client-section-card {
+    min-height: 138px;
+    padding: 18px;
+  }
+
+  /* .client-register-form {
+    padding: 20px 16px 22px;
+  } */
+}
+
+/* Edit client modal spacing */
+
+#editClientModal .modal-dialog {
+  max-width: 720px;
+}
+
+#editClientModal .modal-content {
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+#editClientModal .modal-header {
+  padding: 20px 24px 18px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #e2e8f0;
+}
+
+#editClientModal .modal-header h2 {
+  margin: 0 0 5px;
+
+  color: #1e293b;
+  font-size: 1.45rem;
+  font-weight: 750;
+}
+
+#editClientModal .modal-header p {
+  margin: 0;
+
+  color: #64748b;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+#editClientModal .modal-body {
+  padding: 22px 24px 24px;
+}
+
+#editClientModal .client-modal-section {
+  display: flex;
+  flex-direction: column;
+}
+
+#editClientModal .client-modal-section + .client-modal-section {
+  margin-top: 24px;
+  padding-top: 20px;
+
+  border-top: 1px solid #e2e8f0;
+}
+
+#editClientModal .client-modal-section-heading {
+  margin: 0 0 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  color: #1e293b;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+#editClientModal .client-modal-section-heading i {
+  color: #2563eb;
+  font-size: 0.95rem;
+}
+
+#editClientModal .client-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+#editClientModal .client-form-group + .client-form-group {
+  margin-top: 16px;
+}
+
+#editClientModal .client-form-row {
+  margin-top: 16px;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+#editClientModal .client-form-row .client-form-group {
+  margin-top: 0;
+}
+
+#editClientModal .diagnosis-form-group {
+  /* margin-top: 16px; */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#editClientModal label {
+  margin: 0;
+
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+#editClientModal input,
+#editClientModal select {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+#editClientModal .modal-footer {
+  padding: 15px 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+#editClientModal .diagnosis-form-group {
+  margin-top: 20px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#editClientModal .parent-assignment-section {
+  margin-top: 28px !important;
+  padding-top: 22px !important;
+
+  border-top: 1px solid #e2e8f0;
+}
+
+/* =========================================================
+   APPOINTMENT MANAGEMENT
+   ========================================================= */
+
+.appointment-section-selectors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+
+  margin-bottom: 22px;
+}
+
+.appointment-section-card {
+  width: 100%;
+  min-height: 120px;
+  padding: 18px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  background: #ffffff;
+
+  border: 1px solid #dbe3ee;
+  border-top: 4px solid #cbd5e1;
+  border-radius: 16px;
+
+  box-shadow: 0 8px 22px rgba(15,23,42,.05);
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    .18s ease;
+}
+
+.appointment-section-card:hover {
+  transform: translateY(-2px);
+
+  border-color: #93c5fd;
+
+  box-shadow: 0 12px 30px rgba(37,99,235,.08);
+}
+
+.appointment-section-card.active {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37,99,235,.06),
+      rgba(14,165,233,.02)
+    );
+
+  border-color: #93c5fd;
+  border-top-color: #2563eb;
+}
+
+.appointment-section-icon {
+  width: 44px;
+  height: 44px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 12px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 1.05rem;
+}
+
+.appointment-section-icon.success {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.appointment-section-content {
+  flex: 1;
+}
+
+.appointment-section-content strong {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #0f172a;
+  font-size: .98rem;
+  font-weight: 750;
+}
+
+.appointment-section-content small {
+  display: block;
+
+  color: #64748b;
+  line-height: 1.5;
+
+  font-size: .78rem;
+}
+
+.appointment-section-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-top: 12px;
+
+  color: #2563eb;
+
+  font-size: .74rem;
+  font-weight: 700;
+}
+
+.appointment-tab-panel[hidden]{
+  display:none!important;
+}
+
+.appointment-content-card{
+  background:#fff;
+
+  border:1px solid #e2e8f0;
+  border-radius:18px;
+
+  overflow:hidden;
+
+  box-shadow:0 10px 28px rgba(15,23,42,.05);
+}
+
+.appointment-content-header{
+  display:flex;
+  gap:14px;
+
+  padding:20px 22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37,99,235,.08),
+      rgba(14,165,233,.02)
+    );
+
+  border-bottom:1px solid #e2e8f0;
+}
+
+.appointment-content-header-icon{
+  width:42px;
+  height:42px;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:12px;
+
+  background:#eff6ff;
+
+  color:#2563eb;
+}
+
+.appointment-content-header h2{
+  margin:0 0 5px;
+
+  font-size:1.05rem;
+  font-weight:750;
+}
+
+.appointment-content-header p{
+  margin:0;
+
+  color:#64748b;
+
+  font-size:.8rem;
+}
+
+/* Schedule Appointment Form */
+
+/* .appointment-register-form {
+  width: 100%;
+  max-width: none;
+
+  padding: 24px 28px 28px;
+
+  box-sizing: border-box;
+} */
+
+/* .appointment-register-form label {
+  margin-bottom: 7px;
+} */
+
+.appointment-register-form input,
+.appointment-register-form select,
+.appointment-register-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+ /* @media (max-width: 750px) {
+
+  .appointment-register-form {
+    padding: 20px 16px 22px;
+  } 
+
+}*/
+
+/* Admin Appointment - Recent Appointments */
+
+#recentPanel .table-card {
+  padding: 14px;
+}
+
+#recentPanel .table-responsive {
+  margin: 0;
+  padding: 0;
+}
+
+#recentPanel .modern-data-table {
+  width: 100%;
+  margin: 0;
+}
+
+/* =========================================================
+   THERAPIST PROGRESS NOTE SECTION SELECTORS
+   ========================================================= */
+
+.progress-note-section-selectors {
+  margin-bottom: 20px;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.progress-note-section-card {
+  width: 100%;
+  min-height: 118px;
+  padding: 16px 18px;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  color: #334155;
+  background: #ffffff;
+  text-align: left;
+
+  border: 1px solid #dbe3ee;
+  border-top: 4px solid #cbd5e1;
+  border-radius: 16px;
+
+  box-shadow:
+    0 7px 20px rgba(15, 23, 42, 0.045);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.16s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.progress-note-section-card:hover {
+  transform: translateY(-2px);
+  border-color: #93c5fd;
+
+  box-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.progress-note-section-card.active {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.07),
+      rgba(14, 165, 233, 0.015)
+    ),
+    #ffffff;
+
+  border-color: #93c5fd;
+  border-top-color: #2563eb;
+
+  box-shadow:
+    0 10px 28px rgba(37, 99, 235, 0.1);
+}
+
+.progress-note-section-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 12px;
+  font-size: 1.05rem;
+}
+
+.write-icon {
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.recent-note-icon {
+  color: #047857;
+  background: #ecfdf5;
+}
+
+.progress-note-section-content {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.progress-note-section-content > strong {
+  margin-bottom: 5px;
+
+  color: #0f172a;
+  font-size: 0.98rem;
+  font-weight: 750;
+}
+
+.progress-note-section-content > small {
+  min-height: 38px;
+
+  color: #64748b;
+  font-size: 0.77rem;
+  line-height: 1.5;
+}
+
+.progress-note-section-link {
+  margin-top: 11px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: #2563eb;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.progress-note-tab-panel[hidden] {
+  display: none !important;
+}
+
+.progress-note-tab-panel {
+  animation: progressNotePanelFade 0.2s ease;
+}
+
+.progress-note-form-card {
+  max-width: none;
+}
+
+@keyframes progressNotePanelFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 750px) {
+  .progress-note-section-selectors {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Therapist Write Progress Note Form */
+
+/* .therapist-note-register-form {
+  width: 100%;
+  max-width: none;
+
+  padding: 24px 28px 28px;
+
+  box-sizing: border-box;
+} */
+
+/* .therapist-note-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+} */
+
+/* .therapist-note-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+} */
+
+/* .therapist-note-field label {
+  margin: 0;
+} */
+
+.therapist-note-register-form input,
+.therapist-note-register-form select,
+.therapist-note-register-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.therapist-note-register-form input,
+.therapist-note-register-form select {
+  min-height: 44px;
+}
+
+.therapist-note-register-form textarea {
+  min-height: 150px;
+  padding: 12px 14px;
+}
+
+.therapist-note-register-form .btn.primary {
+  width: 100%;
+}
+
+/* @media (max-width: 750px) {
+  .therapist-note-register-form {
+    padding: 20px 16px 22px;
+  }
+} */
+
+/* =========================================================
+   THERAPIST PROGRESS NOTE MODAL
+   ========================================================= */
+
+.therapist-progress-note-modal {
+  width: min(760px, calc(100vw - 32px));
+  max-height: 88vh;
+
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+
+/* Modal header */
+
+.therapist-progress-note-modal
+.modern-note-modal-header {
+  padding: 26px 30px 22px;
+
+  border-bottom: 1px solid #e7edf5;
+}
+
+.therapist-progress-note-modal
+.modern-note-modal-header h3 {
+  margin: 8px 0 6px;
+
+  font-size: 23px;
+  font-weight: 700;
+
+  color: #172033;
+}
+
+.modern-note-modal-date {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  margin: 0;
+
+  font-size: 14px;
+
+  color: #64748b;
+}
+
+.progress-note-timestamp {
+  margin: 5px 0 0;
+
+  font-size: 13px;
+
+  color: #64748b;
+}
+
+
+/* Modal body */
+
+.therapist-progress-note-modal
+.modern-note-modal-body {
+  padding: 24px 30px 26px;
+
+  background: #f8fafc;
+}
+
+
+/* Detail sections */
+
+.note-detail-section {
+  margin: 0 0 26px;
+}
+
+.note-detail-section + .note-detail-section {
+  margin-top: 26px;
+}
+
+.note-detail-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.note-detail-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 12px;
+}
+
+#editProgressNoteForm {
+  margin: 0;
+}
+
+#editProgressNoteForm > .note-detail-section:first-child {
+  margin-top: 26px;
+}
+
+.note-detail-heading i {
+  font-size: 15px;
+
+  color: #2563eb;
+}
+
+.note-detail-heading h4 {
+  margin: 0;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  color: #1e293b;
+}
+
+/* Child information */
+
+.note-detail-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+.note-detail-item {
+  padding: 15px 17px;
+
+  background: #ffffff;
+
+  border: 1px solid #dfe7f1;
+  border-radius: 12px;
+}
+
+.note-detail-item span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.04em;
+
+  text-transform: uppercase;
+
+  color: #748399;
+}
+
+.note-detail-item strong {
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #1e293b;
+}
+
+
+/* View mode boxes */
+
+.note-text-box {
+  width: 100%;
+
+  min-height: 56px;
+
+  padding: 15px 17px;
+
+  background: #ffffff;
+
+  border: 1px solid #dfe7f1;
+  border-radius: 12px;
+
+  font-size: 14px;
+  line-height: 1.6;
+
+  color: #334155;
+
+  white-space: pre-wrap;
+
+  box-sizing: border-box;
+}
+
+#modalContent.note-text-box {
+  min-height: 150px;
+}
+
+
+/* Edit mode fields */
+
+.note-edit-field {
+  width: 100%;
+
+  padding: 15px 17px;
+
+  background: #ffffff;
+
+  border: 1px solid #cfd9e6;
+  border-radius: 12px;
+
+  font-size: 14px;
+  line-height: 1.6;
+
+  color: #1e293b;
+
+  outline: none;
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.note-edit-field:focus {
+  border-color: #3b82f6;
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+input.note-edit-field {
+  min-height: 56px;
+}
+
+textarea.note-edit-field {
+  min-height: 150px;
+
+  resize: vertical;
+}
+
+
+/* Smooth view/edit switch */
+
+.therapist-progress-note-modal
+.note-view-field,
+.therapist-progress-note-modal
+.note-edit-field {
+  transition:
+    opacity 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+
+/* Actions */
+
+.note-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  margin-top: 22px;
+
+  padding-top: 18px;
+
+  border-top: 1px solid #e7edf5;
+}
+
+.note-modal-actions .btn {
+  min-height: 40px;
+
+  padding: 0 16px;
+
+  border-radius: 9px;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+
+/* Responsive */
+
+@media (max-width: 650px) {
+
+  .therapist-progress-note-modal
+  .modern-note-modal-header,
+  .therapist-progress-note-modal
+  .modern-note-modal-body {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .note-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .note-modal-actions {
+    flex-wrap: wrap;
+  }
+
+}
+
+/* =========================================================
+   SHARED FORM LAYOUT
+   Register Client / Schedule Appointment / Progress Note
+   ========================================================= */
+
+.client-register-form,
+.appointment-register-form,
+.therapist-note-register-form {
+  width: 100%;
+  max-width: none;
+
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  padding: 24px 28px 28px;
+
+  box-sizing: border-box;
+}
+
+.form-field-group,
+.therapist-note-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-field-group label,
+.therapist-note-field label {
+  margin: 0;
+}
+
+@media (max-width: 750px) {
+  .client-register-form,
+  .appointment-register-form,
+  .therapist-note-register-form {
+    padding: 20px 16px 22px;
+  }
+}
+
+/* =========================================================
+   DATATABLE PAGINATION - REMOVE DOUBLE BOX
+   ========================================================= */
+
+/* Outer Bootstrap pagination container */
+div.dt-container .dt-paging .pagination {
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove the little box behind each button */
+div.dt-container .dt-paging .page-item {
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Actual visible pagination button */
+div.dt-container .dt-paging .page-link {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #475569;
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+
+  box-shadow: none !important;
+}
+
+/* Current page */
+div.dt-container .dt-paging .page-item.active .page-link {
+  color: #ffffff !important;
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+/* Hover */
+div.dt-container .dt-paging .page-link:hover {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #bfdbfe !important;
+}
+
+/* Disabled previous / next */
+div.dt-container .dt-paging .page-item.disabled .page-link {
+  color: #94a3b8;
+  background: #f8fafc;
+  opacity: 0.7;
+}
+
+/* =========================================================
+   ADMIN REPORTS
+   ========================================================= */
+
+.report-content-card {
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+
+  box-shadow: 0 2px 7px rgba(15, 23, 42, 0.04);
+}
+
+.report-content-header {
+  padding: 18px 22px;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.08),
+      rgba(14, 165, 233, 0.02)
+    ),
+    #ffffff;
+
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.report-content-header-icon {
+  width: 40px;
+  height: 40px;
+
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  color: #2563eb;
+  background: #eff6ff;
+
+  border-radius: 11px;
+
+  font-size: 1rem;
+}
+
+.report-content-header h2 {
+  margin: 0 0 3px;
+
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.report-content-header p {
+  margin: 0;
+
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.report-filter-form {
+  padding: 22px;
+
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.report-filter-form .form-field-group {
+  flex: 1;
+}
+
+.report-filter-form select {
+  width: 100%;
+  min-height: 44px;
+
+  box-sizing: border-box;
+}
+
+.report-generate-btn {
+  min-height: 44px;
+  padding-left: 18px;
+  padding-right: 18px;
+
+  white-space: nowrap;
+}
+
+.report-results-card {
+  margin-top: 20px;
+}
+
+/* ==============================
+   PROGRESS VISUAL SECTION
+============================== */
+
+.progress-visual-section {
+  margin-bottom: 24px;
+}
+
+
+/* Shared patient filter card */
+
+.progress-filter-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  padding: 18px 22px;
+  margin-bottom: 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #e3eaf3;
+  border-radius: 16px;
+
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.progress-filter-card h2 {
+  margin: 0 0 4px;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  color: #0f172a;
+}
+
+.progress-filter-card p {
+  margin: 0;
+
+  font-size: 13px;
+
+  color: #7b8ba5;
+}
+
+/* ==============================
+   PROGRESS CHARTS
+============================== */
+
+.progress-chart-grid {
+  display: grid;
+
+  grid-template-columns: 1.45fr 1fr;
+
+  gap: 20px;
+
+  margin-bottom: 22px;
+}
+
+.progress-chart-card {
+  min-width: 0;
+
+  background: #ffffff;
+
+  border: 1px solid #e3eaf3;
+  border-radius: 16px;
+
+  padding: 22px 24px;
+
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.progress-chart-header {
+  margin-bottom: 16px;
+}
+
+.progress-chart-header h2 {
+  margin: 0 0 4px;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  color: #0f172a;
+}
+
+.progress-chart-header p {
+  margin: 0;
+
+  font-size: 13px;
+
+  color: #7b8ba5;
+}
+
+.progress-chart-container {
+  position: relative;
+
+  height: 280px;
+}
+
+
+/* Empty chart state */
+
+.progress-chart-empty {
+  min-height: 280px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  text-align: center;
+
+  font-size: 13px;
+
+  color: #94a3b8;
+}
+
+
+/* ==============================
+   RESPONSIVE
+============================== */
+
+@media (max-width: 1000px) {
+
+  .progress-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .progress-filter-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .progress-patient-filter {
+    width: 100%;
+  }
+
+}
+
+/* ==============================
+   PROGRESS PATIENT SEARCH
+============================== */
+
+.progress-patient-filter {
+  width: 270px;
+  flex-shrink: 0;
+}
+
+.progress-patient-filter label {
+  display: block;
+  margin-bottom: 5px;
+
+  font-size: 12px;
+  font-weight: 600;
+  color: #26344d;
+}
+
+
+/* Select2 container */
+
+.progress-patient-filter
+.select2-container {
+  width: 100% !important;
+}
+
+
+/* Closed select box */
+
+.progress-patient-filter
+.select2-container
+.select2-selection--single {
+
+  height: 40px;
+
+  border: 1px solid #d8e1ec;
+  border-radius: 9px;
+
+  background: #ffffff;
+}
+
+
+/* Selected patient */
+
+.progress-patient-filter
+.select2-container
+.select2-selection--single
+.select2-selection__rendered {
+
+  height: 40px;
+  line-height: 40px;
+
+  padding-left: 13px;
+  padding-right: 36px;
+
+  font-size: 13px;
+
+  color: #1e293b;
+}
+
+
+/* Arrow */
+
+.progress-patient-filter
+.select2-container
+.select2-selection--single
+.select2-selection__arrow {
+
+  height: 38px;
+  right: 7px;
+}
+
+
+/* Dropdown */
+
+.select2-dropdown {
+  border: 1px solid #d8e1ec;
+  border-radius: 9px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.10);
+}
+
+
+/* Search area */
+
+.select2-search--dropdown {
+  padding: 9px;
+}
+
+.select2-search--dropdown
+.select2-search__field {
+
+  height: 36px;
+
+  padding: 0 10px;
+
+  border: 1px solid #d8e1ec !important;
+  border-radius: 7px;
+
+  font-size: 13px;
+
+  outline: none;
+}
+
+
+/* Patient options */
+
+.select2-results__option {
+  padding: 9px 12px;
+
+  font-size: 13px;
+
+  color: #334155;
 }

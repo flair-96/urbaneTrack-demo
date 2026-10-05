@@ -13,7 +13,7 @@ User Account Management | UrbaneTrack
       <h1>User Account Management</h1>
 
       <p>
-        Review and manage registered therapist and parent accounts.
+        Review and manage registered therapist, parent and patient accounts.
       </p>
     </div>
 
@@ -53,6 +53,7 @@ User Account Management | UrbaneTrack
             <tr>
               <th>ID</th>
               <th>User</th>
+              <th>Role</th>
               <th>Email</th>
               <th>Status</th>
               <th>Actions</th>
@@ -80,13 +81,15 @@ User Account Management | UrbaneTrack
                   <strong>
                     {{ user.full_name | title }}
                   </strong>
-
-                  <small>
-                    {{ user.role | title }}
-                  </small>
                 </div>
 
               </div>
+            </td>
+
+            <td>
+              <span class="role-badge">
+                {{ user.role | title }}
+              </span>
             </td>
 
             <td>
@@ -253,25 +256,28 @@ User Account Management | UrbaneTrack
         ],
 
         columnDefs: [
-          {
-            targets: [4],
-            orderable: false,
-            searchable: false
-          }
+            {
+              targets: 0,
+              width: "55px"
+            },
+            {
+              targets: [1, 3, 4, 5],
+              orderable: false
+            },
+            {
+              targets: [5],
+              searchable: false
+            }
         ],
 
         language: {
           search: "",
-          searchPlaceholder: "Search accounts...",
+          searchPlaceholder: "Search...",
           lengthMenu: "Show _MENU_ records",
           info: "Showing _START_ to _END_ of _TOTAL_ accounts",
           infoEmpty: "No accounts available",
           zeroRecords: "No matching accounts found",
 
-          paginate: {
-            previous: "Previous",
-            next: "Next"
-          }
         },
 
         layout: {

@@ -53,12 +53,12 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Date and Time</th>
+            <th>Date &amp; Time</th>
             <th>Type</th>
-            <th>Client</th>
+            <th>Patient</th>
             <th>Location</th>
-            <th>Status</th>
             <th>Confirmation</th>
+            <th>Status</th>
           </tr>
         </thead>
 
@@ -110,13 +110,13 @@
                     </strong>
 
                     <small>
-                      Client
+                      Patient
                     </small>
                   </div>
                 </div>
               </td>
 
-
+              <!-- Location -->
               <td>
                 <div class="location-cell">
                   <i class="bi bi-geo-alt"></i>
@@ -127,7 +127,58 @@
                 </div>
               </td>
 
+              <!-- Confirmation -->
+              <td>
+                {% set confirmation =
+                  s.confirmation_status or "Pending"
+                %}
 
+                {% if confirmation == "Confirmed" %}
+
+                  <span class="confirmation-badge confirmation-confirmed">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Confirmed
+                  </span>
+
+                {% elif confirmation == "Accepted" %}
+
+                  <span class="confirmation-badge confirmation-accepted">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Accepted
+                  </span>
+
+                {% elif confirmation == "Rejected" %}
+
+                  <span class="confirmation-badge confirmation-rejected">
+                    <i class="bi bi-x-circle-fill"></i>
+                    Rejected
+                  </span>
+
+                 {% elif confirmation == "Rescheduled" %}
+
+                  <span class="confirmation-badge confirmation-rescheduled">
+                    <i class="bi bi-hourglass-split"></i>
+                    Rescheduled
+                  </span>
+
+                {% elif confirmation == "Cancelled" %}
+
+                  <span class="confirmation-badge confirmation-rejected">
+                    <i class="bi bi-x-circle-fill"></i>
+                    Cancelled
+                  </span>
+
+                {% else %}
+
+                  <span class="confirmation-badge confirmation-pending">
+                    <i class="bi bi-hourglass-split"></i>
+                    {{ confirmation }}
+                  </span>
+
+                {% endif %}
+              </td>
+
+              <!-- Status -->
               <td>
                 {% if s.status == "Completed" %}
 
@@ -155,43 +206,6 @@
                   <span class="status-badge status-scheduled">
                     <i class="bi bi-clock"></i>
                     {{ s.status }}
-                  </span>
-
-                {% endif %}
-              </td>
-
-
-              <td>
-                {% set confirmation =
-                  s.confirmation_status or "Pending"
-                %}
-
-                {% if confirmation == "Confirmed" %}
-
-                  <span class="confirmation-badge confirmation-confirmed">
-                    <i class="bi bi-check-circle-fill"></i>
-                    Confirmed
-                  </span>
-
-                {% elif confirmation == "Rejected" %}
-
-                  <span class="confirmation-badge confirmation-rejected">
-                    <i class="bi bi-x-circle-fill"></i>
-                    Rejected
-                  </span>
-
-                {% elif confirmation == "Cancelled" %}
-
-                  <span class="confirmation-badge confirmation-rejected">
-                    <i class="bi bi-x-circle-fill"></i>
-                    Cancelled
-                  </span>
-
-                {% else %}
-
-                  <span class="confirmation-badge confirmation-pending">
-                    <i class="bi bi-hourglass-split"></i>
-                    {{ confirmation }}
                   </span>
 
                 {% endif %}
@@ -247,7 +261,8 @@
       typeof DataTable !== "undefined"
     ) {
       new DataTable(tableElement, {
-        responsive: true,
+        responsive: false,
+        autoWidth: false,
         pageLength: 10,
 
         lengthMenu: [
@@ -261,14 +276,14 @@
 
         columnDefs: [
           {
-            targets: [6],
+            targets: [2, 3, 4, 5, 6],
             orderable: false
-          }
+          },
         ],
 
         language: {
           search: "",
-          searchPlaceholder: "Search sessions...",
+          searchPlaceholder: "Search...",
 
           lengthMenu:
             "Show _MENU_ records",
@@ -281,11 +296,6 @@
 
           zeroRecords:
             "No matching sessions found",
-
-          paginate: {
-            previous: "Previous",
-            next: "Next"
-          }
         },
 
         layout: {

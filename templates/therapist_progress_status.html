@@ -6,274 +6,903 @@ Progress Status | UrbaneTrack
 
 {% block content %}
 
-<div class="page-container">
+<!-- Page header -->
+<section class="page-header-modern">
 
-  <section class="page-header-modern">
+  <div>
+    <span class="page-eyebrow">
+      Therapist
+    </span>
+
+    <h1>Progress Status</h1>
+
+    <p>
+      Review patient progress scores and AI recommendations.
+    </p>
+  </div>
+
+  <div class="page-header-summary">
+
+    <i class="bi bi-graph-up-arrow"></i>
 
     <div>
-      <span class="page-eyebrow">
-        Therapist
-      </span>
+      <strong>{{ results | length }}</strong>
+      <span>Total Records</span>
+    </div>
 
-      <h1>Progress Status</h1>
+  </div>
+
+</section>
+
+
+<!-- Progress visualisation -->
+<section class="progress-visual-section">
+
+  <!-- Shared patient filter -->
+  <div class="progress-filter-card">
+
+    <div>
+      <h2>Patient Progress</h2>
 
       <p>
-        Review rule-based AI evaluations generated from therapy progress records.
+        Select a patient to review progress across therapy sessions.
       </p>
     </div>
 
-    <div class="page-header-summary">
 
-      <i class="bi bi-graph-up-arrow"></i>
+    <div class="progress-patient-filter">
 
-      <div>
-        <strong>{{ results | length }}</strong>
-        <span>Total Records</span>
-      </div>
+      <label for="goalPatientSelect">
+        Patient
+      </label>
+
+      <select
+        id="goalPatientSelect"
+        class="progress-chart-filter"
+      >
+
+        <option value="">
+          All Patients
+        </option>
+
+        {% for patient in patient_list %}
+
+          <option
+            value="{{ patient.client_id }}"
+            data-name="{{ patient.client_name | title }}"
+          >
+
+            {% if patient.is_duplicate and patient.date_of_birth %}
+
+              {{ patient.client_name | title }}
+              - {{ patient.date_of_birth }}
+
+            {% else %}
+
+              {{ patient.client_name | title }}
+
+            {% endif %}
+
+          </option>
+
+        {% endfor %}
+
+      </select>
 
     </div>
+
+  </div>
+
+
+  <!-- Charts -->
+  <section class="progress-chart-grid">
+
+    <!-- Goal progress -->
+    <article class="progress-chart-card">
+
+      <div class="progress-chart-header">
+
+        <div>
+          <h2>Goal Progress</h2>
+
+          <p>
+            Goal achievement across therapy sessions.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div
+        id="goalChartEmpty"
+        class="progress-chart-empty"
+      >
+        Select a patient to view goal progress.
+      </div>
+
+
+      <div
+        id="goalChartWrapper"
+        class="progress-chart-container"
+        hidden
+      >
+
+        <canvas
+          id="goalProgressChart"
+          data-goal-history='{{ goal_history | tojson }}'
+        ></canvas>
+
+      </div>
+
+    </article>
+
+
+    <!-- Attendance -->
+    <article class="progress-chart-card">
+
+      <div class="progress-chart-header">
+
+        <div>
+          <h2>Attendance Progress</h2>
+
+          <p>
+            Attendance rates across therapy sessions.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div
+        id="attendanceChartEmpty"
+        class="progress-chart-empty"
+      >
+        Select a patient to view attendance progress.
+      </div>
+
+
+      <div
+        id="attendanceChartWrapper"
+        class="progress-chart-container"
+        hidden
+      >
+
+        <canvas
+          id="attendanceChart"
+          data-attendance-history='{{ attendance_history | tojson }}'
+        ></canvas>
+
+      </div>
+
+    </article>
 
   </section>
 
+</section>
 
-  <section class="table-card">
 
-    <div class="table-card-header">
+<!-- Progress table -->
+<section class="table-card">
 
-      <div>
-        <h2>Client Progress Overview</h2>
+  <div class="table-card-header">
 
-        <p>
-          Review progress scores, evaluation status and AI recommendations.
-        </p>
-      </div>
+    <div>
+      <h2>Patient Progress Overview</h2>
 
-      <span class="table-count">
-        {{ results | length }} records
-      </span>
-
+      <p>
+        Review progress scores, status and AI recommendations.
+      </p>
     </div>
 
-    {% if results %}
 
-      <div class="table-responsive">
+    <span
+      id="progressRecordCount"
+      class="table-count"
+    >
+      {{ results | length }} records
+    </span>
 
-        <table
-          id="therapistProgressStatusTable"
-          class="table table-hover align-middle modern-data-table"
-          style="width: 100%;"
-        >
+  </div>
 
-          <thead>
-            <tr>
-              <th>Client</th>
-              <th>Session</th>
-              <th>Status</th>
-              <th>Goal</th>
-              <th>Attendance</th>
-              <th>Rating</th>
-              <th>Recommendation</th>
-            </tr>
-          </thead>
 
-          <tbody>
+  {% if results %}
 
-            {% for result in results %}
+    <div class="table-responsive">
 
-              <tr>
+      <table
+        id="therapistProgressStatusTable"
+        class="table table-hover align-middle modern-data-table"
+        style="width: 100%;"
+      >
 
-                <!-- Client -->
-                <td>
-                  <div class="table-person">
+        <thead>
+          <tr>
 
-                    <span class="table-avatar">
-                      {{ result.client_name[0] | upper }}
-                    </span>
+            <th class="d-none">
+              Client ID
+            </th>
 
-                    <div>
-                      <strong>
-                        {{ result.client_name | title }}
-                      </strong>
+            <th>Patient</th>
+            <th>Session</th>
+            <th>Status</th>
+            <th>Goal</th>
+            <th>Attendance</th>
+            <th>Rating</th>
+            <th>Recommendation</th>
 
-                      <small>
-                        Client
-                      </small>
-                    </div>
+          </tr>
+        </thead>
 
-                  </div>
-                </td>
 
-                <!-- Session -->
-                <td>
-                  <div class="progress-session-date">
+        <tbody>
 
+          {% for result in results %}
+
+            <tr data-client-id="{{ result.client_id }}">
+
+              <!-- Hidden client ID -->
+              <td class="d-none">
+                {{ result.client_id }}
+              </td>
+
+
+              <!-- Patient -->
+              <td>
+                <div class="table-person">
+
+                  <span class="table-avatar">
+                    {{ result.client_name[0] | upper }}
+                  </span>
+
+                  <div>
                     <strong>
-                      {{ result.created_at | datetime }}
-                    </strong>
-
-                  </div>
-                </td>
-
-                <!-- Status -->
-                <td>
-
-                  {% if result.progress_status == "Excellent Progress" %}
-
-                    <span class="progress-status-badge status-excellent">
-                      <i class="bi bi-check-circle-fill"></i>
-                      Excellent
-                    </span>
-
-                  {% elif result.progress_status == "Good Progress" %}
-
-                    <span class="progress-status-badge status-good">
-                      <i class="bi bi-arrow-up-circle-fill"></i>
-                      Good
-                    </span>
-
-                  {% elif result.progress_status == "Moderate Progress" %}
-
-                    <span class="progress-status-badge status-moderate">
-                      <i class="bi bi-dash-circle-fill"></i>
-                      Moderate
-                    </span>
-
-                  {% else %}
-
-                    <span class="progress-status-badge status-attention">
-                      <i class="bi bi-exclamation-circle-fill"></i>
-                      {{ result.progress_status or "Not Evaluated" }}
-                    </span>
-
-                  {% endif %}
-
-                </td>
-
-                <!-- Goal -->
-                <td>
-                  <div class="metric-value">
-                    <strong>
-                      {{ result.goal_score }}%
+                      {{ result.client_name | title }}
                     </strong>
 
                     <small>
-                      Achievement
+                      Patient
                     </small>
                   </div>
-                </td>
 
-                <!-- Attendance -->
-                <td>
-                  <div class="metric-value">
-                    <strong>
-                      {{ result.attendance_rate }}%
-                    </strong>
+                </div>
+              </td>
 
-                  </div>
-                </td>
 
-                <!-- Rating -->
-                <td>
-                  <div class="rating-display">
+              <!-- Session -->
+              <td>
+                <div class="progress-session-date">
 
-                    <i class="bi bi-star-fill"></i>
+                  <strong>
+                    {{ result.date_time | datetime }}
+                  </strong>
 
-                    <strong>
-                      {{ result.therapist_rating }}/5
-                    </strong>
+                  <small>
+                    {{ result.appointment_type | title }} session
+                  </small>
 
-                  </div>
-                </td>
+                </div>
+              </td>
 
-                <!-- Recommendation -->
-                <td>
-                  <p class="recommendation-preview">
-                    {{ result.ai_recommendation or "No recommendation available." }}
-                  </p>
-                </td>
 
-              </tr>
+              <!-- Status -->
+              <td>
 
-            {% endfor %}
+                {% if result.progress_status == "Excellent Progress" %}
 
-          </tbody>
+                  <span class="progress-status-badge status-excellent">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Excellent
+                  </span>
 
-        </table>
+                {% elif result.progress_status == "Good Progress" %}
 
-      </div>
+                  <span class="progress-status-badge status-good">
+                    <i class="bi bi-arrow-up-circle-fill"></i>
+                    Good
+                  </span>
 
-    {% else %}
+                {% elif result.progress_status == "Moderate Progress" %}
 
-      <div class="empty-state">
+                  <span class="progress-status-badge status-moderate">
+                    <i class="bi bi-dash-circle-fill"></i>
+                    Moderate
+                  </span>
 
-        <i class="bi bi-graph-up-arrow"></i>
+                {% else %}
 
-        <h3>No progress records found</h3>
+                  <span class="progress-status-badge status-poor">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    {{ result.progress_status }}
+                  </span>
 
-        <p>
-          AI progress evaluations will appear after progress notes are recorded.
-        </p>
+                {% endif %}
 
-      </div>
+              </td>
 
-    {% endif %}
 
-  </section>
+              <!-- Goal -->
+              <td>
+                <div class="metric-value">
 
-</div>
+                  <strong>
+                    {{ result.goal_score }}%
+                  </strong>
+
+                  <small>
+                    Achievement
+                  </small>
+
+                </div>
+              </td>
+
+
+              <!-- Attendance -->
+              <td>
+                <div class="metric-value">
+
+                  <strong>
+                    {{ result.attendance_rate }}%
+                  </strong>
+
+                  <small>
+                    Attendance
+                  </small>
+
+                </div>
+              </td>
+
+
+              <!-- Rating -->
+              <td>
+
+                <div class="rating-display">
+
+                  <i class="bi bi-star-fill"></i>
+
+                  <strong>
+                    {{ result.therapist_rating }}/5
+                  </strong>
+
+                </div>
+
+              </td>
+
+
+              <!-- Recommendation -->
+              <td>
+
+                <p class="recommendation-preview">
+                  {{ result.ai_recommendation }}
+                </p>
+
+              </td>
+
+            </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  {% else %}
+
+    <div class="empty-state">
+
+      <i class="bi bi-graph-up-arrow"></i>
+
+      <h3>No progress status found</h3>
+
+      <p>
+        Progress evaluations will appear after progress notes are recorded.
+      </p>
+
+    </div>
+
+  {% endif %}
+
+</section>
+
+{% endblock %}
 
 {% block scripts %}
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  const table =
-    document.getElementById("therapistProgressStatusTable");
+  /* ==============================
+     PATIENT SEARCH
+  ============================== */
 
-  if (
-    table &&
-    typeof DataTable !== "undefined"
-  ) {
-    new DataTable(table, {
-      responsive: true,
-      autoWidth: false,
-      pageLength: 10,
+  $("#goalPatientSelect").select2({
+    width: "100%",
+    placeholder: "Search patient",
 
-      lengthMenu: [
-        [5, 10, 25, 50],
-        [5, 10, 25, 50]
-      ],
+    templateSelection: function(data) {
 
-      order: [
-        [1, "desc"]
-      ],
+      if (!data.id) {
+        return data.text;
+      }
 
-      layout: {
-        topStart: "pageLength",
-        topEnd: "search",
-        bottomStart: "info",
-        bottomEnd: "paging"
+      return $(data.element).data("name");
+    }
+  });
+
+
+  const patientSelect =
+    document.getElementById("goalPatientSelect");
+
+  const goalCanvas =
+    document.getElementById("goalProgressChart");
+
+  const attendanceCanvas =
+    document.getElementById("attendanceChart");
+
+  const goalWrapper =
+    document.getElementById("goalChartWrapper");
+
+  const attendanceWrapper =
+    document.getElementById("attendanceChartWrapper");
+
+  const goalEmpty =
+    document.getElementById("goalChartEmpty");
+
+  const attendanceEmpty =
+    document.getElementById("attendanceChartEmpty");
+
+
+  if (typeof Chart === "undefined") {
+    console.error("Chart.js is not loaded.");
+    return;
+  }
+
+
+  const goalHistory =
+    JSON.parse(
+      goalCanvas.dataset.goalHistory || "{}"
+    );
+
+  const attendanceHistory =
+    JSON.parse(
+      attendanceCanvas.dataset.attendanceHistory || "{}"
+    );
+
+
+  /* ==============================
+     GOAL LINE CHART
+  ============================== */
+
+  const goalChart =
+    new Chart(goalCanvas, {
+
+      type: "line",
+
+      data: {
+        labels: [],
+
+        datasets: [{
+          label: "Goal Achievement",
+
+          data: [],
+
+          borderColor: "#2563eb",
+
+          backgroundColor:
+            "rgba(37, 99, 235, 0.08)",
+
+          borderWidth: 3,
+
+          pointRadius: 6,
+          pointHoverRadius: 7,
+
+          pointBackgroundColor:
+            "#2563eb",
+
+          pointBorderColor:
+            "#ffffff",
+
+          pointBorderWidth: 2,
+
+          tension: 0.3,
+
+          fill: true
+        }]
       },
 
-      language: {
-        search: "",
-        searchPlaceholder: "Search progress records...",
-        lengthMenu: "Show _MENU_ records",
-        info: "Showing _START_ to _END_ of _TOTAL_ records",
-        infoEmpty: "No progress records available",
-        zeroRecords: "No matching progress records found",
+      options: {
 
-        paginate: {
-          previous: "Previous",
-          next: "Next"
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          legend: {
+            display: false
+          },
+
+          tooltip: {
+            callbacks: {
+
+              label: function(context) {
+                return context.raw +
+                  "% achievement";
+              }
+
+            }
+          }
+
+        },
+
+        scales: {
+
+          y: {
+            beginAtZero: true,
+            max: 100,
+
+            ticks: {
+              callback: function(value) {
+                return value + "%";
+              }
+            }
+          },
+
+          x: {
+            grid: {
+              display: false
+            }
+          }
+
         }
+
       }
+
     });
+
+
+  /* ==============================
+     ATTENDANCE BAR CHART
+  ============================== */
+
+  const attendanceChart =
+    new Chart(attendanceCanvas, {
+
+      type: "bar",
+
+      data: {
+        labels: [],
+
+        datasets: [{
+          label: "Attendance",
+
+          data: [],
+
+          backgroundColor:
+            "rgba(37, 99, 235, 0.75)",
+
+          borderColor:
+            "#2563eb",
+
+          borderWidth: 1,
+
+          borderRadius: 8,
+
+          barPercentage: 0.5,
+
+          categoryPercentage: 0.65
+        }]
+      },
+
+      options: {
+
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          legend: {
+            display: false
+          },
+
+          tooltip: {
+            callbacks: {
+
+              label: function(context) {
+                return context.raw +
+                  "% attendance";
+              }
+
+            }
+          }
+
+        },
+
+        scales: {
+
+          y: {
+            beginAtZero: true,
+            max: 100,
+
+            ticks: {
+              callback: function(value) {
+                return value + "%";
+              }
+            }
+          },
+
+          x: {
+            grid: {
+              display: false
+            }
+          }
+
+        }
+
+      }
+
+    });
+
+
+  /* ==============================
+     DATATABLE
+  ============================== */
+
+  const tableElement =
+    document.getElementById(
+      "therapistProgressStatusTable"
+    );
+
+  let progressTable = null;
+
+
+  if (
+    tableElement &&
+    typeof DataTable !== "undefined"
+  ) {
+
+    progressTable =
+      new DataTable(
+        tableElement,
+        {
+          responsive: true,
+
+          pageLength: 10,
+
+          autoWidth: false,
+
+          lengthMenu: [
+            [5, 10, 25, 50],
+            [5, 10, 25, 50]
+          ],
+
+
+          /* Session newest first */
+          order: [
+            [2, "desc"]
+          ],
+
+
+          columnDefs: [
+
+            /* Hidden client ID */
+            {
+              targets: 0,
+              visible: false,
+              searchable: true,
+              orderable: false
+            },
+
+            /* Rating + Recommendation */
+            {
+              targets: [6, 7],
+              orderable: false
+            },
+
+            /* Recommendation not searchable */
+            {
+              targets: 7,
+              searchable: false
+            }
+
+          ],
+
+
+          language: {
+
+            lengthMenu:
+              "Show _MENU_ records",
+
+            info:
+              "Showing _START_ to _END_ of _TOTAL_ records",
+
+            infoEmpty:
+              "No progress records available",
+
+            zeroRecords:
+              "No progress records found"
+
+          },
+
+
+          layout: {
+
+            topStart:
+              "pageLength",
+
+            /* Patient selector already handles filtering */
+            topEnd:
+              null,
+
+            bottomStart:
+              "info",
+
+            bottomEnd:
+              "paging"
+
+          }
+
+        }
+      );
+
   }
+
+
+  const progressRecordCount =
+    document.getElementById(
+      "progressRecordCount"
+    );
+
+
+  /* ==============================
+     UPDATE BOTH CHARTS
+  ============================== */
+
+  function updateProgressCharts(clientId) {
+
+    if (!clientId) {
+
+      goalWrapper.hidden = true;
+      attendanceWrapper.hidden = true;
+
+      goalEmpty.hidden = false;
+      attendanceEmpty.hidden = false;
+
+      return;
+    }
+
+
+    const goalData =
+      goalHistory[clientId] || {
+        dates: [],
+        scores: []
+      };
+
+
+    const attendanceData =
+      attendanceHistory[clientId] || {
+        dates: [],
+        rates: []
+      };
+
+
+    /* Goal */
+
+    goalChart.data.labels =
+      [...goalData.dates];
+
+    goalChart
+      .data
+      .datasets[0]
+      .data =
+        [...goalData.scores];
+
+    goalChart.update();
+
+
+    /* Attendance */
+
+    attendanceChart.data.labels =
+      [...attendanceData.dates];
+
+    attendanceChart
+      .data
+      .datasets[0]
+      .data =
+        [...attendanceData.rates];
+
+    attendanceChart.update();
+
+
+    goalWrapper.hidden = false;
+    attendanceWrapper.hidden = false;
+
+    goalEmpty.hidden = true;
+    attendanceEmpty.hidden = true;
+  }
+
+
+  /* ==============================
+     PATIENT SELECT
+  ============================== */
+
+  $("#goalPatientSelect").on(
+    "change",
+    function () {
+
+      const clientId =
+        String(
+          $(this).val() || ""
+        );
+
+
+      /* Update charts */
+
+      updateProgressCharts(
+        clientId
+      );
+
+
+      /* Filter table */
+
+      if (progressTable) {
+
+        if (!clientId) {
+
+          progressTable
+            .column(0)
+            .search("")
+            .draw();
+
+        } else {
+
+          progressTable
+            .column(0)
+            .search(
+              "^" + clientId + "$",
+              true,
+              false
+            )
+            .draw();
+
+        }
+
+
+        /* Update record count */
+
+        const visibleRecords =
+          progressTable
+            .rows({
+              search: "applied"
+            })
+            .count();
+
+
+        progressRecordCount.textContent =
+          visibleRecords +
+          (
+            visibleRecords === 1
+              ? " record"
+              : " records"
+          );
+
+      }
+
+    }
+  );
+
+
+  /* ==============================
+     INITIAL STATE
+  ============================== */
+
+  updateProgressCharts(
+    String(
+      patientSelect.value || ""
+    )
+  );
 
 });
 </script>
-
-{% endblock %}
 
 {% endblock %}

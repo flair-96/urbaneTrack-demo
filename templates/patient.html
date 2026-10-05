@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Parent Portal | UrbaneTrack
+Patient Portal | UrbaneTrack
 {% endblock %}
 
 {% block content %}
@@ -13,13 +13,13 @@ Parent Portal | UrbaneTrack
 
     <div>
       <span class="page-eyebrow">
-        Parent
+        Patient
       </span>
 
-      <h1>Parent Portal</h1>
+      <h1>Patient Portal</h1>
 
       <p>
-        View your child’s appointments and latest confirmation status.
+        View your appointments and therapy progress.
       </p>
     </div>
 
@@ -35,6 +35,29 @@ Parent Portal | UrbaneTrack
     </div>
 
   </section>
+
+  {% if patient_not_linked %}
+
+    <section class="table-card">
+
+      <div class="empty-state">
+
+        <i class="bi bi-person-exclamation"></i>
+
+        <h3>
+          Patient information not available
+        </h3>
+
+        <p>
+          Your patient information has not been registered yet.
+          Please contact the administrator.
+        </p>
+
+      </div>
+
+    </section>
+
+  {% else %}
 
 
   <div class="parent-section-selectors">
@@ -58,7 +81,7 @@ Parent Portal | UrbaneTrack
         </strong>
 
         <small>
-          View upcoming and previous appointments for your child.
+          View your upcoming and previous appointments.
         </small>
 
         <span class="parent-section-link">
@@ -71,7 +94,7 @@ Parent Portal | UrbaneTrack
     </button>
 
 
-    <!-- Child Progress -->
+    <!-- My Progress -->
     <button
       type="button"
       class="parent-section-card"
@@ -86,11 +109,11 @@ Parent Portal | UrbaneTrack
       <span class="parent-section-content">
 
         <strong>
-          Child Progress
+          My Progress
         </strong>
 
         <small>
-          Review your child's therapy progress across sessions.
+          Review your therapy progress across sessions.
         </small>
 
         <span class="parent-section-link">
@@ -165,7 +188,6 @@ Parent Portal | UrbaneTrack
               <th>No.</th>
               <th>Date & Time</th>
               <th>Type</th>
-              <th>Child</th>
               <th>Therapist</th>
               <th>Status</th>
               <th>Confirmation</th>
@@ -223,27 +245,6 @@ Parent Portal | UrbaneTrack
 
                   {% endif %}
 
-                </td>
-
-                <!-- Client -->
-                <td>
-                  <div class="table-person">
-
-                    <span class="table-avatar">
-                      {{ a.client_name[0] | upper }}
-                    </span>
-
-                    <div>
-                      <strong>
-                        {{ a.client_name | title }}
-                      </strong>
-
-                      <small>
-                        Child
-                      </small>
-                    </div>
-
-                  </div>
                 </td>
 
                 <!-- Therapist -->
@@ -418,10 +419,10 @@ Parent Portal | UrbaneTrack
         </div>
 
         <div>
-          <h2>Child Progress</h2>
+          <h2>My Progress</h2>
 
           <p>
-            Review your child's therapy progress across sessions.
+            Review your therapy progress across sessions.
           </p>
         </div>
 
@@ -432,32 +433,6 @@ Parent Portal | UrbaneTrack
 
         <!-- Child selector -->
         <div class="parent-progress-content">
-
-          <div class="parent-progress-filter">
-
-            <label for="parentChildSelect">
-              Child
-            </label>
-
-            <select
-              id="parentChildSelect"
-              class="parent-progress-select"
-            >
-
-              {% for client in clients %}
-
-                <option
-                  value="{{ client.client_id }}"
-                >
-                  {{ client.full_name | title }}
-                </option>
-
-              {% endfor %}
-
-            </select>
-
-          </div>
-
 
           <!-- Summary -->
           <div class="parent-progress-summary-grid">
@@ -646,6 +621,8 @@ Parent Portal | UrbaneTrack
 
   </section>
 
+  {% endif %}
+
 </div>
 
 {% endblock %}
@@ -761,379 +738,345 @@ document.addEventListener(
     let activeAppointmentGroup =
       "upcoming";
     
-    /* ==============================
-      PARENT PROGRESS HISTORY TABLE
-    ============================== */
+/* ==============================
+   PATIENT PROGRESS
+============================== */
 
-    const parentProgressTableElement =
-      document.getElementById(
-        "parentProgressTable"
-      );
+const parentProgressTableElement =
+  document.getElementById(
+    "parentProgressTable"
+  );
 
-    let parentProgressTable = null;
-    
-    let selectedProgressClient = "";
+let parentProgressTable = null;
 
-    /* ==============================
-      CHILD PROGRESS
-    ============================== */
+const latestStatus =
+  document.getElementById(
+    "parentLatestStatus"
+  );
 
-    const childSelect =
-      document.getElementById("parentChildSelect");
+const latestSession =
+  document.getElementById(
+    "parentLatestSession"
+  );
 
-    if (childSelect) {
-      selectedProgressClient =
-        String(childSelect.value || "");
+const goalCanvas =
+  document.getElementById(
+    "parentGoalProgressChart"
+  );
+
+
+/* ==============================
+   GOAL PROGRESS CHART
+============================== */
+
+if (
+  goalCanvas &&
+  typeof Chart !== "undefined"
+) {
+
+  const progressData =
+    JSON.parse(
+      goalCanvas.dataset.progress || "{}"
+    );
+
+  /*
+    Patient only has one client record.
+
+    Get the first progress object returned
+    by Flask.
+  */
+  const patientData =
+    Object.values(progressData)[0] || {
+      dates: [],
+      scores: [],
+      statuses: [],
+      types: [],
+      recommendations: []
+    };
+
+
+  /* ==============================
+     LATEST PROGRESS SUMMARY
+  ============================== */
+
+  if (patientData.dates.length > 0) {
+
+    const latestIndex =
+      patientData.dates.length - 1;
+
+    const status =
+      patientData.statuses[latestIndex] ||
+      "Not Available";
+
+
+    let statusClass =
+      "status-attention";
+
+    let statusIcon =
+      "bi-exclamation-circle-fill";
+
+    let statusLabel =
+      status;
+
+
+    if (status === "Excellent Progress") {
+
+      statusClass =
+        "status-excellent";
+
+      statusIcon =
+        "bi-check-circle-fill";
+
+      statusLabel =
+        "Excellent";
+
+    } else if (status === "Good Progress") {
+
+      statusClass =
+        "status-good";
+
+      statusIcon =
+        "bi-arrow-up-circle-fill";
+
+      statusLabel =
+        "Good";
+
+    } else if (status === "Moderate Progress") {
+
+      statusClass =
+        "status-moderate";
+
+      statusIcon =
+        "bi-dash-circle-fill";
+
+      statusLabel =
+        "Moderate";
     }
 
-    const latestStatus =
-      document.getElementById("parentLatestStatus");
 
-    const latestSession =
-      document.getElementById("parentLatestSession");
+    if (latestStatus) {
 
-    const goalCanvas =
-      document.getElementById("parentGoalProgressChart");
-
-
-    let parentGoalChart = null;
-
-
-    if (
-      childSelect &&
-      goalCanvas &&
-      typeof Chart !== "undefined"
-    ) {
-
-      const progressData =
-        JSON.parse(
-          goalCanvas.dataset.progress || "{}"
-        );
+      latestStatus.innerHTML =
+        `
+          <span class="progress-status-badge ${statusClass}">
+            <i class="bi ${statusIcon}"></i>
+            ${statusLabel}
+          </span>
+        `;
+    }
 
 
-      /* Goal chart */
+    if (latestSession) {
 
-      parentGoalChart =
-        new Chart(goalCanvas, {
+      latestSession.textContent =
+        patientData.dates[latestIndex] ||
+        "Not Available";
+    }
 
-          type: "line",
+  } else {
 
-          data: {
-            labels: [],
+    if (latestStatus) {
 
-            datasets: [{
-              label: "Goal Progress",
+      latestStatus.innerHTML =
+        `
+          <span class="progress-status-badge status-attention">
+            <i class="bi bi-dash-circle"></i>
+            No progress yet
+          </span>
+        `;
+    }
 
-              data: [],
 
-              borderColor: "#2563eb",
+    if (latestSession) {
 
-              backgroundColor:
-                "rgba(37, 99, 235, 0.08)",
+      latestSession.textContent =
+        "No session yet";
+    }
+  }
 
-              borderWidth: 3,
 
-              pointRadius: 5,
+  /* ==============================
+     CREATE GOAL CHART
+  ============================== */
 
-              pointHoverRadius: 6,
+  new Chart(
+    goalCanvas,
+    {
 
-              pointBackgroundColor:
-                "#2563eb",
+      type: "line",
 
-              pointBorderColor:
-                "#ffffff",
+      data: {
 
-              pointBorderWidth: 2,
+        labels:
+          [...patientData.dates],
 
-              tension: 0.3,
+        datasets: [
+          {
+            label:
+              "Goal Progress",
 
-              fill: true
-            }]
+            data:
+              [...patientData.scores],
+
+            borderColor:
+              "#2563eb",
+
+            backgroundColor:
+              "rgba(37, 99, 235, 0.08)",
+
+            borderWidth: 3,
+
+            pointRadius: 5,
+
+            pointHoverRadius: 6,
+
+            pointBackgroundColor:
+              "#2563eb",
+
+            pointBorderColor:
+              "#ffffff",
+
+            pointBorderWidth: 2,
+
+            tension: 0.3,
+
+            fill: true
+          }
+        ]
+      },
+
+
+      options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          legend: {
+            display: false
           },
 
+          tooltip: {
 
-          options: {
+            callbacks: {
 
-            responsive: true,
-            maintainAspectRatio: false,
+              label: function(context) {
 
-            plugins: {
-
-              legend: {
-                display: false
-              },
-
-              tooltip: {
-                callbacks: {
-
-                  label: function(context) {
-                    return context.raw +
-                      "% goal achievement";
-                  }
-
-                }
-              }
-
-            },
-
-            scales: {
-
-              y: {
-                beginAtZero: true,
-                max: 100,
-
-                ticks: {
-                  callback: function(value) {
-                    return value + "%";
-                  }
-                }
-              },
-
-              x: {
-                grid: {
-                  display: false
-                }
+                return (
+                  context.raw +
+                  "% goal achievement"
+                );
               }
 
             }
 
           }
 
-        });
+        },
 
 
-      function updateParentProgress(clientId) {
+        scales: {
 
-        const childData =
-          progressData[clientId] || {
-            dates: [],
-            scores: [],
-            statuses: [],
-            types: [],
-            recommendations: []
-          };
+          y: {
 
-        selectedProgressClient =
-          String(clientId);
+            beginAtZero: true,
 
-        if (parentProgressTable) {
+            max: 100,
 
-          parentProgressTable
-            .page("first")
-            .draw();
+            ticks: {
 
-        }
+              callback: function(value) {
+                return value + "%";
+              }
 
-        /* ==============================
-          SUMMARY
-        ============================== */
+            }
 
-        if (childData.dates.length > 0) {
+          },
 
-          const latestIndex =
-            childData.dates.length - 1;
+          x: {
 
-
-          const status =
-            childData.statuses[latestIndex] ||
-            "Not Available";
-
-
-          let statusClass =
-            "status-attention";
-
-          let statusIcon =
-            "bi-exclamation-circle-fill";
-
-          let statusLabel =
-            status;
-
-
-          if (status === "Excellent Progress") {
-
-            statusClass =
-              "status-excellent";
-
-            statusIcon =
-              "bi-check-circle-fill";
-
-            statusLabel =
-              "Excellent";
-
-          } else if (status === "Good Progress") {
-
-            statusClass =
-              "status-good";
-
-            statusIcon =
-              "bi-arrow-up-circle-fill";
-
-            statusLabel =
-              "Good";
-
-          } else if (status === "Moderate Progress") {
-
-            statusClass =
-              "status-moderate";
-
-            statusIcon =
-              "bi-dash-circle-fill";
-
-            statusLabel =
-              "Moderate";
+            grid: {
+              display: false
+            }
 
           }
 
-
-          latestStatus.innerHTML =
-            `
-              <span class="progress-status-badge ${statusClass}">
-                <i class="bi ${statusIcon}"></i>
-                ${statusLabel}
-              </span>
-            `;
-
-
-          latestSession.textContent =
-            childData.dates[latestIndex] ||
-            "Not Available";
-
-        } else {
-
-          latestStatus.innerHTML =
-            `
-              <span class="progress-status-badge status-attention">
-                <i class="bi bi-dash-circle"></i>
-                No progress yet
-              </span>
-            `;
-
-          latestSession.textContent =
-            "No session yet";
-
         }
-
-
-        /* ==============================
-          GOAL CHART
-        ============================== */
-
-        parentGoalChart.data.labels =
-          [...childData.dates];
-
-        parentGoalChart
-          .data
-          .datasets[0]
-          .data =
-            [...childData.scores];
-
-        parentGoalChart.update();
-
-      }
-
-
-      /* Child changes */
-
-      childSelect.addEventListener(
-        "change",
-        function () {
-
-          updateParentProgress(
-            String(this.value)
-          );
-
-        }
-      );
-
-
-      /* Initial child */
-
-      if (childSelect.value) {
-
-        updateParentProgress(
-          String(childSelect.value)
-        );
 
       }
 
     }
+  );
+}
 
 
-    if (
-      parentProgressTableElement &&
-      typeof DataTable !== "undefined"
-    ) {
+/* ==============================
+   PATIENT PROGRESS TABLE
+============================== */
 
-      DataTable.ext.search.push(
-        function (settings, data, dataIndex) {
+if (
+  parentProgressTableElement &&
+  typeof DataTable !== "undefined"
+) {
 
-          if (
-            settings.nTable.id !==
-            "parentProgressTable"
-          ) {
-            return true;
-          }
+  parentProgressTable =
+    new DataTable(
+      parentProgressTableElement,
+      {
 
-          const row =
-            settings.aoData[dataIndex].nTr;
+        responsive: true,
 
-          if (!row) {
-            return true;
-          }
+        autoWidth: false,
 
-          return (
-            String(row.dataset.clientId) ===
-            selectedProgressClient
-          );
-        }
-      );
+        pageLength: 5,
 
-      parentProgressTable =
-        new DataTable(
-          parentProgressTableElement,
+        lengthChange: false,
+
+        order: [
+          [0, "desc"]
+        ],
+
+        columnDefs: [
           {
-            responsive: true,
-            autoWidth: false,
-
-            pageLength: 5,
-
-            lengthChange: false,
-
-            order: [
-              [0, "desc"]
-            ],
-
-            columnDefs: [
-              {
-                targets: [1, 2, 3, 4],
-                orderable: false
-              }
-            ],
-
-            language: {
-              search: "",
-              searchPlaceholder: "Search progress...",
-
-              info:
-                "Showing _START_ to _END_ of _TOTAL_ records",
-
-              infoEmpty:
-                "No progress records",
-
-              zeroRecords:
-                "No matching progress found"
-            },
-
-            layout: {
-              topStart: null,
-              topEnd: "search",
-              bottomStart: "info",
-              bottomEnd: "paging"
-            }
+            targets: [1, 2, 3, 4],
+            orderable: false
           }
-        );
+        ],
 
-    }
+        language: {
+
+          search: "",
+
+          searchPlaceholder:
+            "Search progress...",
+
+          info:
+            "Showing _START_ to _END_ of _TOTAL_ records",
+
+          infoEmpty:
+            "No progress records",
+
+          zeroRecords:
+            "No matching progress found"
+        },
+
+        layout: {
+
+          topStart: null,
+
+          topEnd: "search",
+
+          bottomStart: "info",
+
+          bottomEnd: "paging"
+
+        }
+
+      }
+    );
+}
 
     if (
       appointmentTableElement &&
@@ -1183,11 +1126,11 @@ document.addEventListener(
 
             columnDefs: [
               {
-                targets: [2, 3, 4, 5, 6, 7],
+                targets: [2, 3, 4, 5, 6],
                 orderable: false
               },
               {
-                targets: [7],
+                targets: [6],
                 searchable: true
               }
             ],

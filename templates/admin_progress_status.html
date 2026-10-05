@@ -17,7 +17,7 @@ Progress Status | UrbaneTrack
     <h1>Progress Status</h1>
 
     <p>
-      View client progress scores and AI recommendations.
+      View patient progress scores and AI recommendations.
     </p>
   </div>
 
@@ -34,6 +34,139 @@ Progress Status | UrbaneTrack
 
 </section>
 
+<!-- Progress visualisation -->
+<section class="progress-visual-section">
+
+  <!-- Shared patient filter -->
+  <div class="progress-filter-card">
+
+    <div>
+      <h2>Patient Progress</h2>
+      <p>
+        Select a patient to review progress across therapy sessions.
+      </p>
+    </div>
+
+    <div class="progress-patient-filter">
+
+      <label for="goalPatientSelect">
+        Patient
+      </label>
+
+      <select
+        id="goalPatientSelect"
+        class="progress-chart-filter"
+      >
+
+        <option value="">
+          All Patients
+        </option>
+
+        {% for patient in patient_list %}
+
+          <option
+            value="{{ patient.client_id }}"
+            data-name="{{ patient.client_name | title }}"
+          >
+
+            {% if patient.is_duplicate and patient.date_of_birth %}
+
+              {{ patient.client_name | title }} - {{ patient.date_of_birth }}
+
+            {% else %}
+
+              {{ patient.client_name | title }}
+
+            {% endif %}
+
+          </option>
+
+        {% endfor %}
+
+      </select>
+
+    </div>
+
+  </div>
+
+
+  <!-- Charts -->
+  <section class="progress-chart-grid">
+
+    <!-- Goal progress -->
+    <article class="progress-chart-card">
+
+      <div class="progress-chart-header">
+
+        <div>
+          <h2>Goal Progress</h2>
+
+          <p>
+            Goal achievement across therapy sessions.
+          </p>
+        </div>
+
+      </div>
+
+      <div
+        id="goalChartEmpty"
+        class="progress-chart-empty"
+      >
+        Select a patient to view goal progress.
+      </div>
+
+      <div
+        id="goalChartWrapper"
+        class="progress-chart-container"
+        hidden
+      >
+        <canvas
+          id="goalProgressChart"
+          data-goal-history='{{ goal_history | tojson }}'
+        ></canvas>
+      </div>
+
+    </article>
+
+
+    <!-- Attendance progress -->
+    <article class="progress-chart-card">
+
+      <div class="progress-chart-header">
+
+        <div>
+          <h2>Attendance Progress</h2>
+
+          <p>
+            Attendance rates across therapy sessions.
+          </p>
+        </div>
+
+      </div>
+
+      <div
+        id="attendanceChartEmpty"
+        class="progress-chart-empty"
+      >
+        Select a patient to view attendance progress.
+      </div>
+
+      <div
+        id="attendanceChartWrapper"
+        class="progress-chart-container"
+        hidden
+      >
+        <canvas
+          id="attendanceChart"
+          data-attendance-history='{{ attendance_history | tojson }}'
+        ></canvas>
+      </div>
+
+    </article>
+
+  </section>
+
+</section>
 
 <!-- Progress status table -->
 <section class="table-card">
@@ -41,14 +174,17 @@ Progress Status | UrbaneTrack
   <div class="table-card-header">
 
     <div>
-      <h2>Client Progress Overview</h2>
+      <h2>Patient Progress Overview</h2>
 
       <p>
         Review progress scores, status and AI recommendations.
       </p>
     </div>
 
-    <span class="table-count">
+    <span
+      id="progressRecordCount"
+      class="table-count"
+    >
       {{ statuses | length }} records
     </span>
 
@@ -66,7 +202,8 @@ Progress Status | UrbaneTrack
 
         <thead>
           <tr>
-            <th>Client</th>
+            <th class="d-none">Client ID</th>
+            <th>Patient</th>
             <th>Therapist</th>
             <th>Session</th>
             <th>Status</th>
@@ -81,9 +218,14 @@ Progress Status | UrbaneTrack
 
           {% for status in statuses %}
 
-            <tr>
+            <tr data-client-id="{{ status.client_id }}">
 
-              <!-- Client -->
+              <!-- Hidden Client ID -->
+              <td class="d-none">
+                {{ status.client_id }}
+              </td>
+
+              <!-- Patient -->
               <td>
                 <div class="table-person">
 
@@ -93,7 +235,7 @@ Progress Status | UrbaneTrack
 
                   <div>
                     <strong>{{ status.client_name | title }}</strong>
-                    <small>Client</small>
+                    <small>Patient</small>
                   </div>
 
                 </div>
@@ -228,5 +370,438 @@ Progress Status | UrbaneTrack
   {% endif %}
 
 </section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  $("#goalPatientSelect").select2({
+    width: "100%",
+    placeholder: "Search patient",
+
+    templateSelection: function(data) {
+
+      if (!data.id) {
+        return data.text;
+      }
+
+      return $(data.element).data("name");
+    }
+  });
+
+
+  const patientSelect =
+    document.getElementById("goalPatientSelect");
+
+  const goalCanvas =
+    document.getElementById("goalProgressChart");
+
+  const attendanceCanvas =
+    document.getElementById("attendanceChart");
+
+  const goalWrapper =
+    document.getElementById("goalChartWrapper");
+
+  const attendanceWrapper =
+    document.getElementById("attendanceChartWrapper");
+
+  const goalEmpty =
+    document.getElementById("goalChartEmpty");
+
+  const attendanceEmpty =
+    document.getElementById("attendanceChartEmpty");
+
+
+  if (typeof Chart === "undefined") {
+    console.error("Chart.js is not loaded.");
+    return;
+  }
+
+
+  const goalHistory =
+    JSON.parse(
+      goalCanvas.dataset.goalHistory || "{}"
+    );
+
+  const attendanceHistory =
+    JSON.parse(
+      attendanceCanvas.dataset.attendanceHistory || "{}"
+    );
+
+
+  /* ==============================
+     GOAL LINE CHART
+  ============================== */
+
+  const goalChart = new Chart(goalCanvas, {
+
+    type: "line",
+
+    data: {
+      labels: [],
+
+      datasets: [{
+        label: "Goal Achievement",
+
+        data: [],
+
+        borderColor: "#2563eb",
+
+        backgroundColor:
+          "rgba(37, 99, 235, 0.08)",
+
+        borderWidth: 3,
+
+        pointRadius: 6,
+        pointHoverRadius: 7,
+
+        pointBackgroundColor:
+          "#2563eb",
+
+        pointBorderColor:
+          "#ffffff",
+
+        pointBorderWidth: 2,
+
+        tension: 0.3,
+
+        fill: true
+      }]
+    },
+
+    options: {
+
+      responsive: true,
+      maintainAspectRatio: false,
+
+      plugins: {
+
+        legend: {
+          display: false
+        },
+
+        tooltip: {
+          callbacks: {
+
+            label: function(context) {
+              return context.raw + "% achievement";
+            }
+
+          }
+        }
+
+      },
+
+      scales: {
+
+        y: {
+          beginAtZero: true,
+          max: 100,
+
+          ticks: {
+            callback: function(value) {
+              return value + "%";
+            }
+          }
+        },
+
+        x: {
+          grid: {
+            display: false
+          }
+        }
+
+      }
+
+    }
+
+  });
+
+
+  /* ==============================
+     ATTENDANCE BAR CHART
+  ============================== */
+
+  const attendanceChart =
+    new Chart(attendanceCanvas, {
+
+      type: "bar",
+
+      data: {
+        labels: [],
+
+        datasets: [{
+          label: "Attendance",
+
+          data: [],
+
+          backgroundColor:
+            "rgba(37, 99, 235, 0.75)",
+
+          borderColor:
+            "#2563eb",
+
+          borderWidth: 1,
+
+          borderRadius: 8,
+
+          barPercentage: 0.5,
+
+          categoryPercentage: 0.65
+        }]
+      },
+
+      options: {
+
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          legend: {
+            display: false
+          },
+
+          tooltip: {
+            callbacks: {
+
+              label: function(context) {
+                return context.raw + "% attendance";
+              }
+
+            }
+          }
+
+        },
+
+        scales: {
+
+          y: {
+            beginAtZero: true,
+            max: 100,
+
+            ticks: {
+              callback: function(value) {
+                return value + "%";
+              }
+            }
+          },
+
+          x: {
+            grid: {
+              display: false
+            }
+          }
+
+        }
+
+      }
+
+    });
+
+
+  const progressStatusTable =
+  document.getElementById("progressStatusTable");
+
+  let progressTable = null;
+
+  if (
+  progressStatusTable &&
+  typeof DataTable !== "undefined"
+  ) {
+
+  progressTable = new DataTable(
+    progressStatusTable,
+    {
+      responsive: true,
+      pageLength: 10,
+      autoWidth: false,
+
+      lengthMenu: [
+        [5, 10, 25, 50],
+        [5, 10, 25, 50]
+      ],
+
+      /* Newest session first */
+      order: [
+        [3, "desc"]
+      ],
+
+      columnDefs: [
+
+        /* Hidden Client ID */
+        {
+          targets: 0,
+          visible: false,
+          searchable: true,
+          orderable: false
+        },
+
+        /* Rating + Recommendation */
+        {
+          targets: [7, 8],
+          orderable: false
+        },
+
+        /* Recommendation not needed in search */
+        {
+          targets: 8,
+          searchable: false
+        }
+
+      ],
+
+      language: {
+        lengthMenu: "Show _MENU_ records",
+
+        info:
+          "Showing _START_ to _END_ of _TOTAL_ records",
+
+        infoEmpty:
+          "No progress records available",
+
+        zeroRecords:
+          "No progress records found"
+      },
+
+      layout: {
+        topStart: "pageLength",
+
+        /* No second search box */
+        topEnd: null,
+
+        bottomStart: "info",
+        bottomEnd: "paging"
+      }
+    }
+  );
+
+  }
+
+  const progressRecordCount =
+    document.getElementById("progressRecordCount");
+
+
+  /* ==============================
+     UPDATE BOTH CHARTS
+  ============================== */
+
+  function updateProgressCharts(clientId) {
+
+    if (!clientId) {
+
+      goalWrapper.hidden = true;
+      attendanceWrapper.hidden = true;
+
+      goalEmpty.hidden = false;
+      attendanceEmpty.hidden = false;
+
+      return;
+    }
+
+
+    const goalData =
+      goalHistory[clientId] || {
+        dates: [],
+        scores: []
+      };
+
+
+    const attendanceData =
+      attendanceHistory[clientId] || {
+        dates: [],
+        rates: []
+      };
+
+
+    /* Goal */
+
+    goalChart.data.labels =
+      [...goalData.dates];
+
+    goalChart.data.datasets[0].data =
+      [...goalData.scores];
+
+    goalChart.update();
+
+
+    /* Attendance */
+
+    attendanceChart.data.labels =
+      [...attendanceData.dates];
+
+    attendanceChart.data.datasets[0].data =
+      [...attendanceData.rates];
+
+    attendanceChart.update();
+
+
+    goalWrapper.hidden = false;
+    attendanceWrapper.hidden = false;
+
+    goalEmpty.hidden = true;
+    attendanceEmpty.hidden = true;
+  }
+
+
+  /* ==============================
+     PATIENT SELECT
+  ============================== */
+
+  $("#goalPatientSelect").on(
+  "change",
+  function () {
+
+    const clientId =
+      String($(this).val() || "");
+
+    updateProgressCharts(clientId);
+
+    /* Filter progress table */
+
+    if (progressTable) {
+
+      if (!clientId) {
+
+        progressTable
+          .column(0)
+          .search("")
+          .draw();
+
+      } else {
+
+        progressTable
+          .column(0)
+          .search(
+            "^" + clientId + "$",
+            true,
+            false
+          )
+          .draw();
+
+      }
+
+    /* Update record count */
+    const visibleRecords =
+      progressTable.rows({
+        search: "applied"
+      }).count();
+
+    progressRecordCount.textContent =
+      visibleRecords +
+      (visibleRecords === 1 ? " record" : " records");
+
+    }
+
+  }
+);
+
+  /* Initial state */
+
+  updateProgressCharts(
+    String(patientSelect.value || "")
+  );
+
+});
+</script>
 
 {% endblock %}
